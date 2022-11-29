@@ -31,3 +31,5 @@ CLOSED: [2022-11-25 ven. 15:40]
 * tohos
 ** TOHO verify if all pub is
 is the good way to go in "./src/configfile/cfg_struct.rs"
+** TOHO remove all the "allow"
+unused_variables

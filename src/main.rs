@@ -1,3 +1,9 @@
+#![allow(non_snake_case)]
+#![allow(non_camel_case_types)]
+#![allow(non_upper_case_globals)]
+#![allow(unused)]
+#![allow(dead_code)]
+
 mod maths;
 use maths::fcts::*;
 use maths::mystructs::*;
@@ -13,6 +19,11 @@ fn main() {
                       vec![2., 2., 2., 2.],
                       vec![3., 3., 3., 3.],
                       vec![4., 4., 4., 4.]];
+
+    let grid_y2 = vec![vec![1., 1., 1., 1.],
+                      vec![2., 2., 2., 2.],
+                      vec![4., 4., 4., 4.],
+                      vec![8., 8., 8., 8.]];
     let mut x = 1.5;
     let mut i = 1;
     let mut f = 0.;
@@ -52,7 +63,7 @@ fn main() {
                    &box_info);
     v = div_tensor(&tensfield, &2, &2, 
                    &box_info);
-    f = laplacian(&grid_y, &2, &2, 
+    f = laplacian(&grid_y2, &2, &2, 
                   &box_info);
     println!("{:?}", f);
 }
