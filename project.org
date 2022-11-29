@@ -1,0 +1,33 @@
+* todos
+** TODO make a function that takes in a SimConfig and runs the simulation
+** to verify
+*** div tensor
+in fcts
+*** laplacian
+in fcts
+
+seems to returns 0 a lot...
+* implementation changes
+** functions
+*** functions
+**** for the gradient func, created partial derivative function
+*** functions args
+- removed the last argument, and returns the changed argument
+**** v_nabla_v
+gets grad_v as argument, maybe not necessary!
+*** function names
+**** tens_vec_product
+***** rust
+tens_product_vec
+***** c
+tens_vec_product
+** done
+* done
+*** DONE function that creates a default/template SimConfig
+CLOSED: [2022-11-25 ven. 15:40]
+:LOGBOOK:
+- State "DONE"       from              [2022-11-25 ven. 15:40]
+:END:
+* tohos
+** TOHO verify if all pub is
+is the good way to go in "./src/configfile/cfg_struct.rs"
