@@ -71,5 +71,8 @@ fn main() {
     f = laplacian(&grid_y2, &2, &2, 
                   &box_info);
     v = laplacian_vector(&vecfield, &2, &2, &box_info);
+
+    v = grad_div_vel(&vecfield, &2, &2, &box_info);
+
     println!("{:?}", v);
 }

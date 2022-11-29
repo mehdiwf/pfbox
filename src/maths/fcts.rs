@@ -275,6 +275,55 @@ pub fn laplacian_vector(vector_field: &VectorField2D,
                 return vec;
 }
 
+pub fn grad_div_vel(vector_field: &VectorField2D,
+                    i: &i32, j: &i32,
+                    box_info: &BoxInfo) -> vec2D
+{
+    let BoxInfo { imax: box_imax,
+                  jmax: box_jmax } = box_info;
+    let ip = (i+1) % box_imax;
+    let im = (i - 1 + box_imax) % box_imax;
+    let jp = (j+1) % box_jmax;
+    let jm = (j - 1 + box_jmax) % box_jmax;
+
+    let vec = vec2D{
+        x: 
+        (10.* vector_field.x[ip as usize][*j as usize]
+         + 10.* vector_field.x[im as usize][*j as usize]
+         + vector_field.x[ip as usize][jp as usize] 
+         + vector_field.x[im as usize][jp as usize] 
+         + vector_field.x[im as usize][jm as usize] 
+         + vector_field.x[ip as usize][jm as usize]
+	 -2.* vector_field.x[*i as usize][jp as usize] 
+         - 2.* vector_field.x[*i as usize][jm as usize]      
+         - 20.* vector_field.x[*i as usize][*j as usize])
+            /(12.*dx*dy)	
+        + ((vector_field.y[ip as usize][jp as usize]  
+            - vector_field.y[im as usize][jp as usize])  
+           + (vector_field.y[im as usize][jm as usize] 
+              - vector_field.y[ip as usize][jm as usize]))
+            /(4.0*dx*dy),
+
+
+        y: 
+        ( 10. * vector_field.y[*i as usize][jp as usize]
+          + 10. * vector_field.y[*i as usize][jm as usize]
+          + vector_field.y[ip as usize][jp as usize] 
+          + vector_field.y[ip as usize][jm as usize]
+          + vector_field.y[im as usize][jp as usize]
+          + vector_field.y[im as usize][jm as usize]
+          -2.* vector_field.y[ip as usize][*j as usize] 
+          -2.* vector_field.y[im as usize][*j as usize]
+          - 20.0*vector_field.y[*i as usize][*j as usize])
+            /(12.0*dx*dy)
+            + ((vector_field.x[ip as usize][jp as usize]
+                - vector_field.x[im as usize][jp as usize])  
+            + (vector_field.x[im as usize][jm as usize]
+               - vector_field.x[ip as usize][jm as usize]))/(4.0*dx*dy)};
+
+    return vec;
+}
+
 
 #[cfg(test)]
 mod tests {
