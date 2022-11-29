@@ -1,3 +1,60 @@
+// old main.rs for testing some stuff
+/*
+    // an uniform grid 
+    let mut uni_grid = vec![vec![1.; 4]; 4];
+    // a grid growing in the x axis
+    let mut grid_x = vec![vec![1., 2., 3., 4.]; 4];
+    let mut grid_x2 = vec![vec![1., 2., 4., 8.]; 4];
+    // a grid growing in the y axis
+
+    let grid_y = vec![vec![1., 1., 1., 1.],
+                      vec![2., 2., 2., 2.],
+                      vec![3., 3., 3., 3.],
+                      vec![4., 4., 4., 4.]];
+
+    let grid_y2 = vec![vec![1., 1., 1., 1.],
+                      vec![2., 2., 2., 2.],
+                      vec![4., 4., 4., 4.],
+                      vec![8., 8., 8., 8.]];
+    let mut x = 1.5;
+    let mut i = 1;
+    let mut f = 0.;
+    let mut v = vec2D{x: 1., y: 2.};
+    let mut t = tens2D{xx: 1., xy: 1.,
+                   yx: 1., yy: 1.};
+    let mut t2 = tens2D{xx:2., xy:2.,
+                        yx:2., yy:2.};
+    let mut y = 1.;
+    let mut z = 0.;
+    let box_info = BoxInfo {
+        imax: 4,
+        jmax: 4};
+
+    let vecfield = VectorField2D{
+        x: vec![vec![1., 1., 1., 1.],
+                vec![2., 2., 2., 2.],
+                vec![4., 4., 4., 4.],
+                vec![8., 8., 8., 8.]],
+        // y: uni_grid
+        // y: vec![vec![1., 2., 3., 4.]; 4]
+        y: vec![vec![1., 2., 4., 8.]; 4],
+   };
+
+    let tensfield = TensorField2D{
+        xx: vec![vec![1., 2., 3., 4.]; 4],
+        xy: vec![vec![1., 2., 3., 4.]; 4],
+        yx: vec![vec![1., 2., 3., 4.]; 4],
+        yy: vec![vec![1., 2., 3., 4.]; 4]
+   };
+*/
+// ---------------------------------------------
+// ---------------------------------------------
+// ---------------------------------------------
+// ---------------------------------------------
+// ---------------------------------------------
+// ---------------------------------------------
+// ---------------------------------------------
+// old stuff, not interesting
 /*
 
 // const Tc : f32 = 1.0;			   // critical temperature
