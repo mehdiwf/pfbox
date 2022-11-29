@@ -260,7 +260,20 @@ pub fn laplacian(scalar_field: &Vec<Vec<f32>>,
                 return laplacian_value;
 }
 
-// div_vector(struct vec2D a[NX][NY]
+pub fn laplacian_vector(vector_field: &VectorField2D,
+                        i: &i32, j: &i32,
+                        box_info: &BoxInfo) -> vec2D
+{
+    let vec = vec2D {
+        x: laplacian(&vector_field.x,
+                     &i, &j,
+                     &box_info),
+        y: laplacian(&vector_field.y,
+                     &i, &j,
+                     &box_info)};
+
+                return vec;
+}
 
 
 #[cfg(test)]

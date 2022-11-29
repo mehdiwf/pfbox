@@ -13,6 +13,7 @@ fn main() {
     let mut uni_grid = vec![vec![1.; 4]; 4];
     // a grid growing in the x axis
     let mut grid_x = vec![vec![1., 2., 3., 4.]; 4];
+    let mut grid_x2 = vec![vec![1., 2., 4., 8.]; 4];
     // a grid growing in the y axis
 
     let grid_y = vec![vec![1., 1., 1., 1.],
@@ -39,9 +40,13 @@ fn main() {
         jmax: 4};
 
     let vecfield = VectorField2D{
-        x: vec![vec![1., 2., 3., 4.]; 4],
+        x: vec![vec![1., 1., 1., 1.],
+                vec![2., 2., 2., 2.],
+                vec![4., 4., 4., 4.],
+                vec![8., 8., 8., 8.]],
         // y: uni_grid
-        y: vec![vec![1., 2., 3., 4.]; 4]
+        // y: vec![vec![1., 2., 3., 4.]; 4]
+        y: vec![vec![1., 2., 4., 8.]; 4],
    };
 
     let tensfield = TensorField2D{
@@ -65,5 +70,6 @@ fn main() {
                    &box_info);
     f = laplacian(&grid_y2, &2, &2, 
                   &box_info);
-    println!("{:?}", f);
+    v = laplacian_vector(&vecfield, &2, &2, &box_info);
+    println!("{:?}", v);
 }
