@@ -144,12 +144,12 @@ pub fn partial_deriv(scal_field: &Vec<Vec<f64>>,
                      direction: &i32,
                      box_info: &BoxInfo) -> f64
 {
-    let BoxInfo { imax: box_imax,
-                  jmax: box_jmax } = box_info;
-    let ip = (i+1) % box_imax;
-    let im = (i - 1 + box_imax) % box_imax;
-    let jp = (j+1) % box_jmax;
-    let jm = (j - 1 + box_jmax) % box_jmax;
+    let BoxInfo { col_max: box_col_max,
+                  row_max: box_row_max } = box_info;
+    let ip = (i+1) % box_row_max;
+    let im = (i - 1 + box_row_max) % box_row_max;
+    let jp = (j+1) % box_col_max;
+    let jm = (j - 1 + box_col_max) % box_col_max;
 
     match direction
         {
@@ -244,12 +244,12 @@ pub fn lap(scalar_field: &Vec<Vec<f64>>,
                  box_info: &BoxInfo) -> f64
 {
 
-    let BoxInfo { imax: box_imax,
-                  jmax: box_jmax } = box_info;
-    let ip = (i+1) % box_imax;
-    let im = (i - 1 + box_imax) % box_imax;
-    let jp = (j+1) % box_jmax;
-    let jm = (j - 1 + box_jmax) % box_jmax;
+    let BoxInfo { col_max: box_col_max,
+                  row_max: box_row_max } = box_info;
+    let ip = (i+1) % box_row_max;
+    let im = (i - 1 + box_row_max) % box_row_max;
+    let jp = (j+1) % box_col_max;
+    let jm = (j - 1 + box_col_max) % box_col_max;
             // on the x axis
     let laplacian_value = 
         (
@@ -296,12 +296,12 @@ pub fn grad_div_vel(vector_field: &VectorField2D,
                     i: &i32, j: &i32,
                     box_info: &BoxInfo) -> vec2D
 {
-    let BoxInfo { imax: box_imax,
-                  jmax: box_jmax } = box_info;
-    let ip = (i+1) % box_imax;
-    let im = (i - 1 + box_imax) % box_imax;
-    let jp = (j+1) % box_jmax;
-    let jm = (j - 1 + box_jmax) % box_jmax;
+    let BoxInfo { col_max: box_col_max,
+                  row_max: box_row_max } = box_info;
+    let ip = (i+1) % box_row_max;
+    let im = (i - 1 + box_row_max) % box_row_max;
+    let jp = (j+1) % box_col_max;
+    let jm = (j - 1 + box_col_max) % box_col_max;
 
     let vec = vec2D{
         x: 
@@ -389,8 +389,8 @@ mod tests {
         let mut v = vec2D{x: 0., y: 0.};
 
         let box_info = BoxInfo {
-            imax: 4,
-            jmax: 4};
+            col_max: 4,
+            row_max: 4};
         
         // three tests:
         // first one with an uniform field

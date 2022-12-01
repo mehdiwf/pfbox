@@ -14,42 +14,41 @@ use rgsl::exponential::exp;
 use maths::fcts::*;
 use maths::mystructs::*;
 
-fn create_scalar_grid(x_size: i32,
-                      y_size: i32) -> ScalarField2D
-    // Vec<Vec<f64>>
+fn create_scalar_grid(ncol_size: i32,
+                      nrow_size: i32) -> ScalarField2D
 {
     return ScalarField2D {
-        s: vec![vec![0.; y_size as usize];
-                x_size as usize],
+        s: vec![vec![0.; ncol_size as usize];
+                nrow_size as usize],
     };
 }
 
-fn create_vector_grid(x_size: i32,
-                      y_size: i32) -> VectorField2D
+fn create_vector_grid(ncol_size: i32,
+                      nrow_size: i32) -> VectorField2D
 {
     let result = VectorField2D
     {
-        x: vec![vec![0.; y_size as usize];
-                x_size as usize],
-        y: vec![vec![0.; y_size as usize];
-                x_size as usize]
+        x: vec![vec![0.; ncol_size as usize];
+                nrow_size as usize],
+        y: vec![vec![0.; ncol_size as usize];
+                nrow_size as usize]
     };
     return result;
 }
 
-fn create_tensor_grid(x_size: i32,
-                      y_size: i32) -> TensorField2D
+fn create_tensor_grid(ncol_size: i32,
+                      nrow_size: i32) -> TensorField2D
 {
     let result = TensorField2D
         {
-            xx: vec![vec![0.; y_size as usize];
-                     x_size as usize],
-            xy: vec![vec![0.; y_size as usize];
-                     x_size as usize],
-            yx: vec![vec![0.; y_size as usize];
-                     x_size as usize],
-            yy: vec![vec![0.; y_size as usize];
-                     x_size as usize]
+            xx: vec![vec![0.; ncol_size as usize];
+                     nrow_size as usize],
+            xy: vec![vec![0.; ncol_size as usize];
+                     nrow_size as usize],
+            yx: vec![vec![0.; ncol_size as usize];
+                     nrow_size as usize],
+            yy: vec![vec![0.; ncol_size as usize];
+                     nrow_size as usize]
         };
     return result;
 }
@@ -76,13 +75,13 @@ fn main() {
     
     // System initialisation
     let mut step = 0;
-    let max_step = 5;
+    let max_time_step = 5;
 
     let dt = 0.1;
     let mut time = 0.;
 
-    let x_size = 2;
-    let y_size = 8;
+    let ncol_size = 10;
+    let nrow_size = 2;
 
     let rho_liq0 = 0.8;
     let ln_rho_liq0 = log(rho_liq0);
@@ -90,111 +89,112 @@ fn main() {
     let ln_rho_vap0 = log(rho_vap0);
     let temp0 = 0.7;
 
-    let box_info = BoxInfo{imax: x_size,
-                           jmax: y_size};
+    let box_info = BoxInfo{col_max: ncol_size,
+                           row_max: nrow_size};
 
     //auie physics quantities definition
     ////////////////////////////////////////////////////////////////////////////
     // Physics quantities definition
     ////////////////////////////////////////////////////////////////////////////
     // GD for grid
-    let mut GD_rho = create_scalar_grid(x_size, y_size);
-    let mut GD_temp = create_scalar_grid(x_size, y_size);
-    let mut GD_pressure = create_tensor_grid(x_size, y_size);
+    let mut GD_rho = create_scalar_grid(ncol_size, nrow_size);
+    let mut GD_temp = create_scalar_grid(ncol_size, nrow_size);
+    let mut GD_pressure = create_tensor_grid(ncol_size, nrow_size);
     // momentum, also known as J = rho*velocity
-    let mut GD_J = create_vector_grid(x_size, y_size);
+    let mut GD_J = create_vector_grid(ncol_size, nrow_size);
     // velocity
-    let mut GD_v = create_vector_grid(x_size, y_size);
+    let mut GD_v = create_vector_grid(ncol_size, nrow_size);
 
     //auie quantities used for the computations definition
     ////////////////////////////////////////////////////////////////////////////
     // Quantities used for the computations definition
     ////////////////////////////////////////////////////////////////////////////
     
-    let mut GD_ln_rho = create_scalar_grid(x_size, y_size);
-    let mut GD_grad_rho = create_vector_grid(x_size, y_size);
-    let mut GD_lap_rho = create_scalar_grid(x_size, y_size);
+    let mut GD_ln_rho = create_scalar_grid(ncol_size, nrow_size);
+    let mut GD_grad_rho = create_vector_grid(ncol_size, nrow_size);
+    let mut GD_lap_rho = create_scalar_grid(ncol_size, nrow_size);
 
-    let mut GD_vJ = create_tensor_grid(x_size, y_size);
+    let mut GD_vJ = create_tensor_grid(ncol_size, nrow_size);
 
-    let mut GD_grad_v = create_tensor_grid(x_size, y_size);
+    let mut GD_grad_v = create_tensor_grid(ncol_size, nrow_size);
 
-    let mut GD_div_v = create_scalar_grid(x_size, y_size);
+    let mut GD_div_v = create_scalar_grid(ncol_size, nrow_size);
 
-    let mut GD_traceless_grad_v = create_tensor_grid(x_size, y_size);
+    let mut GD_traceless_grad_v = create_tensor_grid(ncol_size, nrow_size);
 
-    let mut GD_lap_v = create_vector_grid(x_size, y_size);
+    let mut GD_lap_v = create_vector_grid(ncol_size, nrow_size);
 
-    let mut GD_div_vJ = create_vector_grid(x_size, y_size);
-    let mut GD_grad_div_v = create_vector_grid(x_size, y_size);
+    let mut GD_div_vJ = create_vector_grid(ncol_size, nrow_size);
+    let mut GD_grad_div_v = create_vector_grid(ncol_size, nrow_size);
 
-    let mut GD_div_press = create_vector_grid(x_size, y_size);
+    let mut GD_div_press = create_vector_grid(ncol_size, nrow_size);
 
-    let mut GD_ln_rho_traceless_grad_v = create_vector_grid(x_size, y_size);
+    let mut GD_ln_rho_traceless_grad_v = create_vector_grid(ncol_size, nrow_size);
     
     let inv_cv = 1.0/(1.5*kB);
 
-    let mut GD_traceless_grad_v_dyadic_grad_v = create_scalar_grid(x_size, y_size);
+    let mut GD_traceless_grad_v_dyadic_grad_v = create_scalar_grid(ncol_size, nrow_size);
 
-    let mut GD_grad_ln_rho_scalar_grad_T = create_scalar_grid(x_size, y_size);
+    let mut GD_grad_ln_rho_scalar_grad_T = create_scalar_grid(ncol_size, nrow_size);
 
-    let mut GD_grad_ln_rho = create_vector_grid(x_size, y_size);
+    let mut GD_grad_ln_rho = create_vector_grid(ncol_size, nrow_size);
 
-    let mut GD_v_scalar_grad_ln_rho = create_scalar_grid(x_size, y_size);
+    let mut GD_v_scalar_grad_ln_rho = create_scalar_grid(ncol_size, nrow_size);
 
-    let mut GD_grad_ln_rho_traceless_grad_v = create_vector_grid(x_size, y_size);
+    let mut GD_grad_ln_rho_traceless_grad_v = create_vector_grid(ncol_size, nrow_size);
     
-    let mut GD_grad_T = create_vector_grid(x_size, y_size);
+    let mut GD_grad_T = create_vector_grid(ncol_size, nrow_size);
 
-    let mut GD_lap_T = create_scalar_grid(x_size, y_size);
+    let mut GD_lap_T = create_scalar_grid(ncol_size, nrow_size);
 
-    let mut GD_v_scalar_grad_T = create_scalar_grid(x_size, y_size);
-
-    // the grid used to compute stuff
-    let mut GD_buffer = create_scalar_grid(x_size, y_size);
-
-    let mut GD_buffer_vec = create_vector_grid(x_size, y_size);
-
-    let mut GD_buffer_tens = create_tensor_grid(x_size, y_size);
+    let mut GD_v_scalar_grad_T = create_scalar_grid(ncol_size, nrow_size);
 
     //auie fluid initial state
     ////////////////////////////////////////////////////////////////////////////
     // Fluid initial state
     ////////////////////////////////////////////////////////////////////////////
     
-    // initializing fluid with first half: vapor
-    for i in 0..x_size {
-        for j in 0..y_size {
+    for col in 0usize..ncol_size as usize {
+        for row in 0usize..nrow_size as usize {
             // putting liquid in the first half
-            if (i < x_size/2){
-                GD_rho.set_pos(i as usize, j as usize, &rho_liq0);
-                GD_ln_rho.set_pos(i as usize, j as usize, &ln_rho_liq0);}}}
+            if ((col as i32) < ncol_size/2){
+                GD_rho.set_pos(row, col,
+                               &rho_liq0);
+                GD_ln_rho.set_pos(row, col,
+                                  &ln_rho_liq0);}
+            else {GD_rho.set_pos(row, col,
+                                 &rho_vap0);
+                  GD_ln_rho.set_pos(row, col,
+                                    &ln_rho_vap0);}
 
-    // for i in 0..x_size {
-    //     for j in 0..y_size {}}
+            // setting initial temperature
+            GD_temp.set_pos(row, col, &temp0);
+        }}
+    
 
     //auie computation variables update
     ////////////////////////////////////////////////////////////////////////////
     // Computations variables update
     ////////////////////////////////////////////////////////////////////////////
 
-    for i_step in 0..max_step {
+    //auie time loop
+    for i_time_step in 0..max_time_step {
 
-        step = i_step;
+        step = i_time_step;
 
     // update of computations variables
-    for i in 0usize..x_size as usize {
-        for j in 0usize..y_size as usize {
+    for col in 0usize..ncol_size as usize {
+        for row in 0usize..nrow_size as usize {
 
-            let i_i32 = i as i32;
-            let j_i32 = j as i32;
+            let col_i32 = col as i32;
+            let row_i32 = row as i32;
 
 
             // -------------------------------------------------------
             // div_press begin update
             GD_div_press
-                .set_pos(i, j,
-                         &div_tensor(&GD_pressure, &i_i32, &j_i32,
+                .set_pos(row, col,
+                         &div_tensor(&GD_pressure, &row_i32, &col_i32,
                                      &box_info));
             // div_press end update
             // -------------------------------------------------------
@@ -203,9 +203,9 @@ fn main() {
             // -------------------------------------------------------
             // GD_grad_ln_rho_scalar_grad_T begin update
             GD_grad_ln_rho_scalar_grad_T
-                .set_pos(i, j,
-                         &scal_product(&GD_grad_ln_rho.get_pos(i, j),
-                                       &GD_grad_T.get_pos(i, j)));
+                .set_pos(row, col,
+                         &scal_product(&GD_grad_ln_rho.get_pos(row, col),
+                                       &GD_grad_T.get_pos(row, col)));
             // GD_grad_ln_rho_scalar_grad_T end update
             // -------------------------------------------------------
 
@@ -213,76 +213,65 @@ fn main() {
             // GD_grad_ln_rho_traceless_grad_v begin update
             
             GD_grad_ln_rho_traceless_grad_v
-                .set_pos(i, j,
+                .set_pos(row, col,
                          &tens_product_vec(
-                             &GD_traceless_grad_v.get_pos(i, j),
-                             &GD_grad_ln_rho.get_pos(i, j)));
-            // GD_grad_ln_rho_scalar_grad_T end update
-            // -------------------------------------------------------
-
-            // -------------------------------------------------------
-            // GD_grad_ln_rho_traceless_grad_v begin update
-            
-            GD_grad_ln_rho_traceless_grad_v
-                .set_pos(i, j,
-                         &tens_product_vec(
-                             &GD_traceless_grad_v.get_pos(i, j),
-                             &GD_grad_ln_rho.get_pos(i, j)));
-            // GD_grad_ln_rho_scalar_grad_T end update
+                             &GD_traceless_grad_v.get_pos(row, col),
+                             &GD_grad_ln_rho.get_pos(row, col)));
+            // GD_grad_ln_rho_traceless_grad_v end update
             // -------------------------------------------------------
 
             // -------------------------------------------------------
             // GD_pressure begin update            
             GD_pressure
-                .set_pos(i, j,
-                         &pressure(&GD_rho.get_pos(i,j),
-                                   &GD_grad_rho.get_pos(i,j),
-                                   &GD_lap_rho.get_pos(i,j),
-                                   &GD_lap_rho.get_pos(i,j)));
+                .set_pos(row, col,
+                         &pressure(&GD_rho.get_pos(row, col),
+                                   &GD_grad_rho.get_pos(row, col),
+                                   &GD_lap_rho.get_pos(row, col),
+                                   &GD_temp.get_pos(row, col)));
             // GD_pressure end update
             // -------------------------------------------------------
             
             // -------------------------------------------------------
             // GD_v_grad_ln_rho begin update            
             GD_v_scalar_grad_ln_rho
-                .set_pos(i, j,
-                         &scal_product(&GD_v.get_pos(i, j),
-                                       &GD_grad_ln_rho.get_pos(i, j)));
+                .set_pos(row, col,
+                         &scal_product(&GD_v.get_pos(row, col),
+                                       &GD_grad_ln_rho.get_pos(row, col)));
             // GD_v_grad_ln_rho end update
             // -------------------------------------------------------
 
             // -------------------------------------------------------
             // GD_traceless_grad_v_dyadic_grad_v begin update            
             GD_traceless_grad_v_dyadic_grad_v
-                .set_pos(i, j,
-                         &dyadic_product(&GD_traceless_grad_v.get_pos(i, j),
-                                         &GD_grad_v.get_pos(i, j)));
+                .set_pos(row, col,
+                         &dyadic_product(&GD_traceless_grad_v.get_pos(row, col),
+                                         &GD_grad_v.get_pos(row, col)));
             // GD_traceless_grad_v_dyadic_grad_v end update
             // -------------------------------------------------------
 
             // -------------------------------------------------------
             // GD_v_scal_grad_T begin update            
             GD_v_scalar_grad_T
-                .set_pos(i, j,
-                         &scal_product(&GD_v.get_pos(i, j),
-                                       &GD_grad_T.get_pos(i, j)));
+                .set_pos(row, col,
+                         &scal_product(&GD_v.get_pos(row, col),
+                                       &GD_grad_T.get_pos(row, col)));
             // GD_v_scal_grad_T end update
             // -------------------------------------------------------
             
             // -------------------------------------------------------
             // GD_div_vJ begin update            
             GD_div_vJ
-                .set_pos(i, j,
+                .set_pos(row, col,
                          &div_tensor(&GD_vJ,
-                         &i_i32, &j_i32, &box_info));
+                                     &row_i32, &col_i32, &box_info));
             // GD_div_vJ end update
             // -------------------------------------------------------
 
             // -------------------------------------------------------
             // GD_vJ begin update
             {
-                let v = GD_v.get_pos(i, j);
-                let J = GD_J.get_pos(i, j);
+                let v = GD_v.get_pos(row, col);
+                let J = GD_J.get_pos(row, col);
                 let tens_vJ = tens2D{
                     xx: v.x * J.x,
                     xy: v.x * J.y,
@@ -290,7 +279,7 @@ fn main() {
                     yy: v.y * J.y
                 };
                 GD_vJ
-                    .set_pos(i, j,
+                    .set_pos(row, col,
                              &tens_vJ)
             }
             // GD_vJ end update
@@ -300,9 +289,9 @@ fn main() {
             // -------------------------------------------------------
             // GD_grad_div_v begin update
             GD_grad_div_v
-                .set_pos(i, j,
+                .set_pos(row, col,
                          &grad_div_vel(&GD_v,
-                                       &i_i32, &j_i32,
+                                       &row_i32, &col_i32,
                                        &box_info));
             // GD_grad_div_v end update
             // -------------------------------------------------------
@@ -310,9 +299,9 @@ fn main() {
             // -------------------------------------------------------
             // GD_grad_div_v begin update
             GD_grad_ln_rho
-                .set_pos(i, j,
+                .set_pos(row, col,
                          &gradient(&GD_ln_rho,
-                                   &i_i32, &j_i32,
+                                   &row_i32, &col_i32,
                                    &box_info));
             // GD_grad_div_v end update
             // -------------------------------------------------------
@@ -320,9 +309,9 @@ fn main() {
             // -------------------------------------------------------
             // GD_grad_v begin update
             GD_grad_v
-                .set_pos(i, j,
+                .set_pos(row, col,
                          &gradient_vector(&GD_v,
-                                          &i_i32, &j_i32,
+                                          &row_i32, &col_i32,
                                           &box_info));
             // GD_grad_v end update
             // -------------------------------------------------------
@@ -330,9 +319,9 @@ fn main() {
             // -------------------------------------------------------
             // GD_div_v begin update
             GD_div_v
-                .set_pos(i, j,
+                .set_pos(row, col,
                          &div_vector(&GD_v,
-                                     &i_i32, &j_i32,
+                                     &row_i32, &col_i32,
                                      &box_info));
             // GD_div_v end update
             // -------------------------------------------------------
@@ -340,9 +329,9 @@ fn main() {
             // -------------------------------------------------------
             // GD_lap_v begin update
             GD_lap_v
-                .set_pos(i, j,
+                .set_pos(row, col,
                          &laplacian_vector(&GD_v,
-                                           &i_i32, &j_i32,
+                                           &row_i32, &col_i32,
                                            &box_info));
             // GD_lap_v end update
             // -------------------------------------------------------
@@ -350,22 +339,24 @@ fn main() {
             // -------------------------------------------------------
             // GD_ln_rho begin update
             // :todo:log:
-            let rho = GD_rho.get_pos(i, j);
-            if (rho <= 1.) {
-                let str_to_append = format!("step {}, i={}, j={}\n\
-                                             neg log {}\n\
+            let rho = GD_rho.get_pos(row, col);
+            if (rho < 0.) {
+                let str_to_append = format!("step {}, col={}, row={}\n\
+                                             neg log: {}\n\
                                              ------------\n",
-                                            &step, &i, &j, &rho);
+                                            &step, &col, &row, &rho);
                 // appending the string to 
                 file.write_all(&str_to_append.as_bytes())
                     .expect("write failed");
+                println!("error step {}:\n\
+                          negative rho: rho = {}", step, rho);
             GD_ln_rho
-                .set_pos(i, j,
+                .set_pos(row, col,
                          &0.);}
             else {
-                let ln_rho = log(GD_rho.get_pos(i, j));
+                let ln_rho = log(GD_rho.get_pos(row, col));
                 GD_ln_rho
-                    .set_pos(i, j,
+                    .set_pos(row, col,
                              &ln_rho);}
             // GD_ln_rho end update
             // -------------------------------------------------------
@@ -373,9 +364,9 @@ fn main() {
             // -------------------------------------------------------
             // GD_grad_rho begin update
             GD_grad_rho
-                .set_pos(i, j,
+                .set_pos(row, col,
                          &gradient(&GD_rho,
-                                   &i_i32, &j_i32,
+                                   &row_i32, &col_i32,
                                    &box_info));
             // GD_grad_rho end update
             // -------------------------------------------------------
@@ -383,9 +374,9 @@ fn main() {
             // -------------------------------------------------------
             // GD_lap_rho begin update
             GD_lap_rho
-                .set_pos(i, j,
+                .set_pos(row, col,
                          &laplacian(&GD_rho,
-                                    &i_i32, &j_i32,
+                                    &row_i32, &col_i32,
                                     &box_info));
             // GD_lap_rho end update
             // -------------------------------------------------------
@@ -393,9 +384,9 @@ fn main() {
             // -------------------------------------------------------
             // GD_lap_T begin update
             GD_lap_T
-                .set_pos(i, j,
+                .set_pos(row, col,
                          &laplacian(&GD_temp,
-                                    &i_i32, &j_i32,
+                                    &row_i32, &col_i32,
                                     &box_info));
             // GD_lap_T end update
             // -------------------------------------------------------
@@ -403,9 +394,9 @@ fn main() {
             // -------------------------------------------------------
             // GD_grad_T begin update
             GD_grad_T
-                .set_pos(i, j,
+                .set_pos(row, col,
                          &gradient(&GD_temp,
-                                   &i_i32, &j_i32,
+                                   &row_i32, &col_i32,
                                    &box_info));
             // GD_grad_T end update
             // -------------------------------------------------------
@@ -413,8 +404,8 @@ fn main() {
             // -------------------------------------------------------
             // GD_traceless_grad_v begin update
             {
-                let grad_v = GD_grad_v.get_pos(i, j);
-                let div_v = GD_div_v.get_pos(i, j);
+                let grad_v = GD_grad_v.get_pos(row, col);
+                let div_v = GD_div_v.get_pos(row, col);
                 
                 let traceless_grad_v = tens2D {
                     xx: 2.*grad_v.xx - (2./(1.*dim as f64)) * div_v,
@@ -422,7 +413,7 @@ fn main() {
                     yx: grad_v.xy + grad_v.yx,
                     yy: 2.*grad_v.yy - (2./(1.*dim as f64)) * div_v};
                 
-                GD_traceless_grad_v.set_pos(i, j,
+                GD_traceless_grad_v.set_pos(row, col,
                                             &traceless_grad_v);
             }
             // GD_traceless_grad_v end update
@@ -433,19 +424,19 @@ fn main() {
     //bépo WRITING part
         // :doing:
         
-        let filename = format!("{}/step_{}.log",
-                               output_dir, i_step);
+        let filename = format!("{}/step_{}",
+                               output_dir, i_time_step);
         let mut file = fs::File::create(&filename)
             .expect("couldn't create log file");
         
         file.write_all(
-            "# column temperature density\n".as_bytes())
+            "# column density temperature\n".as_bytes())
             .expect("write failed");
 
         let rho_profile = GD_rho.x_profile();
         let temp_profile = GD_temp.x_profile();
         
-        for col_index in 0usize..x_size as usize
+        for col_index in 0usize..ncol_size as usize
         {
             let str_to_append = format!("{} {} {}\n",
                                         &col_index,
@@ -470,29 +461,29 @@ fn main() {
     // Main loop
     ////////////////////////////////////////////////////////////////////////////
     
-    for i in 0usize..x_size as usize {
-        for j in 0usize..y_size as usize {
+    for row in 0usize..nrow_size as usize {
+        for col in 0usize..ncol_size as usize {
 
-            let i_i32 = i as i32;
-            let j_i32 = j as i32;
+            let row_i32 = row as i32;
+            let col_i32 = col as i32;
 
-            let div_vJ = GD_div_vJ.get_pos(i, j);
-            let rho = GD_rho.get_pos(i, j);
-            let lap_v = GD_lap_v.get_pos(i, j);
-            let grad_div_v = GD_grad_div_v.get_pos(i, j);
+            let div_vJ = GD_div_vJ.get_pos(row, col);
+            let rho = GD_rho.get_pos(row, col);
+            let lap_v = GD_lap_v.get_pos(row, col);
+            let grad_div_v = GD_grad_div_v.get_pos(row, col);
             let grad_ln_rho_traceless_grad_v =
-                GD_grad_ln_rho_traceless_grad_v.get_pos(i, j);
-            let grad_ln_rho = GD_grad_ln_rho.get_pos(i, j);
-            let div_v = GD_div_v.get_pos(i, j);
-            let div_press = GD_div_press.get_pos(i, j);
-            let ln_rho = GD_ln_rho.get_pos(i, j);
-            let v_grad_ln_rho = GD_v_scalar_grad_ln_rho.get_pos(i, j);
-            let temp = GD_temp.get_pos(i, j);            
-            let traceless_grad_v_dyadic_grad_v = GD_traceless_grad_v_dyadic_grad_v.get_pos(i, j);
-            let grad_ln_rho_scalar_grad_T = GD_grad_ln_rho_scalar_grad_T.get_pos(i, j);
-            let lap_T = GD_lap_T.get_pos(i, j);
-            let v_scalar_grad_T = GD_v_scalar_grad_T.get_pos(i, j);
-            let J = GD_J.get_pos(i, j);
+                GD_grad_ln_rho_traceless_grad_v.get_pos(row, col);
+            let grad_ln_rho = GD_grad_ln_rho.get_pos(row, col);
+            let div_v = GD_div_v.get_pos(row, col);
+            let div_press = GD_div_press.get_pos(row, col);
+            let ln_rho = GD_ln_rho.get_pos(row, col);
+            let v_grad_ln_rho = GD_v_scalar_grad_ln_rho.get_pos(row, col);
+            let temp = GD_temp.get_pos(row, col);            
+            let traceless_grad_v_dyadic_grad_v = GD_traceless_grad_v_dyadic_grad_v.get_pos(row, col);
+            let grad_ln_rho_scalar_grad_T = GD_grad_ln_rho_scalar_grad_T.get_pos(row, col);
+            let lap_T = GD_lap_T.get_pos(row, col);
+            let v_scalar_grad_T = GD_v_scalar_grad_T.get_pos(row, col);
+            let J = GD_J.get_pos(row, col);
             
             //bépo MOMENTUM conservation
 
@@ -521,7 +512,7 @@ fn main() {
             // if you want gravity
             // J.y += -rho * gravity * dt;
 
-            GD_J.set_pos(i, j, &new_J);
+            GD_J.set_pos(row, col, &new_J);
 
             //bépo MASS conservation
 
@@ -532,7 +523,7 @@ fn main() {
                 (div_v + v_grad_ln_rho) * dt;
             let mut new_rho = exp(new_ln_rho);
             
-            GD_rho.set_pos(i, j, &new_rho);
+            GD_rho.set_pos(row, col, &new_rho);
 
             //bépo TEMPERATURE ENERGY conservation
             
@@ -550,10 +541,10 @@ fn main() {
                         + lambda0 * (grad_ln_rho_scalar_grad_T + lap_T)
                 ) * dt
                 - v_scalar_grad_T * dt;
-            GD_temp.set_pos(i, j, &new_T);
+            GD_temp.set_pos(row, col, &new_T);
 
             //bépo VELOCITY from momentum
-            GD_v.set_pos(i, j,
+            GD_v.set_pos(row, col,
                          &vec2D{x: J.x/rho,
                                 y: J.y/rho});
             
