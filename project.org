@@ -11,11 +11,10 @@ https://stackoverflow.com/questions/72690767/how-to-parse-toml-in-rust-with-unkn
 https://stackoverflow.com/questions/41447678/comparison-of-two-floats-in-rust-to-arbitrary-level-of-precision
 * orga
 ** todos
+*** TODO understand why it is unstable
 *** TODO test if conservation equations work
 *** TODO deal with negative log values (:todo:log:)
-*** TODO don't forget to update v with updated J at the end
-
-*** TODO to verify
+*** TODO to verify/test
 **** div tensor
 in fcts
 **** laplacian
@@ -46,6 +45,25 @@ tens_vec_product
 - v_grad_T renamed v_scal_grad_T
 *** done
 ** done
+*** DONE adapt simplot to plot the results of my simulation on rust
+CLOSED: [2022-12-01 Thu 19:45]
+:LOGBOOK:
+- State "DONE"       from              [2022-12-01 Thu 19:45]
+:END:
+*** DONE don't forget to update v with updated J at the end
+CLOSED: [2022-12-01 Thu 19:45]
+:LOGBOOK:
+- State "DONE"       from "TODO"       [2022-12-01 Thu 19:45]
+:END:
+*** DONE check indexing
+CLOSED: [2022-12-01 Thu 19:44]
+:LOGBOOK:
+- State "DONE"       from "TODO"       [2022-12-01 Thu 19:44]
+:END:
+I think I have problems with indexing:
+- i, j, x_size, y_size...
+- the position in [ ][ ] for my stuff...
+- fix ALL THAT
 *** DONE write conservation equations
 CLOSED: [2022-12-01 Thu 16:21]
 :LOGBOOK:
