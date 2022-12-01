@@ -54,9 +54,9 @@ fn create_tensor_grid(x_size: i32,
 }
 
 fn main() {
-
-    let path = "./src/testoutput/log.txt";    
-    // Open a file in write-only mode, returns `io::Result<File>`
+    let output_dir = "./src/testoutput";
+    let path = format!("{}/log.txt", output_dir);
+    // Open/Create a file in write-only mode, returns `io::Result<File>`
     let file = match fs::File::create(&path) {
         Err(why) => panic!("couldn't create logfile {}: {}", path, why),
         Ok(file) => file,
@@ -74,13 +74,13 @@ fn main() {
     
     // System initialisation
     let mut step = 0;
-    let max_step = 3;
+    let max_step = 5;
 
     let dt = 0.1;
     let mut time = 0.;
 
-    let x_size = 8;
-    let y_size = 2;
+    let x_size = 2;
+    let y_size = 8;
 
     let rho_liq0 = 0.8;
     let ln_rho_liq0 = log(rho_liq0);
@@ -175,6 +175,10 @@ fn main() {
     ////////////////////////////////////////////////////////////////////////////
     // Computations variables update
     ////////////////////////////////////////////////////////////////////////////
+
+    for i_step in 0..max_step {
+
+        step = i_step;
 
     // update of computations variables
     for i in 0usize..x_size as usize {
@@ -353,7 +357,6 @@ fn main() {
                 // appending the string to 
                 file.write_all(&str_to_append.as_bytes())
                     .expect("write failed");
-                // println!("neg log: {}", rho);
             GD_ln_rho
                 .set_pos(i, j,
                          &0.);}
@@ -420,23 +423,45 @@ fn main() {
                 GD_traceless_grad_v.set_pos(i, j,
                                             &traceless_grad_v);
             }
-            //---------------------------------------------    
-            // GD_traceless_grad_v.xx[i][j] =
-            //     2.*grad_v.xx - (2./(1.*dim as f64)) * div_v;
-	    
-            // GD_traceless_grad_v.xy[i][j] = 
-            //     grad_v.xy + grad_v.yx;
-            // GD_traceless_grad_v.yx[i][j] = 
-            //     grad_v.xy + grad_v.yx;
-
-	    // GD_traceless_grad_v.yy[i][j] =
-            //     2.*grad_v.yy - (2./(1.*dim as f64)) * div_v;
-            //---------------------------------------------
             // GD_traceless_grad_v end update
             // -------------------------------------------------------
 
-        }}
-    
+        }} // updating computations values end parenthesis
+
+    //bépo WRITING part
+        // :doing:
+        
+        let filename = format!("{}/step_{}.log",
+                               output_dir, i_step);
+        let mut file = fs::File::create(&filename)
+            .expect("couldn't create log file");
+        
+        file.write_all(
+            "# column temperature density\n".as_bytes())
+            .expect("write failed");
+
+        let rho_profile = GD_rho.x_profile();
+        let temp_profile = GD_temp.x_profile();
+        
+        for col_index in 0usize..x_size as usize
+        {
+            let str_to_append = format!("{} {} {}\n",
+                                        &col_index,
+                                        &rho_profile[col_index],
+                                        &temp_profile[col_index]);
+
+            file.write_all(&str_to_append.as_bytes())
+                .expect("write failed");
+        }
+        
+    // let str_to_append = format!("step {}, i={}, j={}\n\
+    //                              neg log {}\n\
+    //                              ------------\n",
+    //                             &step, &i, &j, &rho);
+    //     // appending the string to 
+    //     file.write_all(&str_to_append.as_bytes())
+    //         .expect("write failed");
+        
 
     //auie main loop
     ////////////////////////////////////////////////////////////////////////////
@@ -524,7 +549,14 @@ fn main() {
                 ) * dt
                 - v_scalar_grad_T * dt;
             GD_temp.set_pos(i, j, &new_T);
-        }}
+
+            //bépo VELOCITY from momentum
+            GD_v.set_pos(i, j,
+                         &vec2D{x: J.x/rho,
+                                y: J.y/rho});
+            
+        }} // i, j loop closing parenthesis
+    } // time step closing parenthesis
 
     // v = tens_product_vec(&t, &v);
     // f = dyadic_product(&t, &t2);
