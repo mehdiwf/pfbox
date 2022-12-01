@@ -3,13 +3,52 @@
 version = 3
 
 [[package]]
+name = "GSL"
+version = "4.0.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3c90488c022c43f0009d7e804c4925b8975296b1c7aaca4cb18e3b434f809f7c"
+dependencies = [
+ "GSL-sys",
+ "paste",
+]
+
+[[package]]
+name = "GSL-sys"
+version = "2.0.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "fbf44cd363ba6b685de2ead20a580ff72cee2e953285bd8ca8cc9208d58dace5"
+dependencies = [
+ "libc",
+ "pkg-config",
+]
+
+[[package]]
+name = "libc"
+version = "0.2.137"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "fc7fcc620a3bff7cdd7a365be3376c97191aeaccc2a603e600951e452615bf89"
+
+[[package]]
+name = "paste"
+version = "1.0.9"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b1de2e551fb905ac83f73f7aedf2f0cb4a0da7e35efa24a202a936269f1f18e1"
+
+[[package]]
 name = "pfbox_procedure"
 version = "0.1.0"
 dependencies = [
+ "GSL",
  "serde",
  "serde_derive",
  "toml",
 ]
+
+[[package]]
+name = "pkg-config"
+version = "0.3.26"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6ac9a59f73473f1b8d852421e59e64809f025994837ef743615c6d0c5b305160"
 
 [[package]]
 name = "proc-macro2"
