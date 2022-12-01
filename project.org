@@ -1,37 +1,250 @@
-* todos
-** TODO make a function that takes in a SimConfig and runs the simulation
-** to verify
-*** div tensor
+* rust snippets
+** 2 dimensional array
+https://stackoverflow.com/questions/13212212/creating-two-dimensional-arrays-in-rust
+#+begin_src rust
+let mut state = [[0u8; 4]; 6];
+state[0][1] = 42;
+#+end_src
+** unknown toml
+https://stackoverflow.com/questions/72690767/how-to-parse-toml-in-rust-with-unknown-structure
+** float comparison
+https://stackoverflow.com/questions/41447678/comparison-of-two-floats-in-rust-to-arbitrary-level-of-precision
+* orga
+** todos
+*** TODO deal with negative log values (:todo:log:)
+*** TODO don't forget to update v with updated J at the end
+
+*** TODO to verify
+**** div tensor
 in fcts
-*** laplacian
+**** laplacian
 in fcts
 
 seems to returns 0 a lot...
-** Cahn_Hilliard
-not done because it seems it's not used in the code
-* implementation changes
-** functions
+*** next
+**** TODO make a function that takes in a SimConfig and runs the simulation
+** implementation changes
 *** functions
-**** for the gradient func, created partial derivative function
-*** functions args
+**** functions
+***** for the gradient func, created partial derivative function
+**** functions args
 - removed the last argument, and returns the changed argument
-**** v_nabla_v
+***** v_nabla_v
 gets grad_v as argument, maybe not necessary!
-*** function names
-**** tens_vec_product
-***** rust
+**** function names
+***** tens_vec_product
+****** rust
 tens_product_vec
-***** c
+****** c
 tens_vec_product
+*** renaming
+- traceless_grad_v_grad_v renamed traceless_grad_v_dyadic_grad_v
+- grad_ln_rho_grad_T renamed grad_ln_rho_scalar_grad_T
+- v_grad_T renamed v_scal_grad_T
+- grad_ln_rho_grad_T renamed grad_ln_rho_scalar_grad_T
+- v_grad_T renamed v_scal_grad_T
+*** done
 ** done
-* done
+*** DONE compute all the terms needed for the main loop
+CLOSED: [2022-12-01 Thu 15:07]
+:LOGBOOK:
+- State "DONE"       from              [2022-12-01 Thu 15:07]
+:END:
+**** details
+***** traceless_grad_v
+- [ ] TensorField2D grad_v
+- [ ] ScalarField2D div_v
+***** momentum eq
+- [ ] f32 dt (no computation needed)
+- [ ] VectorField2D lap_v
+- [ ] VectorField2D div_vJ = div(vJ)
+- [ ] VectorField2D grad_div_v = grad_div_function on velocity
+- [ ] VectorField2D grad_ln_rho_traceless_grad_v =
+  tens_vec_product(traceless_grad_v, grad_ln_rho)
+- [ ] VectorField2D grad_ln_rho
+- [ ] VectorField2D div_press = div_tensor(press)
+- [ ] ScalarField2D div_v
+
+already done
+- rho
+
+constants
+- eta0
+- zeta0
+***** thermal energy
+- const (not defined) cv = 1.5*kB
+- 1/cv
+- div_v
+- traceless_grad_v_grad_v
+- grad_ln_rho_grad_T
+- lap_T
+- v_grad_T
+
+constants
+- eta0
+- zeta0
+- lambda0
+
+***** mass
+- ScalarField2D div_v
+- f32 v_grad_ln_rho = scalar_product(v, grad_ln_rho)
+- VectorField2D grad_ln_rho
+
+functions:
+- exp (check gsl lib)
+
+**** computed
+- [X] div_press
+- [X] grad_ln_rho_grad_T renamed grad_ln_rho_scalar_grad_T
+- [X] grad_ln_rho_traceless_grad_v
+- [X] press
+- [X] v_grad_ln_rho
+- [X] traceless_grad_v_grad_v renamed GD_traceless_grad_v_dyadic_grad_v
+- [X] v_grad_T renamed GD_v_scal_grad_T
+- [X] div_vJ
+- [X] vJ
+- [X] grad_div_v
+- [X] grad_ln_rho
+- [X] grad_v
+- [X] div_v
+- [X] lap_v
+- [X] ln_rho
+- [X] grad_rho
+- [X] lap_rho
+- [X] lap_T
+- [X] grad_T
+
+**** dependencies list
+| name                         | dependencies |
+|------------------------------+--------------|
+| div_press                    |            5 |
+| grad_ln_rho_grad_T           |            5 |
+| grad_ln_rho_traceless_grad_v |            4 |
+| press                        |            4 |
+| v_grad_ln_rho                |            4 |
+| traceless_grad_v_grad_v      |            3 |
+| v_grad_T                     |            3 |
+| div_vJ                       |            2 |
+| vJ                           |            2 |
+| grad_div_v                   |            2 |
+| grad_ln_rho                  |            2 |
+| grad_v                       |            1 |
+| div_v                        |            1 |
+| lap_v                        |            1 |
+| ln_rho                       |            1 |
+| grad_rho                     |            1 |
+| lap_rho                      |            1 |
+| lap_T                        |            1 |
+| grad_T                       |            1 |
+*** DONE define all the terms needed for the main loop
+CLOSED: [2022-12-01 Thu 15:02]
+:LOGBOOK:
+- State "DONE"       from              [2022-12-01 Thu 15:02]
+:END:
+**** DONE all variables checked
+CLOSED: [2022-12-01 Thu 15:02]
+:LOGBOOK:
+- State "DONE"       from              [2022-12-01 Thu 15:02]
+:END:
+- [X] TensorField2D grad_v
+- [X] ScalarField2D div_v
+- [X] f32 dt (no computation needed)
+- [X] VectorField2D lap_v
+- [X] VectorField2D div_vJ = div(vJ)
+- [X] VectorField2D grad_div_v = grad_div_function on velocity
+- [X] VectorField2D grad_ln_rho_traceless_grad_v =
+  tens_vec_product(traceless_grad_v, grad_ln rho)
+- [X] VectorField2D grad_ln_rho
+- [X] VectorField2D div_press = div_tensor(press)
+- [X] ScalarField2D div_v
+- [X] const (not defined) cv = 1.5*kB
+- [X] 1/cv
+- [X] div_v
+- [X] traceless_grad_v_grad_v =
+  dyadic_product(traceless_grad_v,grad_v)
+  traceless_grad_v_grad_v renamed traceless_grad_v_dyadic_grad_v
+- [X] grad_ln_rho_grad_T = scal_product(grad_ln_rho,grad_T)
+  grad_ln_rho_grad_T renamed grad_ln_rho_scalar_grad_T
+- [X] lap_T
+- [X] v_grad_T renamed v_scal_grad_T
+**** DONE traceless_grad_v
+CLOSED: [2022-11-30 Wed 17:23]
+:LOGBOOK:
+- State "DONE"       from              [2022-11-30 Wed 17:23]
+:END:
+- [X] TensorField2D grad_v
+- [X] ScalarField2D div_v
+**** DONE momentum eq
+CLOSED: [2022-11-30 Wed 20:07]
+:LOGBOOK:
+- State "DONE"       from              [2022-11-30 Wed 20:07]
+:END:
+- [X] f32 dt (no computation needed)
+- [X] VectorField2D lap_v
+- [X] VectorField2D div_vJ = div(vJ)
+- [X] VectorField2D grad_div_v = grad_div_function on velocity
+- [X] VectorField2D grad_ln_rho_traceless_grad_v =
+  tens_vec_product(traceless_grad_v, grad_ln rho)
+- [X] VectorField2D grad_ln_rho
+- [X] VectorField2D div_press = div_tensor(press)
+- [X] ScalarField2D div_v
+
+already done
+- rho
+
+constants
+- eta0
+- zeta0
+**** DONE thermal energy
+CLOSED: [2022-12-01 Thu 15:01]
+:LOGBOOK:
+- State "DONE"       from              [2022-12-01 Thu 15:01]
+:END:
+- [X] const (not defined) cv = 1.5*kB
+- [X] 1/cv
+- [X] div_v
+- [X] traceless_grad_v_grad_v =
+  dyadic_product(traceless_grad_v,grad_v)
+  traceless_grad_v_grad_v renamed traceless_grad_v_dyadic_grad_v
+- [X] grad_ln_rho_grad_T = scal_product(grad_ln_rho,grad_T)
+  grad_ln_rho_grad_T renamed grad_ln_rho_scalar_grad_T
+- [X] lap_T
+- [X] v_grad_T renamed v_scal_grad_T
+
+constants
+- eta0
+- zeta0
+- lambda0
+
+**** DONE ln rho
+CLOSED: [2022-12-01 Thu 15:01]
+:LOGBOOK:
+- State "DONE"       from              [2022-12-01 Thu 15:01]
+:END:
+- ScalarField2D div_v
+- f32 v_grad_ln_rho = scalar_product(v, grad_ln_rho)
+- VectorField2D grad_ln_rho
+
+functions:
+- exp (check gsl lib)
 *** DONE function that creates a default/template SimConfig
 CLOSED: [2022-11-25 ven. 15:40]
 :LOGBOOK:
 - State "DONE"       from              [2022-11-25 ven. 15:40]
 :END:
-* tohos
-** TOHO verify if all pub is
+** tohos
+*** TOHO Cahn_Hilliard
+not done because it seems it's not used in the code
+*** TOHO move fn create objects in another place than main
+*** TOHO remove things like "as i32" or "as usize" if possible
+*** TOHO harmoniser les fonctions qui prennent VecVec et MyStructs
+exemple:
+- gradient/grad_scalar
+
+mais aussi:
+- laplacian
+*** TOCHECK traceless_grad_v doesn't appear in dependencies py program?
+*** TOHO verify if all pub is
 is the good way to go in "./src/configfile/cfg_struct.rs"
-** TOHO remove all the "allow"
+*** TOHO remove all the "allow"
 unused_variables
