@@ -77,7 +77,7 @@ fn main() {
     let mut step = 0;
     let max_time_step = 5;
 
-    let dt = 0.1;
+    let dt = 0.002;
     let mut time = 0.;
 
     let ncol_size = 10;
