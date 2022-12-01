@@ -49,7 +49,8 @@ pub fn x_profile(scalar_field: &Vec<Vec<f64>>) -> Vec<f64>
         let mut col_value = 0.;
         for row in 0usize..row_len
         {col_value += scalar_field[row][col];}
-        profile[col] = col_value;}
+        profile[col] = col_value/(row_len as f64);}
+    
     return profile;
 }
 
