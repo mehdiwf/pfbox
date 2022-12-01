@@ -6,6 +6,7 @@
 
 mod maths;
 
+use std::env; // to have a backtrace (search backtrace in this file)
 use std::io::Write; // to use "write_all" method
 use std::fs; // to read/write a file contents
 use rgsl::logarithm::log;
@@ -54,6 +55,7 @@ fn create_tensor_grid(x_size: i32,
 }
 
 fn main() {
+    // env::set_var("RUST_BACKTRACE", "1");
     let output_dir = "./src/testoutput";
     let path = format!("{}/log.txt", output_dir);
     // Open/Create a file in write-only mode, returns `io::Result<File>`
