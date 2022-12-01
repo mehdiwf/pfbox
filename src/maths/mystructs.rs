@@ -35,6 +35,24 @@ pub struct BoxInfo {
     pub imax: i32,
     pub jmax: i32}
 
+pub struct VectorProfile2D{
+    x: Vec<f64>,
+    y: Vec<f64>
+}
+
+pub fn x_profile(scalar_field: &Vec<Vec<f64>>) -> Vec<f64>
+{
+    let row_len = scalar_field.len();
+    let col_len = scalar_field[0].len();
+    let mut profile = vec![0.; col_len];
+    for col in 0usize..col_len {
+        let mut col_value = 0.;
+        for row in 0usize..row_len
+        {col_value += scalar_field[row][col];}
+        profile[col] = col_value;}
+    return profile;
+}
+
 impl ScalarField2D {
     pub fn get_pos(&self, i: usize, j: usize) -> f64
     {
@@ -45,6 +63,9 @@ impl ScalarField2D {
     {
         self.s[i][j] = *f;
     }
+
+    pub fn x_profile(&self) -> Vec<f64>
+    {return x_profile(&self.s);}
 }
 
 impl VectorField2D {
@@ -60,6 +81,16 @@ impl VectorField2D {
     {
         self.x[i][j] = vec.x;
         self.y[i][j] = vec.y;
+    }
+
+    pub fn x_profile(&self) -> VectorProfile2D
+    {
+        let profile = VectorProfile2D
+        {
+            x: x_profile(&self.x),
+            y: x_profile(&self.y)
+        };
+        return profile;
     }
 }
 
@@ -82,4 +113,20 @@ impl TensorField2D {
         self.yy[i][j] = tens.yy;
     }
     
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn x_profile_test() {
+        let grid_y = vec![vec![1., 1., 0., -1.],
+                          vec![0., 0., 0., -2.],
+                          vec![-1., 1., 0., 0.]];
+        let profile = vec![0., 2., 0., -3.];
+        assert_eq!(profile, 
+                   x_profile(&grid_y));
+        }
+
 }
