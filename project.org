@@ -11,6 +11,7 @@ https://stackoverflow.com/questions/72690767/how-to-parse-toml-in-rust-with-unkn
 https://stackoverflow.com/questions/41447678/comparison-of-two-floats-in-rust-to-arbitrary-level-of-precision
 * orga
 ** todos
+*** TODO test if conservation equations work
 *** TODO deal with negative log values (:todo:log:)
 *** TODO don't forget to update v with updated J at the end
 
@@ -45,6 +46,11 @@ tens_vec_product
 - v_grad_T renamed v_scal_grad_T
 *** done
 ** done
+*** DONE write conservation equations
+CLOSED: [2022-12-01 Thu 16:21]
+:LOGBOOK:
+- State "DONE"       from              [2022-12-01 Thu 16:21]
+:END:
 *** DONE compute all the terms needed for the main loop
 CLOSED: [2022-12-01 Thu 15:07]
 :LOGBOOK:
