@@ -41,7 +41,7 @@ liquid_density_list = []
 final_temp_list = []
 final_temp_std_list = []
 
-show_plot_evolution(simdic, to_plot, interval=500,
+show_plot_evolution(simdic, to_plot, interval=1,
                     save=False,
                     space_index_column = 'column')
 
