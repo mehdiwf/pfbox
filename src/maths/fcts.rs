@@ -233,29 +233,26 @@ pub fn div_tensor(tensor_field: &TensorField2D,
     return vector;
 }
 
-pub fn lap(scalar_field: &Vec<Vec<f64>>,
+pub fn lap_scalar(scalar_field: &Vec<Vec<f64>>,
                  i: i32, j: i32,
                  box_info: &BoxInfo) -> f64
 {
 
     let BoxInfo { col_max: box_col_max,
                   row_max: box_row_max } = box_info;
-    let ip = (i+1) % box_row_max;
-    let im = (i - 1 + box_row_max) % box_row_max;
-    let jp = (j+1) % box_col_max;
-    let jm = (j - 1 + box_col_max) % box_col_max;
+    let ip = ((i+1) % box_row_max) as usize;
+    let im = ((i - 1 + box_row_max) % box_row_max) as usize;
+    let jp = ((j+1) % box_col_max) as usize;
+    let jm = ((j - 1 + box_col_max) % box_col_max) as usize;
+    let (i, j) = (i as usize, j as usize);
             // on the x axis
     let laplacian_value = 
         (
-            2.0*(scalar_field[ip as usize][j as usize]  
-                 + scalar_field[im as usize][j as usize]  
-                 + scalar_field[i as usize][jp as usize]  
-                 + scalar_field[i as usize][jm as usize])
-            + scalar_field[ip as usize][jp as usize] 
-            + scalar_field[im as usize][jm as usize] 
-            + scalar_field[im as usize][jp as usize] 
-            + scalar_field[ip as usize][jm as usize]
-            - 12.0*scalar_field[i as usize][j as usize]
+            2.0*(scalar_field[ip][j] + scalar_field[im][j]  
+                 + scalar_field[i][jp] + scalar_field[i][jm])
+            + scalar_field[ip][jp] + scalar_field[im][jm] 
+            + scalar_field[im][jp] + scalar_field[ip][jm]
+            - 12.0*scalar_field[i][j]
         )
         /(3.0*dx*dy);
                 return laplacian_value;
@@ -266,8 +263,8 @@ pub fn laplacian(scalar_field: &ScalarField2D,
                  box_info: &BoxInfo) -> f64
 {
     let field = &scalar_field.s;
-    let laplacian_value = lap(field,
-                              i, j, &box_info);
+    let laplacian_value = lap_scalar(field,
+                                     i, j, &box_info);
     return laplacian_value;
 }
 
@@ -276,12 +273,12 @@ pub fn laplacian_vector(vector_field: &VectorField2D,
                         box_info: &BoxInfo) -> vec2D
 {
     let vec = vec2D {
-        x: lap(&vector_field.x,
-                     i, j,
-                     &box_info),
-        y: lap(&vector_field.y,
-                     i, j,
-                     &box_info)};
+        x: lap_scalar(&vector_field.x,
+                      i, j,
+                      &box_info),
+        y: lap_scalar(&vector_field.y,
+                      i, j,
+                      &box_info)};
 
                 return vec;
 }
@@ -292,45 +289,38 @@ pub fn grad_div_vel(vector_field: &VectorField2D,
 {
     let BoxInfo { col_max: box_col_max,
                   row_max: box_row_max } = box_info;
-    let ip = (i+1) % box_row_max;
-    let im = (i - 1 + box_row_max) % box_row_max;
-    let jp = (j+1) % box_col_max;
-    let jm = (j - 1 + box_col_max) % box_col_max;
-
+    
+    let ip = ((i+1) % box_row_max) as usize;
+    let im = ((i - 1 + box_row_max) % box_row_max) as usize;
+    let jp = ((j+1) % box_col_max) as usize;
+    let jm = ((j - 1 + box_col_max) % box_col_max) as usize;
+    let (i, j) = (i as usize, j as usize);
+    
     let vec = vec2D{
         x: 
-        (10.* vector_field.x[ip as usize][j as usize]
-         + 10.* vector_field.x[im as usize][j as usize]
-         + vector_field.x[ip as usize][jp as usize] 
-         + vector_field.x[im as usize][jp as usize] 
-         + vector_field.x[im as usize][jm as usize] 
-         + vector_field.x[ip as usize][jm as usize]
-	 -2.* vector_field.x[i as usize][jp as usize] 
-         - 2.* vector_field.x[i as usize][jm as usize]      
-         - 20.* vector_field.x[i as usize][j as usize])
-            /(12.*dx*dy)	
-        + ((vector_field.y[ip as usize][jp as usize]  
-            - vector_field.y[im as usize][jp as usize])  
-           + (vector_field.y[im as usize][jm as usize] 
-              - vector_field.y[ip as usize][jm as usize]))
+        (10.* vector_field.x[ip][j] + 10.* vector_field.x[im][j]
+         + vector_field.x[ip][jp] + vector_field.x[im][jp] 
+         + vector_field.x[im][jm] + vector_field.x[ip][jm]
+	 - 2.* vector_field.x[i][jp] - 2.* vector_field.x[i][jm]
+         - 20.* vector_field.x[i][j])
+            /(12.*dx*dy)
+        + ((vector_field.y[ip][jp] - vector_field.y[im][jp])  
+           + (vector_field.y[im][jm] 
+           - vector_field.y[ip][jm]))
             /(4.0*dx*dy),
 
 
         y: 
-        ( 10. * vector_field.y[i as usize][jp as usize]
-          + 10. * vector_field.y[i as usize][jm as usize]
-          + vector_field.y[ip as usize][jp as usize] 
-          + vector_field.y[ip as usize][jm as usize]
-          + vector_field.y[im as usize][jp as usize]
-          + vector_field.y[im as usize][jm as usize]
-          -2.* vector_field.y[ip as usize][j as usize] 
-          -2.* vector_field.y[im as usize][j as usize]
-          - 20.0*vector_field.y[i as usize][j as usize])
+        (10.* vector_field.y[i][jp] + 10.* vector_field.y[i][jm]
+         + vector_field.y[ip][jp] + vector_field.y[ip][jm]
+         + vector_field.y[im][jp] + vector_field.y[im][jm]
+         - 2.* vector_field.y[ip][j] -2.* vector_field.y[im][j]
+         - 20.0*vector_field.y[i][j])
             /(12.0*dx*dy)
-            + ((vector_field.x[ip as usize][jp as usize]
-                - vector_field.x[im as usize][jp as usize])  
-            + (vector_field.x[im as usize][jm as usize]
-               - vector_field.x[ip as usize][jm as usize]))/(4.0*dx*dy)};
+            
+          + ((vector_field.x[ip][jp] - vector_field.x[im][jp])
+             + (vector_field.x[im][jm] - vector_field.x[ip][jm]))
+            /(4.0*dx*dy)};
 
     return vec;
 }
