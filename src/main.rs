@@ -54,6 +54,7 @@ fn create_tensor_grid(ncol_size: i32,
 }
 
 fn main() {
+    let do_vdw_sim = true;
     // env::set_var("RUST_BACKTRACE", "1");
     let output_dir = "./src/testoutput";
     let path = format!("{}/log.txt", output_dir);
@@ -91,6 +92,8 @@ fn main() {
 
     let box_info = BoxInfo{col_max: ncol_size,
                            row_max: nrow_size};
+
+    if do_vdw_sim {
 
     //auie physics quantities definition
     ////////////////////////////////////////////////////////////////////////////
@@ -563,20 +566,7 @@ fn main() {
             
         }} // i, j loop closing parenthesis
     } // time step closing parenthesis
+    } // if vdw_simu closing parenthesis
 
-    // v = tens_product_vec(&t, &v);
-    // f = dyadic_product(&t, &t2);
-    // t = grad_vector(&vecfield, &2, &2, 
-    //                 &box_info);
-    // f = div_vector(&vecfield, &2, &2, 
-    //                &box_info);
-    // v = div_tensor(&tensfield, &2, &2, 
-    //                &box_info);
-    // f = laplacian(&grid_y2, &2, &2, 
-    //               &box_info);
-    // v = laplacian_vector(&vecfield, &2, &2, &box_info);
-
-    // v = grad_div_vel(&vecfield, &2, &2, &box_info);
-
-    // println!("{:?}", v);
+    // TEST
 }
