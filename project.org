@@ -15,6 +15,7 @@ for rgsl:
 sudo apt-get install libgsl0-dev
 * orga code building
 ** todos
+*** TODO fix the grad_scalar test unit
 *** TODO deal with negative log values (:todo:log:)
 *** TODO verify derivatives direction
 - j'ai mis comme c'est fait dans le code de Samy, mais ça me semblait
