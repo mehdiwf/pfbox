@@ -220,24 +220,6 @@ fn main() {
             // -------------------------------------------------------
 
             // -------------------------------------------------------
-            // GD_traceless_grad_v begin update
-            {
-                let grad_v = GD_grad_v.get_pos(row, col);
-                let div_v = GD_div_v.get_pos(row, col);
-                
-                let traceless_grad_v = tens2D {
-                    xx: 2.*grad_v.xx - (2./(1.*dim as f64)) * div_v,
-                    xy: grad_v.xy + grad_v.yx,
-                    yx: grad_v.xy + grad_v.yx,
-                    yy: 2.*grad_v.yy - (2./(1.*dim as f64)) * div_v};
-                
-                GD_traceless_grad_v.set_pos(row, col,
-                                            &traceless_grad_v);
-            }
-            // GD_traceless_grad_v end update
-            // -------------------------------------------------------
-
-            // -------------------------------------------------------
             // GD_grad_rho begin update
             GD_grad_rho
                 .set_pos(row, col,
@@ -328,6 +310,23 @@ fn main() {
             // GD_grad_div_v end update
             // -------------------------------------------------------
 
+            // -------------------------------------------------------
+            // GD_traceless_grad_v begin update
+            {
+                let grad_v = GD_grad_v.get_pos(row, col);
+                let div_v = GD_div_v.get_pos(row, col);
+                
+                let traceless_grad_v = tens2D {
+                    xx: 2.*grad_v.xx - (2./(1.*dim as f64)) * div_v,
+                    xy: grad_v.xy + grad_v.yx,
+                    yx: grad_v.xy + grad_v.yx,
+                    yy: 2.*grad_v.yy - (2./(1.*dim as f64)) * div_v};
+                
+                GD_traceless_grad_v.set_pos(row, col,
+                                            &traceless_grad_v);
+            }
+            // GD_traceless_grad_v end update
+            // -------------------------------------------------------
 
             // -------------------------------------------------------
             // GD_vJ begin update
