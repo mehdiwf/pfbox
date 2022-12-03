@@ -64,6 +64,18 @@ CLOSED: [2022-12-03 Sat 13:00]
   ok
 - div press
   ok
+**** TODO conservation eq verification
+***** DONE momentum
+CLOSED: [2022-12-03 Sat 13:12]
+:LOGBOOK:
+- State "DONE"       from              [2022-12-03 Sat 13:12]
+:END:
+***** DONE mass
+CLOSED: [2022-12-03 Sat 13:16]
+:LOGBOOK:
+- State "DONE"       from              [2022-12-03 Sat 13:16]
+:END:
+***** thermal energy
 **** TODO functions verification
 - shear_viscosity
   ok
