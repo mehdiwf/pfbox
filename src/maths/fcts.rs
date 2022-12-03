@@ -38,8 +38,8 @@ pub const lambda : f64 = 0.66;
 pub const dim : i32 = 2;
 
 // elementary unit cell length in the x direction
-pub const dx : f64 = 0.5;
-pub const dy : f64 = 0.5;
+pub const dx : f64 = 0.02;
+pub const dy : f64 = 0.02;
 
 // force density in the x_direction 
 pub const forcex : f64 = 0.00;
@@ -68,9 +68,7 @@ pub const EPS : f64 = 0.004;
 
 pub const PI : f64 = 3.14159265358;
 
-pub fn shear_viscosity(rho: f64,
-                       temperature: f64,
-                       shear_visc: f64) -> f64
+pub fn shear_viscosity(rho: f64) -> f64
 {
     eta0 * m * rho
 }
@@ -104,8 +102,8 @@ pub fn v_nabla_v(v: &vec2D, v_imp: &vec2D,
 {
     let v_grad_v = vec2D{
         x: (v.x + v_imp.x) * grad_v.xx
-            + (v.y + v_imp.y) * (grad_v.yx),
-        y: (v.x + v_imp.x) * (grad_v.xy )
+            + (v.y + v_imp.y) * grad_v.yx,
+        y: (v.x + v_imp.x) * grad_v.xy
             + (v.y + v_imp.y) * grad_v.yy};
 
     return v_grad_v;
@@ -146,33 +144,32 @@ pub fn partial_deriv(scal_field: &Vec<Vec<f64>>,
 {
     let BoxInfo { col_max: box_col_max,
                   row_max: box_row_max } = box_info;
-    let ip = (i+1) % box_row_max;
-    let im = (i - 1 + box_row_max) % box_row_max;
-    let jp = (j+1) % box_col_max;
-    let jm = (j - 1 + box_col_max) % box_col_max;
+    // i+1 with Periodic Boundaries
+    let ip = ((i+1) % box_row_max) as usize;
+    // i-1 with Periodic Boundaries
+    let im = ((i - 1 + box_row_max) % box_row_max) as usize;
+    // j+1 with Periodic Boundaries
+    let jp = ((j+1) % box_col_max) as usize;
+    // j-1 with Periodic Boundaries
+    let jm = ((j - 1 + box_col_max) % box_col_max) as usize;
+    let (i, j) = (i as usize, j as usize);
 
     match direction
         {
             // on the x axis
             0 => {
    let derivative = 
-          lambda*(scal_field[ip as usize][j as usize] 
-                  - scal_field[im as usize][j as usize])/(2.*dx)
-	  + 0.25*lambda*(scal_field[ip as usize][jp as usize] 
-                         - scal_field[im as usize][jp as usize])/(2.*dx)	
-          + 0.25*lambda*(scal_field[ip as usize][jm as usize] 
-                         - scal_field[im as usize][jm as usize])/(2.*dx);
+          lambda*(scal_field[ip][j] - scal_field[im][j])/(2.*dx)
+	  + 0.25*lambda*(scal_field[ip][jp] - scal_field[im][jp])/(2.*dx)
+          + 0.25*lambda*(scal_field[ip][jm] - scal_field[im][jm])/(2.*dx);
                 return derivative;
             },
             // on the y axis
             1 => {
    let derivative = 
-          lambda*(scal_field[i as usize][jp as usize] 
-                  - scal_field[i as usize][jm as usize])/(2.*dx)
-	  + 0.25*lambda*(scal_field[ip as usize][jp as usize] 
-                         - scal_field[ip as usize][jm as usize])/(2.*dx)	
-          + 0.25*lambda*(scal_field[im as usize][jp as usize] 
-                         - scal_field[im as usize][jm as usize])/(2.*dx);
+          lambda*(scal_field[i][jp] - scal_field[i][jm])/(2.*dx)
+	  + 0.25*lambda*(scal_field[ip][jp] - scal_field[ip][jm])/(2.*dx)	
+          + 0.25*lambda*(scal_field[im][jp] - scal_field[im][jm])/(2.*dx);
                 return derivative;
             },
             // if different than 0/1, panic
@@ -341,20 +338,20 @@ pub fn grad_div_vel(vector_field: &VectorField2D,
     return vec;
 }
 
-pub fn pressure(rho: f64, grad_rho_tmp: &vec2D, 
-                lap_rho_tmp: f64, temp: f64) -> tens2D
+pub fn pressure(rho: f64, grad_rho: &vec2D, 
+                lap_rho: f64, temp: f64) -> tens2D
 {
     let p_thermo = rho * kB * temp/(1. - b * rho)
                    - aa * rho * rho;
     let p_iso = p_thermo - 0.5 * w * 
-        (grad_rho_tmp.x * grad_rho_tmp.x + grad_rho_tmp.y*grad_rho_tmp.y)
-        -  w*rho*lap_rho_tmp;
+        (grad_rho.x * grad_rho.x + grad_rho.y*grad_rho.y)
+        -  w*rho*lap_rho;
     
     let pressure = tens2D {
-        xx: p_iso + w*grad_rho_tmp.x*grad_rho_tmp.x,
-        xy: w * grad_rho_tmp.x * grad_rho_tmp.y,
-	yx: w * grad_rho_tmp.x * grad_rho_tmp.y,
-        yy: p_iso  + w * grad_rho_tmp.y * grad_rho_tmp.y
+        xx: p_iso + w*grad_rho.x*grad_rho.x,
+        xy: w * grad_rho.x * grad_rho.y,
+	yx: w * grad_rho.x * grad_rho.y,
+        yy: p_iso  + w * grad_rho.y * grad_rho.y
 };
     return pressure;
 }
