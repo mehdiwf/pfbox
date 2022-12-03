@@ -504,16 +504,16 @@ fn main() {
                 x: J.x +
                     (- div_vJ.x
 	             + eta0 * rho * lap_v.x
-                     + eta0*(1.-2./(1.*dim as f64) + zeta0)
+                     + eta0 * (1.-2./(1.*dim as f64) + zeta0)
                      * rho * grad_div_v.x
 	             + eta0 * rho * grad_ln_rho_traceless_grad_v.x
                      + zeta0 * rho * grad_ln_rho.x * div_v
                      - div_press.x)
                     * dt,
-                y:J.y + 
+                y: J.y + 
                     (- div_vJ.y
 	             + eta0 * rho * lap_v.y
-                     + eta0*(1.-2./(1.*dim as f64) + zeta0)
+                     + eta0 * (1.-2./(1.*dim as f64) + zeta0)
                      * rho * grad_div_v.y
 	             + eta0 * rho * grad_ln_rho_traceless_grad_v.y
                      + zeta0 * rho * grad_ln_rho.y * div_v
@@ -537,6 +537,11 @@ fn main() {
             
             GD_rho.set_pos(row, col, &new_rho);
 
+            //bépo VELOCITY from momentum
+            GD_v.set_pos(row, col,
+                         &vec2D{x: new_J.x/new_rho,
+                                y: new_J.y/new_rho});
+            
             //bépo TEMPERATURE ENERGY conservation
             
             // term l div_v
@@ -544,21 +549,16 @@ fn main() {
             let mut new_T = temp +
                 inv_cv *
                 (
-                        // term l div_v
-                        -kB * temp * (1. + rho * b/(1.-rho * b)) * div_v 
-                        // term dissipative_stress_grad_v
-                        + eta0 * traceless_grad_v_dyadic_grad_v
-                        + zeta0 * div_v * div_v
-                        // term laplacian T
+                    // term l div_v
+                    -kB * temp * (1. + rho * b/(1.-rho * b)) * div_v 
+                    // term dissipative_stress_grad_v
+                    + eta0 * traceless_grad_v_dyadic_grad_v
+                    + zeta0 * div_v * div_v
+                    // term laplacian T
                         + lambda0 * (grad_ln_rho_scalar_grad_T + lap_T)
                 ) * dt
                 - v_scalar_grad_T * dt;
             GD_temp.set_pos(row, col, &new_T);
-
-            //bépo VELOCITY from momentum
-            GD_v.set_pos(row, col,
-                         &vec2D{x: J.x/rho,
-                                y: J.y/rho});
             
         }} // i, j loop closing parenthesis
     } // time step closing parenthesis
