@@ -248,7 +248,7 @@ fn main() {
                 .set_pos(row, col,
                          &0.);}
             else {
-                let ln_rho = log(GD_rho.get_pos(row, col));
+                let ln_rho = log(rho);
                 GD_ln_rho
                     .set_pos(row, col,
                              &ln_rho);}
@@ -352,7 +352,8 @@ fn main() {
             GD_div_vJ
                 .set_pos(row, col,
                          &div_tensor(&GD_vJ,
-                                     row_i32, col_i32, &box_info));
+                                     row_i32, col_i32,
+                                     &box_info));
             // GD_div_vJ end update
             // -------------------------------------------------------
 
@@ -378,12 +379,12 @@ fn main() {
 
 
             // -------------------------------------------------------
-            // GD_v_grad_ln_rho begin update            
+            // GD_v_scalar_grad_ln_rho begin update            
             GD_v_scalar_grad_ln_rho
                 .set_pos(row, col,
                          &scal_product(&GD_v.get_pos(row, col),
                                        &GD_grad_ln_rho.get_pos(row, col)));
-            // GD_v_grad_ln_rho end update
+            // GD_v_scalar_grad_ln_rho end update
             // -------------------------------------------------------
 
 
