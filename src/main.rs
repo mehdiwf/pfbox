@@ -194,7 +194,7 @@ fn main() {
             // div_press begin update
             GD_div_press
                 .set_pos(row, col,
-                         &div_tensor(&GD_pressure, &row_i32, &col_i32,
+                         &div_tensor(&GD_pressure, row_i32, col_i32,
                                      &box_info));
             // div_press end update
             // -------------------------------------------------------
@@ -224,10 +224,10 @@ fn main() {
             // GD_pressure begin update            
             GD_pressure
                 .set_pos(row, col,
-                         &pressure(&GD_rho.get_pos(row, col),
+                         &pressure(GD_rho.get_pos(row, col),
                                    &GD_grad_rho.get_pos(row, col),
-                                   &GD_lap_rho.get_pos(row, col),
-                                   &GD_temp.get_pos(row, col)));
+                                   GD_lap_rho.get_pos(row, col),
+                                   GD_temp.get_pos(row, col)));
             // GD_pressure end update
             // -------------------------------------------------------
             
@@ -263,7 +263,7 @@ fn main() {
             GD_div_vJ
                 .set_pos(row, col,
                          &div_tensor(&GD_vJ,
-                                     &row_i32, &col_i32, &box_info));
+                                     row_i32, col_i32, &box_info));
             // GD_div_vJ end update
             // -------------------------------------------------------
 
@@ -291,7 +291,7 @@ fn main() {
             GD_grad_div_v
                 .set_pos(row, col,
                          &grad_div_vel(&GD_v,
-                                       &row_i32, &col_i32,
+                                       row_i32, col_i32,
                                        &box_info));
             // GD_grad_div_v end update
             // -------------------------------------------------------
@@ -301,7 +301,7 @@ fn main() {
             GD_grad_ln_rho
                 .set_pos(row, col,
                          &gradient(&GD_ln_rho,
-                                   &row_i32, &col_i32,
+                                   row_i32, col_i32,
                                    &box_info));
             // GD_grad_div_v end update
             // -------------------------------------------------------
@@ -311,7 +311,7 @@ fn main() {
             GD_grad_v
                 .set_pos(row, col,
                          &gradient_vector(&GD_v,
-                                          &row_i32, &col_i32,
+                                          row_i32, col_i32,
                                           &box_info));
             // GD_grad_v end update
             // -------------------------------------------------------
@@ -321,7 +321,7 @@ fn main() {
             GD_div_v
                 .set_pos(row, col,
                          &div_vector(&GD_v,
-                                     &row_i32, &col_i32,
+                                     row_i32, col_i32,
                                      &box_info));
             // GD_div_v end update
             // -------------------------------------------------------
@@ -331,7 +331,7 @@ fn main() {
             GD_lap_v
                 .set_pos(row, col,
                          &laplacian_vector(&GD_v,
-                                           &row_i32, &col_i32,
+                                           row_i32, col_i32,
                                            &box_info));
             // GD_lap_v end update
             // -------------------------------------------------------
@@ -366,7 +366,7 @@ fn main() {
             GD_grad_rho
                 .set_pos(row, col,
                          &gradient(&GD_rho,
-                                   &row_i32, &col_i32,
+                                   row_i32, col_i32,
                                    &box_info));
             // GD_grad_rho end update
             // -------------------------------------------------------
@@ -376,7 +376,7 @@ fn main() {
             GD_lap_rho
                 .set_pos(row, col,
                          &laplacian(&GD_rho,
-                                    &row_i32, &col_i32,
+                                    row_i32, col_i32,
                                     &box_info));
             // GD_lap_rho end update
             // -------------------------------------------------------
@@ -386,7 +386,7 @@ fn main() {
             GD_lap_T
                 .set_pos(row, col,
                          &laplacian(&GD_temp,
-                                    &row_i32, &col_i32,
+                                    row_i32, col_i32,
                                     &box_info));
             // GD_lap_T end update
             // -------------------------------------------------------
@@ -396,7 +396,7 @@ fn main() {
             GD_grad_T
                 .set_pos(row, col,
                          &gradient(&GD_temp,
-                                   &row_i32, &col_i32,
+                                   row_i32, col_i32,
                                    &box_info));
             // GD_grad_T end update
             // -------------------------------------------------------

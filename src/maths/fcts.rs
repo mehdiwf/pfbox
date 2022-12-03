@@ -68,22 +68,22 @@ pub const EPS : f64 = 0.004;
 
 pub const PI : f64 = 3.14159265358;
 
-pub fn shear_viscosity(rho: &f64,
-                       temperature: &f64,
-                       shear_visc: &f64) -> f64
+pub fn shear_viscosity(rho: f64,
+                       temperature: f64,
+                       shear_visc: f64) -> f64
 {
     eta0 * m * rho
 }
 
-pub fn bulk_viscosity(rho: &f64) -> f64
+pub fn bulk_viscosity(rho: f64) -> f64
 {
     zeta0 * m * rho
 }
 
-pub fn dissipative_stress(shear_visc: &f64,
-                          bulk_visc: &f64,
+pub fn dissipative_stress(shear_visc: f64,
+                          bulk_visc: f64,
                           grad_v: &tens2D, 
-		          div_v: &f64,
+		          div_v: f64,
                           diss_stress: &tens2D) -> tens2D
 {
     let new_diss_stress = tens2D
@@ -140,8 +140,8 @@ pub fn dyadic_product(tens_a: &tens2D, tens_b: &tens2D) -> f64
 /// WARNING!!!: partial derivative in the x direction is 1, not 0
 /// WARNING!!!: partial derivative in the y direction is 0, not 1
 pub fn partial_deriv(scal_field: &Vec<Vec<f64>>,
-                     i: &i32, j: &i32,
-                     direction: &i32,
+                     i: i32, j: i32,
+                     direction: i32,
                      box_info: &BoxInfo) -> f64
 {
     let BoxInfo { col_max: box_col_max,
@@ -156,8 +156,8 @@ pub fn partial_deriv(scal_field: &Vec<Vec<f64>>,
             // on the x axis
             0 => {
    let derivative = 
-          lambda*(scal_field[ip as usize][*j as usize] 
-                  - scal_field[im as usize][*j as usize])/(2.*dx)
+          lambda*(scal_field[ip as usize][j as usize] 
+                  - scal_field[im as usize][j as usize])/(2.*dx)
 	  + 0.25*lambda*(scal_field[ip as usize][jp as usize] 
                          - scal_field[im as usize][jp as usize])/(2.*dx)	
           + 0.25*lambda*(scal_field[ip as usize][jm as usize] 
@@ -167,8 +167,8 @@ pub fn partial_deriv(scal_field: &Vec<Vec<f64>>,
             // on the y axis
             1 => {
    let derivative = 
-          lambda*(scal_field[*i as usize][jp as usize] 
-                  - scal_field[*i as usize][jm as usize])/(2.*dx)
+          lambda*(scal_field[i as usize][jp as usize] 
+                  - scal_field[i as usize][jm as usize])/(2.*dx)
 	  + 0.25*lambda*(scal_field[ip as usize][jp as usize] 
                          - scal_field[ip as usize][jm as usize])/(2.*dx)	
           + 0.25*lambda*(scal_field[im as usize][jp as usize] 
@@ -182,65 +182,65 @@ pub fn partial_deriv(scal_field: &Vec<Vec<f64>>,
 }
 
 pub fn grad_scalar(scalar_field: &Vec<Vec<f64>>,
-                   i: &i32, j: &i32,
+                   i: i32, j: i32,
                    box_info: &BoxInfo) -> vec2D
 {
     let grad = vec2D {
         // x is index 1 because it's the columns in the simulation
-        x: partial_deriv(&scalar_field, &i, &j, &1, &box_info),
-        y: partial_deriv(&scalar_field, &i, &j, &0, &box_info),};
+        x: partial_deriv(&scalar_field, i, j, 1, &box_info),
+        y: partial_deriv(&scalar_field, i, j, 0, &box_info),};
         
     return grad;
 }
 
 pub fn gradient(scalar_field: &ScalarField2D,
-                i: &i32, j: &i32,
+                i: i32, j: i32,
                 box_info: &BoxInfo) -> vec2D
 {
     let grad = vec2D {
         // x is index 1 because it's the columns in the simulation
-        x: partial_deriv(&scalar_field.s, &i, &j, &1, &box_info),
-        y: partial_deriv(&scalar_field.s, &i, &j, &0, &box_info),};
+        x: partial_deriv(&scalar_field.s, i, j, 1, &box_info),
+        y: partial_deriv(&scalar_field.s, i, j, 0, &box_info),};
         
     return grad;
 }
 
 pub fn gradient_vector(vector_field: &VectorField2D,
-                    i: &i32, j: &i32,
+                    i: i32, j: i32,
                     box_info: &BoxInfo) -> tens2D
 {
     let tens = tens2D {
-        xx: partial_deriv(&vector_field.x, &i, &j, &1, &box_info),
-        xy: partial_deriv(&vector_field.x, &i, &j, &0, &box_info),
-        yx: partial_deriv(&vector_field.y, &i, &j, &1, &box_info),
-        yy: partial_deriv(&vector_field.y, &i, &j, &0, &box_info)};
+        xx: partial_deriv(&vector_field.x, i, j, 1, &box_info),
+        xy: partial_deriv(&vector_field.x, i, j, 0, &box_info),
+        yx: partial_deriv(&vector_field.y, i, j, 1, &box_info),
+        yy: partial_deriv(&vector_field.y, i, j, 0, &box_info)};
     return tens;
 }
 
 pub fn div_vector(vector_field: &VectorField2D,
-                  i: &i32, j: &i32,
+                  i: i32, j: i32,
                   box_info: &BoxInfo) -> f64
 {
-    let dVx_dx = partial_deriv(&vector_field.x, &i, &j, &1, &box_info);
-    let dVy_dy = partial_deriv(&vector_field.y, &i, &j, &0, &box_info);
+    let dVx_dx = partial_deriv(&vector_field.x, i, j, 1, &box_info);
+    let dVy_dy = partial_deriv(&vector_field.y, i, j, 0, &box_info);
 
     return dVx_dx + dVy_dy;
 }
 
 pub fn div_tensor(tensor_field: &TensorField2D,
-                  i: &i32, j: &i32,
+                  i: i32, j: i32,
                   box_info: &BoxInfo) -> vec2D
 {
     let vector = vec2D{
-        x: partial_deriv(&tensor_field.xx, &i, &j, &1, &box_info)
-            + partial_deriv(&tensor_field.yx, &i, &j, &0, &box_info),
-        y: partial_deriv(&tensor_field.xy, &i, &j, &1, &box_info)
-            + partial_deriv(&tensor_field.yy, &i, &j, &0, &box_info)};
+        x: partial_deriv(&tensor_field.xx, i, j, 1, &box_info)
+            + partial_deriv(&tensor_field.yx, i, j, 0, &box_info),
+        y: partial_deriv(&tensor_field.xy, i, j, 1, &box_info)
+            + partial_deriv(&tensor_field.yy, i, j, 0, &box_info)};
     return vector;
 }
 
 pub fn lap(scalar_field: &Vec<Vec<f64>>,
-                 i: &i32, j: &i32,
+                 i: i32, j: i32,
                  box_info: &BoxInfo) -> f64
 {
 
@@ -253,47 +253,47 @@ pub fn lap(scalar_field: &Vec<Vec<f64>>,
             // on the x axis
     let laplacian_value = 
         (
-            2.0*(scalar_field[ip as usize][*j as usize]  
-                 + scalar_field[im as usize][*j as usize]  
-                 + scalar_field[*i as usize][jp as usize]  
-                 + scalar_field[*i as usize][jm as usize])
+            2.0*(scalar_field[ip as usize][j as usize]  
+                 + scalar_field[im as usize][j as usize]  
+                 + scalar_field[i as usize][jp as usize]  
+                 + scalar_field[i as usize][jm as usize])
             + scalar_field[ip as usize][jp as usize] 
             + scalar_field[im as usize][jm as usize] 
             + scalar_field[im as usize][jp as usize] 
             + scalar_field[ip as usize][jm as usize]
-            - 12.0*scalar_field[*i as usize][*j as usize]
+            - 12.0*scalar_field[i as usize][j as usize]
         )
         /(3.0*dx*dy);
                 return laplacian_value;
 }
 
 pub fn laplacian(scalar_field: &ScalarField2D,
-                 i: &i32, j: &i32,
+                 i: i32, j: i32,
                  box_info: &BoxInfo) -> f64
 {
     let field = &scalar_field.s;
     let laplacian_value = lap(field,
-                              &i, &j, &box_info);
+                              i, j, &box_info);
     return laplacian_value;
 }
 
 pub fn laplacian_vector(vector_field: &VectorField2D,
-                        i: &i32, j: &i32,
+                        i: i32, j: i32,
                         box_info: &BoxInfo) -> vec2D
 {
     let vec = vec2D {
         x: lap(&vector_field.x,
-                     &i, &j,
+                     i, j,
                      &box_info),
         y: lap(&vector_field.y,
-                     &i, &j,
+                     i, j,
                      &box_info)};
 
                 return vec;
 }
 
 pub fn grad_div_vel(vector_field: &VectorField2D,
-                    i: &i32, j: &i32,
+                    i: i32, j: i32,
                     box_info: &BoxInfo) -> vec2D
 {
     let BoxInfo { col_max: box_col_max,
@@ -305,15 +305,15 @@ pub fn grad_div_vel(vector_field: &VectorField2D,
 
     let vec = vec2D{
         x: 
-        (10.* vector_field.x[ip as usize][*j as usize]
-         + 10.* vector_field.x[im as usize][*j as usize]
+        (10.* vector_field.x[ip as usize][j as usize]
+         + 10.* vector_field.x[im as usize][j as usize]
          + vector_field.x[ip as usize][jp as usize] 
          + vector_field.x[im as usize][jp as usize] 
          + vector_field.x[im as usize][jm as usize] 
          + vector_field.x[ip as usize][jm as usize]
-	 -2.* vector_field.x[*i as usize][jp as usize] 
-         - 2.* vector_field.x[*i as usize][jm as usize]      
-         - 20.* vector_field.x[*i as usize][*j as usize])
+	 -2.* vector_field.x[i as usize][jp as usize] 
+         - 2.* vector_field.x[i as usize][jm as usize]      
+         - 20.* vector_field.x[i as usize][j as usize])
             /(12.*dx*dy)	
         + ((vector_field.y[ip as usize][jp as usize]  
             - vector_field.y[im as usize][jp as usize])  
@@ -323,15 +323,15 @@ pub fn grad_div_vel(vector_field: &VectorField2D,
 
 
         y: 
-        ( 10. * vector_field.y[*i as usize][jp as usize]
-          + 10. * vector_field.y[*i as usize][jm as usize]
+        ( 10. * vector_field.y[i as usize][jp as usize]
+          + 10. * vector_field.y[i as usize][jm as usize]
           + vector_field.y[ip as usize][jp as usize] 
           + vector_field.y[ip as usize][jm as usize]
           + vector_field.y[im as usize][jp as usize]
           + vector_field.y[im as usize][jm as usize]
-          -2.* vector_field.y[ip as usize][*j as usize] 
-          -2.* vector_field.y[im as usize][*j as usize]
-          - 20.0*vector_field.y[*i as usize][*j as usize])
+          -2.* vector_field.y[ip as usize][j as usize] 
+          -2.* vector_field.y[im as usize][j as usize]
+          - 20.0*vector_field.y[i as usize][j as usize])
             /(12.0*dx*dy)
             + ((vector_field.x[ip as usize][jp as usize]
                 - vector_field.x[im as usize][jp as usize])  
@@ -341,8 +341,8 @@ pub fn grad_div_vel(vector_field: &VectorField2D,
     return vec;
 }
 
-pub fn pressure(rho: &f64, grad_rho_tmp: &vec2D, 
-                lap_rho_tmp: &f64, temp: &f64) -> tens2D
+pub fn pressure(rho: f64, grad_rho_tmp: &vec2D, 
+                lap_rho_tmp: f64, temp: f64) -> tens2D
 {
     let p_thermo = rho * kB * temp/(1. - b * rho)
                    - aa * rho * rho;
@@ -397,7 +397,7 @@ mod tests {
 
         let uni_grid = vec![vec![1.; 4]; 4];
         
-        v = grad_scalar(&uni_grid, &2, &2, &box_info);
+        v = grad_scalar(&uni_grid, 2, 2, &box_info);
         assert_eq!(v.x, 0., "testing the gradient is zero \
                              with a uniform field");
         assert_eq!(v.y, 0., "testing the gradient is zero \
@@ -407,7 +407,7 @@ mod tests {
 
         let grid_x = vec![vec![1., 2., 3., 4.]; 4];
 
-        v = grad_scalar(&grid_x, &2, &2, &box_info);
+        v = grad_scalar(&grid_x, 2, 2, &box_info);
         assert!((v.x > 0.), "testing the gradient.x is positive \
                             for a field growing with respect of x");
         assert_eq!(v.y, 0., "testing the gradient.y is zero \
@@ -420,7 +420,7 @@ mod tests {
                           vec![3., 3., 3., 3.],
                           vec![4., 4., 4., 4.]];
 
-        v = grad_scalar(&grid_y, &2, &2, &box_info);
+        v = grad_scalar(&grid_y, 2, 2, &box_info);
         println!("y {:?}", v);
         assert!((v.y > 0.), "testing the gradient.y is positive \
                             for a field growing with respect of y");
