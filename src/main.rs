@@ -535,6 +535,7 @@ fn main() {
                 (div_v + v_grad_ln_rho) * dt;
             let mut new_rho = exp(new_ln_rho);
             
+            GD_ln_rho.set_pos(row, col, &new_ln_rho);
             GD_rho.set_pos(row, col, &new_rho);
 
             //bépo VELOCITY from momentum
