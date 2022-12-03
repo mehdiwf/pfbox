@@ -194,12 +194,9 @@ pub fn gradient(scalar_field: &ScalarField2D,
                 i: i32, j: i32,
                 box_info: &BoxInfo) -> vec2D
 {
-    let grad = vec2D {
-        // x is index 1 because it's the columns in the simulation
-        x: partial_deriv(&scalar_field.s, i, j, 1, &box_info),
-        y: partial_deriv(&scalar_field.s, i, j, 0, &box_info),};
-        
-    return grad;
+    let field = &scalar_field.s;
+    return grad_scalar(field, i, j,
+                       &box_info);
 }
 
 pub fn gradient_vector(vector_field: &VectorField2D,
