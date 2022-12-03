@@ -76,12 +76,12 @@ fn main() {
     
     // System initialisation
     let mut step = 0;
-    let max_time_step = 5;
+    let max_time_step = 5000;
 
-    let dt = 0.002;
+    let dt = 1e-5;
     let mut time = 0.;
 
-    let ncol_size = 10;
+    let ncol_size = 100;
     let nrow_size = 2;
 
     let rho_liq0 = 0.8;
