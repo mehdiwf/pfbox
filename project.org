@@ -13,18 +13,96 @@ https://stackoverflow.com/questions/41447678/comparison-of-two-floats-in-rust-to
 for rgsl:
 
 sudo apt-get install libgsl0-dev
-* orga
+* orga code building
 ** todos
 *** TODO understand why it is unstable
-*** TODO test if conservation equations work
-*** TODO deal with negative log values (:todo:log:)
-*** TODO to verify/test
-**** div tensor
-in fcts
-**** laplacian
-in fcts
+**** TOCHECK the grad x/y in samy is not in the same direction as mine
+in his grad.x it's a gradient through the row axis (so the y axis!)
+**** DONE update verification
+CLOSED: [2022-12-03 Sat 13:00]
+:LOGBOOK:
+- State "DONE"       from "TODO"       [2022-12-03 Sat 13:00]
+:END:
+***** things updated
+- lap rho
+  ok
+- lap T
+  ok
+- grad T
+  ok
+- grad rho
+  ok
+- ln rho
+  ok
+- lap v
+  ok
+- div v
+  ok
+- grad v
+  ok
+- grad ln rho
+  ok
+- grad div v
+  ok
+- traceless grad v
+  ok
+- vJ
+  ok
+- div vJ
+  ok
+- v scalar grad T
+  ok
+- traceless grad v dyadic grad
+  ok
+- v scalar grad ln rho
+  ok
+- pressure
+  ok
+- grad ln rho traceless grad v
+  ok
+- grad ln rho scalar grad T
+  ok
+- div press
+  ok
+**** TODO functions verification
+- shear_viscosity
+  ok
+- bulk_viscosity
+  ok
+- dissipative_stress
+  ok
+- v_nabla_v
+  ok
+- scal_product
+  ok
+- tens_product_vec
+  ok
+- dyadic_product
+  ok
+- partial_deriv
+  ok
+- grad_scalar
+  ------------------------------ !
+- gradient
+  ------------------------------ !
+- gradient_vector
+  ------------------------------ !
+- div_vector
+  ------------------------------ !
+- div_tensor
+  ------------------------------ !
+- lap_scalar
+  ok
+- laplacian
+  ok
+- laplacian_vector
+  ok
+- grad_div_vel
+  ok
+- pressure
+  ok
 
-seems to returns 0 a lot...
+*** TODO deal with negative log values (:todo:log:)
 *** next
 **** TODO make a function that takes in a SimConfig and runs the simulation
 ** implementation changes
@@ -49,17 +127,19 @@ tens_vec_product
 - v_grad_T renamed v_scal_grad_T
 *** done
 ** done
-*** DONE adapt simplot to plot the results of my simulation on rust
+*** plots 
+**** DONE adapt simplot to plot the results of my simulation on rust
 CLOSED: [2022-12-01 Thu 19:45]
 :LOGBOOK:
 - State "DONE"       from              [2022-12-01 Thu 19:45]
 :END:
-*** DONE don't forget to update v with updated J at the end
+*** physics loop construction
+**** DONE don't forget to update v with updated J at the end
 CLOSED: [2022-12-01 Thu 19:45]
 :LOGBOOK:
 - State "DONE"       from "TODO"       [2022-12-01 Thu 19:45]
 :END:
-*** DONE check indexing
+**** DONE check indexing
 CLOSED: [2022-12-01 Thu 19:44]
 :LOGBOOK:
 - State "DONE"       from "TODO"       [2022-12-01 Thu 19:44]
@@ -68,21 +148,21 @@ I think I have problems with indexing:
 - i, j, x_size, y_size...
 - the position in [ ][ ] for my stuff...
 - fix ALL THAT
-*** DONE write conservation equations
+**** DONE write conservation equations
 CLOSED: [2022-12-01 Thu 16:21]
 :LOGBOOK:
 - State "DONE"       from              [2022-12-01 Thu 16:21]
 :END:
-*** DONE compute all the terms needed for the main loop
+**** DONE compute all the terms needed for the main loop
 CLOSED: [2022-12-01 Thu 15:07]
 :LOGBOOK:
 - State "DONE"       from              [2022-12-01 Thu 15:07]
 :END:
-**** details
-***** traceless_grad_v
+***** details
+****** traceless_grad_v
 - [ ] TensorField2D grad_v
 - [ ] ScalarField2D div_v
-***** momentum eq
+****** momentum eq
 - [ ] f32 dt (no computation needed)
 - [ ] VectorField2D lap_v
 - [ ] VectorField2D div_vJ = div(vJ)
@@ -99,7 +179,7 @@ already done
 constants
 - eta0
 - zeta0
-***** thermal energy
+****** thermal energy
 - const (not defined) cv = 1.5*kB
 - 1/cv
 - div_v
@@ -113,7 +193,7 @@ constants
 - zeta0
 - lambda0
 
-***** mass
+****** mass
 - ScalarField2D div_v
 - f32 v_grad_ln_rho = scalar_product(v, grad_ln_rho)
 - VectorField2D grad_ln_rho
@@ -121,7 +201,7 @@ constants
 functions:
 - exp (check gsl lib)
 
-**** computed
+***** computed
 - [X] div_press
 - [X] grad_ln_rho_grad_T renamed grad_ln_rho_scalar_grad_T
 - [X] grad_ln_rho_traceless_grad_v
@@ -142,7 +222,7 @@ functions:
 - [X] lap_T
 - [X] grad_T
 
-**** dependencies list
+***** dependencies list
 | name                         | dependencies |
 |------------------------------+--------------|
 | div_press                    |            5 |
@@ -164,12 +244,12 @@ functions:
 | lap_rho                      |            1 |
 | lap_T                        |            1 |
 | grad_T                       |            1 |
-*** DONE define all the terms needed for the main loop
+**** DONE define all the terms needed for the main loop
 CLOSED: [2022-12-01 Thu 15:02]
 :LOGBOOK:
 - State "DONE"       from              [2022-12-01 Thu 15:02]
 :END:
-**** DONE all variables checked
+***** DONE all variables checked
 CLOSED: [2022-12-01 Thu 15:02]
 :LOGBOOK:
 - State "DONE"       from              [2022-12-01 Thu 15:02]
@@ -195,14 +275,14 @@ CLOSED: [2022-12-01 Thu 15:02]
   grad_ln_rho_grad_T renamed grad_ln_rho_scalar_grad_T
 - [X] lap_T
 - [X] v_grad_T renamed v_scal_grad_T
-**** DONE traceless_grad_v
+***** DONE traceless_grad_v
 CLOSED: [2022-11-30 Wed 17:23]
 :LOGBOOK:
 - State "DONE"       from              [2022-11-30 Wed 17:23]
 :END:
 - [X] TensorField2D grad_v
 - [X] ScalarField2D div_v
-**** DONE momentum eq
+***** DONE momentum eq
 CLOSED: [2022-11-30 Wed 20:07]
 :LOGBOOK:
 - State "DONE"       from              [2022-11-30 Wed 20:07]
@@ -223,7 +303,7 @@ already done
 constants
 - eta0
 - zeta0
-**** DONE thermal energy
+***** DONE thermal energy
 CLOSED: [2022-12-01 Thu 15:01]
 :LOGBOOK:
 - State "DONE"       from              [2022-12-01 Thu 15:01]
@@ -244,7 +324,7 @@ constants
 - zeta0
 - lambda0
 
-**** DONE ln rho
+***** DONE ln rho
 CLOSED: [2022-12-01 Thu 15:01]
 :LOGBOOK:
 - State "DONE"       from              [2022-12-01 Thu 15:01]
@@ -255,12 +335,20 @@ CLOSED: [2022-12-01 Thu 15:01]
 
 functions:
 - exp (check gsl lib)
-*** DONE function that creates a default/template SimConfig
+*** api
+**** DONE function that creates a default/template SimConfig
 CLOSED: [2022-11-25 ven. 15:40]
 :LOGBOOK:
 - State "DONE"       from              [2022-11-25 ven. 15:40]
 :END:
 ** tohos
+*** TOHO to verify/test
+**** div tensor
+in fcts
+**** laplacian
+in fcts
+
+seems to returns 0 a lot...
 *** TOHO Cahn_Hilliard
 not done because it seems it's not used in the code
 *** TOHO move fn create objects in another place than main
@@ -276,3 +364,4 @@ mais aussi:
 is the good way to go in "./src/configfile/cfg_struct.rs"
 *** TOHO remove all the "allow"
 unused_variables
+*** TOHO remove & in setter for scalar fields
