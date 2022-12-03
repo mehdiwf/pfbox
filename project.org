@@ -15,8 +15,8 @@ for rgsl:
 sudo apt-get install libgsl0-dev
 * orga code building
 ** todos
-*** TODO fix the grad_scalar test unit
-*** TODO deal with negative log values (:todo:log:)
+*** TODO compare my simulation outputs and samy's
+with exactly the same parameters
 *** TODO verify derivatives direction
 - j'ai mis comme c'est fait dans le code de Samy, mais ça me semblait
   bizarre la direction dans laquelle c'était fait...
@@ -35,6 +35,8 @@ sudo apt-get install libgsl0-dev
 - div_tensor
   ------------------------------ !
 
+*** TODO fix the grad_scalar test unit
+*** TODO deal with negative log values (:todo:log:)
 *** next
 **** TODO make a function that takes in a SimConfig and runs the simulation
 ** implementation changes
