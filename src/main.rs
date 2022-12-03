@@ -55,7 +55,7 @@ fn create_tensor_grid(ncol_size: i32,
 
 fn main() {
     let do_vdw_sim = true;
-//    let do_vdw_sim = false;
+    // let do_vdw_sim = false;
     // env::set_var("RUST_BACKTRACE", "1");
     let output_dir = "./src/testoutput";
     let path = format!("{}/log.txt", output_dir);
@@ -78,6 +78,7 @@ fn main() {
     // System initialisation
     let mut step = 0;
     let max_time_step = 5000;
+    let step_count_before_save = max_time_step/20;
 
     let dt = 1e-5;
     let mut time = 0.;
@@ -439,6 +440,8 @@ fn main() {
         }} // updating computations values end parenthesis
 
     //bépo WRITING part
+
+        if (step % step_count_before_save == 0) {
         
         let filename = format!("{}/step_{}",
                                output_dir, i_time_step);
@@ -461,8 +464,7 @@ fn main() {
 
             file.write_all(&str_to_append.as_bytes())
                 .expect("write failed");
-        }
-        
+        }}
     // let str_to_append = format!("step {}, i={}, j={}\n\
     //                              neg log {}\n\
     //                              ------------\n",
@@ -567,5 +569,5 @@ fn main() {
             
         }} // i, j loop closing parenthesis
     } // time step closing parenthesis
-    } // if vdw_simu closing parenthesis    
+    } // if vdw_simu closing parenthesis
 } // main definition closing parenthesis
