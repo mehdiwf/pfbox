@@ -55,6 +55,7 @@ fn create_tensor_grid(ncol_size: i32,
 
 fn main() {
     let do_vdw_sim = true;
+//    let do_vdw_sim = false;
     // env::set_var("RUST_BACKTRACE", "1");
     let output_dir = "./src/testoutput";
     let path = format!("{}/log.txt", output_dir);
@@ -566,7 +567,5 @@ fn main() {
             
         }} // i, j loop closing parenthesis
     } // time step closing parenthesis
-    } // if vdw_simu closing parenthesis
-
-    // TEST
-}
+    } // if vdw_simu closing parenthesis    
+} // main definition closing parenthesis
