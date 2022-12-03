@@ -43,6 +43,9 @@ final_temp_std_list = []
 
 show_plot_evolution(simdic, to_plot, interval=1, save=False, space_index_column = 'column')
 
+df = simdic['df']
+print(df[df['density'] > 1e7])
+
 # for datadir in data_dir_list:
 #     simdic = extract_simulation_info(datadir)
 #     df_lasttime = get_df_at_percent_time(simdic, 100)
