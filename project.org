@@ -15,15 +15,79 @@ for rgsl:
 sudo apt-get install libgsl0-dev
 * orga code building
 ** todos
-*** TODO understand why it is unstable
-**** TOCHECK the grad x/y in samy is not in the same direction as mine
+*** TODO deal with negative log values (:todo:log:)
+*** TODO verify derivatives direction
+- j'ai mis comme c'est fait dans le code de Samy, mais ça me semblait
+  bizarre la direction dans laquelle c'était fait...
+
+  c'est dans les fcts:
+- partial_deriv
+  ------------------------------ !
+- grad_scalar
+  ------------------------------ !
+- gradient
+  ------------------------------ !
+- gradient_vector
+  ------------------------------ !
+- div_vector
+  ------------------------------ !
+- div_tensor
+  ------------------------------ !
+
+*** next
+**** TODO make a function that takes in a SimConfig and runs the simulation
+** implementation changes
+*** functions
+**** functions
+***** for the gradient func, created partial derivative function
+**** functions args
+- removed the last argument, and returns the changed argument
+***** v_nabla_v
+gets grad_v as argument, maybe not necessary!
+**** function names
+***** tens_vec_product
+****** rust
+tens_product_vec
+****** c
+tens_vec_product
+*** renaming
+- traceless_grad_v_grad_v renamed traceless_grad_v_dyadic_grad_v
+- grad_ln_rho_grad_T renamed grad_ln_rho_scalar_grad_T
+- v_grad_T renamed v_scal_grad_T
+- grad_ln_rho_grad_T renamed grad_ln_rho_scalar_grad_T
+- v_grad_T renamed v_scal_grad_T
+*** done
+** done
+*** plots 
+**** DONE adapt simplot to plot the results of my simulation on rust
+CLOSED: [2022-12-01 Thu 19:45]
+:LOGBOOK:
+- State "DONE"       from              [2022-12-01 Thu 19:45]
+:END:
+*** physics loop construction
+**** DONE understand why it is unstable
+CLOSED: [2022-12-03 Sat 16:54]
+:LOGBOOK:
+- State "DONE"       from "TODO"       [2022-12-03 Sat 16:54]
+:END:
+
+why ? the time step was not tiny enough, and I needed to put the
+derivatives like it is done in samy's code, even though it's counter
+intuitive
+
+
+***** DONE the grad x/y in samy is not in the same direction as mine
+CLOSED: [2022-12-03 Sat 16:59]
+:LOGBOOK:
+- State "DONE"       from "TOCHECK"    [2022-12-03 Sat 16:59]
+:END:
 in his grad.x it's a gradient through the row axis (so the y axis!)
-**** DONE update verification
+***** DONE update verification
 CLOSED: [2022-12-03 Sat 13:00]
 :LOGBOOK:
 - State "DONE"       from "TODO"       [2022-12-03 Sat 13:00]
 :END:
-***** things updated
+****** things updated
 - lap rho
   ok
 - lap T
@@ -64,19 +128,31 @@ CLOSED: [2022-12-03 Sat 13:00]
   ok
 - div press
   ok
-**** TODO conservation eq verification
-***** DONE momentum
+***** DONE conservation eq verification
+CLOSED: [2022-12-03 Sat 16:59]
+:LOGBOOK:
+- State "DONE"       from "TODO"       [2022-12-03 Sat 16:59]
+:END:
+****** DONE momentum
 CLOSED: [2022-12-03 Sat 13:12]
 :LOGBOOK:
 - State "DONE"       from              [2022-12-03 Sat 13:12]
 :END:
-***** DONE mass
+****** DONE mass
 CLOSED: [2022-12-03 Sat 13:16]
 :LOGBOOK:
 - State "DONE"       from              [2022-12-03 Sat 13:16]
 :END:
-***** thermal energy
-**** TODO functions verification
+****** DONE thermal energy
+CLOSED: [2022-12-03 Sat 16:59]
+:LOGBOOK:
+- State "DONE"       from              [2022-12-03 Sat 16:59]
+:END:
+***** DONE functions verification
+CLOSED: [2022-12-03 Sat 16:59]
+:LOGBOOK:
+- State "DONE"       from "TODO"       [2022-12-03 Sat 16:59]
+:END:
 - shear_viscosity
   ok
 - bulk_viscosity
@@ -113,39 +189,6 @@ CLOSED: [2022-12-03 Sat 13:16]
   ok
 - pressure
   ok
-
-*** TODO deal with negative log values (:todo:log:)
-*** next
-**** TODO make a function that takes in a SimConfig and runs the simulation
-** implementation changes
-*** functions
-**** functions
-***** for the gradient func, created partial derivative function
-**** functions args
-- removed the last argument, and returns the changed argument
-***** v_nabla_v
-gets grad_v as argument, maybe not necessary!
-**** function names
-***** tens_vec_product
-****** rust
-tens_product_vec
-****** c
-tens_vec_product
-*** renaming
-- traceless_grad_v_grad_v renamed traceless_grad_v_dyadic_grad_v
-- grad_ln_rho_grad_T renamed grad_ln_rho_scalar_grad_T
-- v_grad_T renamed v_scal_grad_T
-- grad_ln_rho_grad_T renamed grad_ln_rho_scalar_grad_T
-- v_grad_T renamed v_scal_grad_T
-*** done
-** done
-*** plots 
-**** DONE adapt simplot to plot the results of my simulation on rust
-CLOSED: [2022-12-01 Thu 19:45]
-:LOGBOOK:
-- State "DONE"       from              [2022-12-01 Thu 19:45]
-:END:
-*** physics loop construction
 **** DONE don't forget to update v with updated J at the end
 CLOSED: [2022-12-01 Thu 19:45]
 :LOGBOOK:
@@ -353,6 +396,7 @@ CLOSED: [2022-11-25 ven. 15:40]
 :LOGBOOK:
 - State "DONE"       from              [2022-11-25 ven. 15:40]
 :END:
+
 ** tohos
 *** TOHO to verify/test
 **** div tensor
