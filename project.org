@@ -398,6 +398,8 @@ CLOSED: [2022-11-25 ven. 15:40]
 :END:
 
 ** tohos
+*** TOHO colorful outputs
+https://docs.rs/colored/latest/colored/
 *** TOHO to verify/test
 **** div tensor
 in fcts
