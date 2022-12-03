@@ -184,8 +184,8 @@ pub fn grad_scalar(scalar_field: &Vec<Vec<f64>>,
 {
     let grad = vec2D {
         // x is index 1 because it's the columns in the simulation
-        x: partial_deriv(&scalar_field, i, j, 1, &box_info),
-        y: partial_deriv(&scalar_field, i, j, 0, &box_info),};
+        x: partial_deriv(&scalar_field, i, j, 0, &box_info),
+        y: partial_deriv(&scalar_field, i, j, 1, &box_info),};
         
     return grad;
 }
@@ -204,10 +204,10 @@ pub fn gradient_vector(vector_field: &VectorField2D,
                     box_info: &BoxInfo) -> tens2D
 {
     let tens = tens2D {
-        xx: partial_deriv(&vector_field.x, i, j, 1, &box_info),
-        xy: partial_deriv(&vector_field.x, i, j, 0, &box_info),
-        yx: partial_deriv(&vector_field.y, i, j, 1, &box_info),
-        yy: partial_deriv(&vector_field.y, i, j, 0, &box_info)};
+        xx: partial_deriv(&vector_field.x, i, j, 0, &box_info),
+        xy: partial_deriv(&vector_field.x, i, j, 1, &box_info),
+        yx: partial_deriv(&vector_field.y, i, j, 0, &box_info),
+        yy: partial_deriv(&vector_field.y, i, j, 1, &box_info)};
     return tens;
 }
 
@@ -215,8 +215,8 @@ pub fn div_vector(vector_field: &VectorField2D,
                   i: i32, j: i32,
                   box_info: &BoxInfo) -> f64
 {
-    let dVx_dx = partial_deriv(&vector_field.x, i, j, 1, &box_info);
-    let dVy_dy = partial_deriv(&vector_field.y, i, j, 0, &box_info);
+    let dVx_dx = partial_deriv(&vector_field.x, i, j, 0, &box_info);
+    let dVy_dy = partial_deriv(&vector_field.y, i, j, 1, &box_info);
 
     return dVx_dx + dVy_dy;
 }
@@ -226,10 +226,11 @@ pub fn div_tensor(tensor_field: &TensorField2D,
                   box_info: &BoxInfo) -> vec2D
 {
     let vector = vec2D{
-        x: partial_deriv(&tensor_field.xx, i, j, 1, &box_info)
-            + partial_deriv(&tensor_field.yx, i, j, 0, &box_info),
-        y: partial_deriv(&tensor_field.xy, i, j, 1, &box_info)
-            + partial_deriv(&tensor_field.yy, i, j, 0, &box_info)};
+        x: partial_deriv(&tensor_field.xx, i, j, 0, &box_info)
+         + partial_deriv(&tensor_field.yx, i, j, 1, &box_info),
+        
+        y: partial_deriv(&tensor_field.xy, i, j, 0, &box_info)
+         + partial_deriv(&tensor_field.yy, i, j, 1, &box_info)};
     return vector;
 }
 
