@@ -189,188 +189,6 @@ fn main() {
             let col_i32 = col as i32;
             let row_i32 = row as i32;
 
-
-            // -------------------------------------------------------
-            // div_press begin update
-            GD_div_press
-                .set_pos(row, col,
-                         &div_tensor(&GD_pressure, row_i32, col_i32,
-                                     &box_info));
-            // div_press end update
-            // -------------------------------------------------------
-
-
-            // -------------------------------------------------------
-            // GD_grad_ln_rho_scalar_grad_T begin update
-            GD_grad_ln_rho_scalar_grad_T
-                .set_pos(row, col,
-                         &scal_product(&GD_grad_ln_rho.get_pos(row, col),
-                                       &GD_grad_T.get_pos(row, col)));
-            // GD_grad_ln_rho_scalar_grad_T end update
-            // -------------------------------------------------------
-
-            // -------------------------------------------------------
-            // GD_grad_ln_rho_traceless_grad_v begin update
-            
-            GD_grad_ln_rho_traceless_grad_v
-                .set_pos(row, col,
-                         &tens_product_vec(
-                             &GD_traceless_grad_v.get_pos(row, col),
-                             &GD_grad_ln_rho.get_pos(row, col)));
-            // GD_grad_ln_rho_traceless_grad_v end update
-            // -------------------------------------------------------
-
-            // -------------------------------------------------------
-            // GD_pressure begin update            
-            GD_pressure
-                .set_pos(row, col,
-                         &pressure(GD_rho.get_pos(row, col),
-                                   &GD_grad_rho.get_pos(row, col),
-                                   GD_lap_rho.get_pos(row, col),
-                                   GD_temp.get_pos(row, col)));
-            // GD_pressure end update
-            // -------------------------------------------------------
-            
-            // -------------------------------------------------------
-            // GD_v_grad_ln_rho begin update            
-            GD_v_scalar_grad_ln_rho
-                .set_pos(row, col,
-                         &scal_product(&GD_v.get_pos(row, col),
-                                       &GD_grad_ln_rho.get_pos(row, col)));
-            // GD_v_grad_ln_rho end update
-            // -------------------------------------------------------
-
-            // -------------------------------------------------------
-            // GD_traceless_grad_v_dyadic_grad_v begin update            
-            GD_traceless_grad_v_dyadic_grad_v
-                .set_pos(row, col,
-                         &dyadic_product(&GD_traceless_grad_v.get_pos(row, col),
-                                         &GD_grad_v.get_pos(row, col)));
-            // GD_traceless_grad_v_dyadic_grad_v end update
-            // -------------------------------------------------------
-
-            // -------------------------------------------------------
-            // GD_v_scal_grad_T begin update            
-            GD_v_scalar_grad_T
-                .set_pos(row, col,
-                         &scal_product(&GD_v.get_pos(row, col),
-                                       &GD_grad_T.get_pos(row, col)));
-            // GD_v_scal_grad_T end update
-            // -------------------------------------------------------
-            
-            // -------------------------------------------------------
-            // GD_div_vJ begin update            
-            GD_div_vJ
-                .set_pos(row, col,
-                         &div_tensor(&GD_vJ,
-                                     row_i32, col_i32, &box_info));
-            // GD_div_vJ end update
-            // -------------------------------------------------------
-
-            // -------------------------------------------------------
-            // GD_vJ begin update
-            {
-                let v = GD_v.get_pos(row, col);
-                let J = GD_J.get_pos(row, col);
-                let tens_vJ = tens2D{
-                    xx: v.x * J.x,
-                    xy: v.x * J.y,
-                    yx: v.y * J.x,
-                    yy: v.y * J.y
-                };
-                GD_vJ
-                    .set_pos(row, col,
-                             &tens_vJ)
-            }
-            // GD_vJ end update
-            // -------------------------------------------------------
-            
-            
-            // -------------------------------------------------------
-            // GD_grad_div_v begin update
-            GD_grad_div_v
-                .set_pos(row, col,
-                         &grad_div_vel(&GD_v,
-                                       row_i32, col_i32,
-                                       &box_info));
-            // GD_grad_div_v end update
-            // -------------------------------------------------------
-            
-            // -------------------------------------------------------
-            // GD_grad_div_v begin update
-            GD_grad_ln_rho
-                .set_pos(row, col,
-                         &gradient(&GD_ln_rho,
-                                   row_i32, col_i32,
-                                   &box_info));
-            // GD_grad_div_v end update
-            // -------------------------------------------------------
-
-            // -------------------------------------------------------
-            // GD_grad_v begin update
-            GD_grad_v
-                .set_pos(row, col,
-                         &gradient_vector(&GD_v,
-                                          row_i32, col_i32,
-                                          &box_info));
-            // GD_grad_v end update
-            // -------------------------------------------------------
-
-            // -------------------------------------------------------
-            // GD_div_v begin update
-            GD_div_v
-                .set_pos(row, col,
-                         &div_vector(&GD_v,
-                                     row_i32, col_i32,
-                                     &box_info));
-            // GD_div_v end update
-            // -------------------------------------------------------
-
-            // -------------------------------------------------------
-            // GD_lap_v begin update
-            GD_lap_v
-                .set_pos(row, col,
-                         &laplacian_vector(&GD_v,
-                                           row_i32, col_i32,
-                                           &box_info));
-            // GD_lap_v end update
-            // -------------------------------------------------------
-            
-            // -------------------------------------------------------
-            // GD_ln_rho begin update
-            // :todo:log:
-            let rho = GD_rho.get_pos(row, col);
-            if (rho < 0.) {
-                let str_to_append = format!("step {}, col={}, row={}\n\
-                                             neg log: {}\n\
-                                             ------------\n",
-                                            &step, &col, &row, &rho);
-                // appending the string to 
-                file.write_all(&str_to_append.as_bytes())
-                    .expect("write failed");
-                println!("error step {}:\n\
-                          negative rho: rho = {}", step, rho);
-            GD_ln_rho
-                .set_pos(row, col,
-                         &0.);}
-            else {
-                let ln_rho = log(GD_rho.get_pos(row, col));
-                GD_ln_rho
-                    .set_pos(row, col,
-                             &ln_rho);}
-            // GD_ln_rho end update
-            // -------------------------------------------------------
-
-            // -------------------------------------------------------
-            // GD_grad_rho begin update
-            GD_grad_rho
-                .set_pos(row, col,
-                         &gradient(&GD_rho,
-                                   row_i32, col_i32,
-                                   &box_info));
-            // GD_grad_rho end update
-            // -------------------------------------------------------
-
             // -------------------------------------------------------
             // GD_lap_rho begin update
             GD_lap_rho
@@ -419,10 +237,204 @@ fn main() {
             // GD_traceless_grad_v end update
             // -------------------------------------------------------
 
+            // -------------------------------------------------------
+            // GD_grad_rho begin update
+            GD_grad_rho
+                .set_pos(row, col,
+                         &gradient(&GD_rho,
+                                   row_i32, col_i32,
+                                   &box_info));
+            // GD_grad_rho end update
+            // -------------------------------------------------------
+
+
+            // -------------------------------------------------------
+            // GD_ln_rho begin update
+            // :todo:log:
+            let rho = GD_rho.get_pos(row, col);
+            if (rho < 0.) {
+                let str_to_append = format!("step {}, col={}, row={}\n\
+                                             neg log: {}\n\
+                                             ------------\n",
+                                            &step, &col, &row, &rho);
+                // appending the string to 
+                file.write_all(&str_to_append.as_bytes())
+                    .expect("write failed");
+                println!("error step {}:\n\
+                          negative rho: rho = {}", step, rho);
+            GD_ln_rho
+                .set_pos(row, col,
+                         &0.);}
+            else {
+                let ln_rho = log(GD_rho.get_pos(row, col));
+                GD_ln_rho
+                    .set_pos(row, col,
+                             &ln_rho);}
+            // GD_ln_rho end update
+            // -------------------------------------------------------
+
+
+            // -------------------------------------------------------
+            // GD_lap_v begin update
+            GD_lap_v
+                .set_pos(row, col,
+                         &laplacian_vector(&GD_v,
+                                           row_i32, col_i32,
+                                           &box_info));
+            // GD_lap_v end update
+            // -------------------------------------------------------
+
+
+            // -------------------------------------------------------
+            // GD_div_v begin update
+            GD_div_v
+                .set_pos(row, col,
+                         &div_vector(&GD_v,
+                                     row_i32, col_i32,
+                                     &box_info));
+            // GD_div_v end update
+            // -------------------------------------------------------
+
+
+            // -------------------------------------------------------
+            // GD_grad_v begin update
+            GD_grad_v
+                .set_pos(row, col,
+                         &gradient_vector(&GD_v,
+                                          row_i32, col_i32,
+                                          &box_info));
+            // GD_grad_v end update
+            // -------------------------------------------------------
+
+
+            // -------------------------------------------------------
+            // GD_grad_ln_rho begin update
+            GD_grad_ln_rho
+                .set_pos(row, col,
+                         &gradient(&GD_ln_rho,
+                                   row_i32, col_i32,
+                                   &box_info));
+            // GD_grad_ln_rho end update
+            // -------------------------------------------------------
+
+
+            // -------------------------------------------------------
+            // GD_grad_div_v begin update
+            GD_grad_div_v
+                .set_pos(row, col,
+                         &grad_div_vel(&GD_v,
+                                       row_i32, col_i32,
+                                       &box_info));
+            // GD_grad_div_v end update
+            // -------------------------------------------------------
+
+
+            // -------------------------------------------------------
+            // GD_vJ begin update
+            {
+                let v = GD_v.get_pos(row, col);
+                let J = GD_J.get_pos(row, col);
+                let tens_vJ = tens2D{
+                    xx: v.x * J.x,
+                    xy: v.x * J.y,
+                    yx: v.y * J.x,
+                    yy: v.y * J.y
+                };
+                GD_vJ
+                    .set_pos(row, col,
+                             &tens_vJ)
+            }
+            // GD_vJ end update
+            // -------------------------------------------------------
+
+
+            // -------------------------------------------------------
+            // GD_div_vJ begin update            
+            GD_div_vJ
+                .set_pos(row, col,
+                         &div_tensor(&GD_vJ,
+                                     row_i32, col_i32, &box_info));
+            // GD_div_vJ end update
+            // -------------------------------------------------------
+
+
+            // -------------------------------------------------------
+            // GD_v_scal_grad_T begin update            
+            GD_v_scalar_grad_T
+                .set_pos(row, col,
+                         &scal_product(&GD_v.get_pos(row, col),
+                                       &GD_grad_T.get_pos(row, col)));
+            // GD_v_scal_grad_T end update
+            // -------------------------------------------------------
+
+
+            // -------------------------------------------------------
+            // GD_traceless_grad_v_dyadic_grad_v begin update            
+            GD_traceless_grad_v_dyadic_grad_v
+                .set_pos(row, col,
+                         &dyadic_product(&GD_traceless_grad_v.get_pos(row, col),
+                                         &GD_grad_v.get_pos(row, col)));
+            // GD_traceless_grad_v_dyadic_grad_v end update
+            // -------------------------------------------------------
+
+
+            // -------------------------------------------------------
+            // GD_v_grad_ln_rho begin update            
+            GD_v_scalar_grad_ln_rho
+                .set_pos(row, col,
+                         &scal_product(&GD_v.get_pos(row, col),
+                                       &GD_grad_ln_rho.get_pos(row, col)));
+            // GD_v_grad_ln_rho end update
+            // -------------------------------------------------------
+
+
+            // -------------------------------------------------------
+            // GD_pressure begin update            
+            GD_pressure
+                .set_pos(row, col,
+                         &pressure(GD_rho.get_pos(row, col),
+                                   &GD_grad_rho.get_pos(row, col),
+                                   GD_lap_rho.get_pos(row, col),
+                                   GD_temp.get_pos(row, col)));
+            // GD_pressure end update
+            // -------------------------------------------------------
+
+
+            // -------------------------------------------------------
+            // GD_grad_ln_rho_traceless_grad_v begin update
+            
+            GD_grad_ln_rho_traceless_grad_v
+                .set_pos(row, col,
+                         &tens_product_vec(
+                             &GD_traceless_grad_v.get_pos(row, col),
+                             &GD_grad_ln_rho.get_pos(row, col)));
+            // GD_grad_ln_rho_traceless_grad_v end update
+            // -------------------------------------------------------
+
+
+            // -------------------------------------------------------
+            // GD_grad_ln_rho_scalar_grad_T begin update
+            GD_grad_ln_rho_scalar_grad_T
+                .set_pos(row, col,
+                         &scal_product(&GD_grad_ln_rho.get_pos(row, col),
+                                       &GD_grad_T.get_pos(row, col)));
+            // GD_grad_ln_rho_scalar_grad_T end update
+            // -------------------------------------------------------
+
+
+            // -------------------------------------------------------
+            // div_press begin update
+            GD_div_press
+                .set_pos(row, col,
+                         &div_tensor(&GD_pressure, row_i32, col_i32,
+                                     &box_info));
+            // div_press end update
+            // -------------------------------------------------------
+
+
         }} // updating computations values end parenthesis
 
     //bépo WRITING part
-        // :doing:
         
         let filename = format!("{}/step_{}",
                                output_dir, i_time_step);
