@@ -15,8 +15,58 @@ for rgsl:
 sudo apt-get install libgsl0-dev
 * orga code building
 ** todos
+*** TODO create a module for the simulation, outside of main
 *** TODO compare my simulation outputs and samy's
-with exactly the same parameters
+
+idea:
+- print the parameters just before the c simulation, to see it's
+  actually all from the input file, and to check if the parameters are
+  actually equal in my rust simu and the c simu
+- compare results with exactly the same parameters
+
+**** c code parameters (used)
+***** constants
+- Tc
+- rhom_c
+- Pc
+- aa
+- b
+- w
+- G
+- kB
+- DeBroglie0
+- m
+- inv_m
+- eta0
+- zeta0
+- lambda0
+- Jev
+- hlv
+- lambda
+- dim
+- dx
+- dy
+- forcex
+- flux
+- NX
+- NY
+- j_wall_bot
+- j_wall_top
+- rho_wall
+- Tw
+- nsteps_eq_heat
+- rho_min
+***** input file
+- T0
+- T1
+- rho_liq
+- rho_vap
+- dt
+- FINAL_TIME
+- STEP_EQ
+- HISTO_FREQ
+- HISTO_SAVE
+
 *** TODO verify derivatives direction
 - j'ai mis comme c'est fait dans le code de Samy, mais ça me semblait
   bizarre la direction dans laquelle c'était fait...
