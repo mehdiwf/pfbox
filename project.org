@@ -10,9 +10,17 @@ https://stackoverflow.com/questions/72690767/how-to-parse-toml-in-rust-with-unkn
 ** float comparison
 https://stackoverflow.com/questions/41447678/comparison-of-two-floats-in-rust-to-arbitrary-level-of-precision
 * code dependencies
-for rgsl:
+** flamegraph-rs
+#+begin_src 
+sudo apt install linux-tools-common linux-tools-generic linux-tools-`uname -r`
+#+end_src
 
+** rgsl
+for rgsl:
+(debian)
+#+begin_src 
 sudo apt-get install libgsl0-dev
+#+end_src
 * orga code building
 ** todos
 *** TODO compare my simulation outputs and samy's
