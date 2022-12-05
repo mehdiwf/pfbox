@@ -77,13 +77,14 @@ fn main() {
     
     // System initialisation
     let mut step = 0;
-    let max_time_step = 5000;
+    let max_time_step = 100000;
     let step_count_before_save = max_time_step/20;
+    let step_count_before_save = 20000;
 
-    let dt = 1e-5;
     let print_frequency = 20.;
     let mut print_percertage_threshold = 100./print_frequency;
     
+    let dt = 1e-2;
     let mut time = 0.;
 
     let ncol_size = 100;
