@@ -1,35 +1,25 @@
 use super::mystructs::*;
 
-pub const Tc : f64 = 1.0;			   // critical temperature
-pub const rhom_c : f64 = 1.0/3.0; // critical mass density
-pub const Pc : f64 = 1.0; // critical pressure (not used)
-
 pub const aa : f64 = 1.0;
+
+// critical mass density
+pub const rhom_c : f64 = 1.0/3.0;
+
 pub const b : f64 = 1.0/(3.0*rhom_c);
 // square gradient coefficient 
 pub const w : f64 = 1.0;
-// Cahn Hilliard coefficient
-pub const G : f64 = 0.0;
-
 
 // chosen so that kBTc=1!
 pub const kB : f64 = 8./27.;
 
-pub const DeBroglie0 : f64 = 0.1;
-
 // molecule mass
 pub const m : f64 = 1.0;
-pub const inv_m : f64 = 1./m ;
 // shear viscosity
 pub const eta0 : f64 = 1.0;
 // bulk viscosity 
 pub const zeta0 : f64 = 1.0;
 // thermal conductivity
 pub const lambda0 : f64 = 0.2;
-// coefficient in front of the evaporative flux
-pub const Jev : f64 = 0.0;
-// liquid/vapor latent heat
-pub const hlv : f64 = 1.0;
 
 // coefficient to evaluate the gradients
 pub const lambda : f64 = 0.66;
@@ -38,34 +28,49 @@ pub const lambda : f64 = 0.66;
 pub const dim : i32 = 2;
 
 // elementary unit cell length in the x direction
-pub const dx : f64 = 0.02;
-pub const dy : f64 = 0.02;
-
-// force density in the x_direction 
-pub const forcex : f64 = 0.00;
-// constant heat flux at the bottom of the crenel
-pub const flux : f64 = 0.00;
+pub const dx : f64 = 0.5;
+pub const dy : f64 = 0.5;
 
 // dimensions of the simulation box 
 // :mifzmodif:
 pub const NX : i32 = 100;
 pub const NY : i32 = 2 ;
 
+// UNUSED VARIABLES //----------------------------------
+
+// critical temperature
+pub const Tc : f64 = 1.0;
+// critical pressure (not used)
+pub const Pc : f64 = 1.0;
+
+// Cahn Hilliard coefficient
+pub const G : f64 = 0.0;
+
+pub const DeBroglie0 : f64 = 0.1;
+
+pub const inv_m : f64 = 1./m ;
+
+// coefficient in front of the evaporative flux
+pub const Jev : f64 = 0.0;
+// liquid/vapor latent heat
+pub const hlv : f64 = 1.0;
+
+// force density in the x_direction 
+pub const forcex : f64 = 0.00;
+// constant heat flux at the bottom of the crenel
+pub const flux : f64 = 0.00;
+
 pub const j_wall_bot : i32 =  0;
 pub const j_wall_top : i32 =  NY-1;
-
 pub const rho_wall : f64 = 0.2/b;
-
 pub const Tw : f64 = 0.9;
 
 // number of time step of equilibration without energy transfer 
 pub const nsteps_eq_heat : i32 = 100000;
- 
 pub const rho_min : f64 = 0.01/b;
 
 // a small number 
 pub const EPS : f64 = 0.004;
-
 pub const PI : f64 = 3.14159265358;
 
 pub fn shear_viscosity(rho: f64) -> f64
