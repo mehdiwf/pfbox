@@ -81,6 +81,9 @@ fn main() {
     let step_count_before_save = max_time_step/20;
 
     let dt = 1e-5;
+    let print_frequency = 20.;
+    let mut print_percertage_threshold = 100./print_frequency;
+    
     let mut time = 0.;
 
     let ncol_size = 100;
@@ -186,6 +189,12 @@ fn main() {
     for i_time_step in 0..max_time_step {
 
         step = i_time_step;
+        let percentage_done = 100.*(step as f64/max_time_step as f64);
+        if (percentage_done > print_percertage_threshold)
+        {
+            print_percertage_threshold += 100./print_frequency;
+            println!("completed {percentage_done:.1}%");
+        }
 
     // update of computations variables
     for col in 0usize..ncol_size as usize {
