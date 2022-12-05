@@ -15,9 +15,8 @@ for rgsl:
 sudo apt-get install libgsl0-dev
 * orga code building
 ** todos
-*** TODO create a module for the simulation, outside of main
 *** TODO compare my simulation outputs and samy's
-
+**** idea
 idea:
 - print the parameters just before the c simulation, to see it's
   actually all from the input file, and to check if the parameters are
@@ -26,47 +25,86 @@ idea:
 
 **** c code parameters (used)
 ***** constants
+used:
+- zeta0
+- eta0
+- lambda0
+- lambda
+- kB
+- NY
+- dy
+- NX
+- dx
+- w
+- dim
+- aa
+- b
+- m
+
+unused:
 - Tc
 - rhom_c
 - Pc
-- aa
-- b
-- w
 - G
-- kB
 - DeBroglie0
-- m
 - inv_m
-- eta0
-- zeta0
-- lambda0
 - Jev
 - hlv
-- lambda
-- dim
-- dx
-- dy
 - forcex
 - flux
-- NX
-- NY
 - j_wall_bot
 - j_wall_top
 - rho_wall
 - Tw
 - nsteps_eq_heat
 - rho_min
+
 ***** input file
+used:
 - T0
-- T1
 - rho_liq
 - rho_vap
-- dt
+- HISTO_SAVE
 - FINAL_TIME
+- dt
+
+unused:
 - STEP_EQ
 - HISTO_FREQ
+- T1
+
+***** used in computations
+- eta0
+- m
+- zeta0
+- lambda
+- dx
+- dy
+- inv_cv
+- lambda0
+- dim
+- b
+pressure
+- aa
+- w
+- kB
+fluid initialization
+- T0
+- rho_liq
+- rho_vap
+main loop
+- FINAL_TIME
+logging
 - HISTO_SAVE
 
+
+(cahn hilliard)
+- kB
+- aa
+- w
+- lambda0
+- Tc
+*** TODO create a module for the simulation, outside of main
 *** TODO verify derivatives direction
 - j'ai mis comme c'est fait dans le code de Samy, mais ça me semblait
   bizarre la direction dans laquelle c'était fait...
@@ -451,6 +489,7 @@ CLOSED: [2022-11-25 ven. 15:40]
 :END:
 
 ** tohos
+*** TOHO separate constants from functions
 *** TOHO colorful outputs
 https://docs.rs/colored/latest/colored/
 *** TOHO to verify/test
