@@ -171,9 +171,9 @@ pub fn do_sim(configinput: cfg_struct::ConfigInput) {
     let temp0 = temper0;
 
     let box_info = BoxInfo{col_max: ncol_size,
-                           row_max: nrow_size};
-
-    if do_vdw_sim {
+                           row_max: nrow_size,
+                           col_dx: dx,
+                           row_dx: dy};
 
     //auie physics quantities definition
     ////////////////////////////////////////////////////////////////////////////
@@ -284,6 +284,7 @@ pub fn do_sim(configinput: cfg_struct::ConfigInput) {
                 .set_pos(row, col,
                          &laplacian(&GD_rho,
                                     row_i32, col_i32,
+                                    lambda,
                                     &box_info));
             // GD_lap_rho end update
             // -------------------------------------------------------
@@ -294,6 +295,7 @@ pub fn do_sim(configinput: cfg_struct::ConfigInput) {
                 .set_pos(row, col,
                          &laplacian(&GD_temp,
                                     row_i32, col_i32,
+                                    lambda,
                                     &box_info));
             // GD_lap_T end update
             // -------------------------------------------------------
@@ -304,6 +306,7 @@ pub fn do_sim(configinput: cfg_struct::ConfigInput) {
                 .set_pos(row, col,
                          &gradient(&GD_temp,
                                    row_i32, col_i32,
+                                   lambda,
                                    &box_info));
             // GD_grad_T end update
             // -------------------------------------------------------
@@ -314,6 +317,7 @@ pub fn do_sim(configinput: cfg_struct::ConfigInput) {
                 .set_pos(row, col,
                          &gradient(&GD_rho,
                                    row_i32, col_i32,
+                                   lambda,
                                    &box_info));
             // GD_grad_rho end update
             // -------------------------------------------------------
@@ -351,6 +355,7 @@ pub fn do_sim(configinput: cfg_struct::ConfigInput) {
                 .set_pos(row, col,
                          &laplacian_vector(&GD_v,
                                            row_i32, col_i32,
+                                           lambda,
                                            &box_info));
             // GD_lap_v end update
             // -------------------------------------------------------
@@ -362,6 +367,7 @@ pub fn do_sim(configinput: cfg_struct::ConfigInput) {
                 .set_pos(row, col,
                          &div_vector(&GD_v,
                                      row_i32, col_i32,
+                                     lambda,
                                      &box_info));
             // GD_div_v end update
             // -------------------------------------------------------
@@ -373,6 +379,7 @@ pub fn do_sim(configinput: cfg_struct::ConfigInput) {
                 .set_pos(row, col,
                          &gradient_vector(&GD_v,
                                           row_i32, col_i32,
+                                          lambda,
                                           &box_info));
             // GD_grad_v end update
             // -------------------------------------------------------
@@ -384,6 +391,7 @@ pub fn do_sim(configinput: cfg_struct::ConfigInput) {
                 .set_pos(row, col,
                          &gradient(&GD_ln_rho,
                                    row_i32, col_i32,
+                                   lambda,
                                    &box_info));
             // GD_grad_ln_rho end update
             // -------------------------------------------------------
@@ -395,6 +403,7 @@ pub fn do_sim(configinput: cfg_struct::ConfigInput) {
                 .set_pos(row, col,
                          &grad_div_vel(&GD_v,
                                        row_i32, col_i32,
+                                       lambda,
                                        &box_info));
             // GD_grad_div_v end update
             // -------------------------------------------------------
@@ -442,6 +451,7 @@ pub fn do_sim(configinput: cfg_struct::ConfigInput) {
                 .set_pos(row, col,
                          &div_tensor(&GD_vJ,
                                      row_i32, col_i32,
+                                     lambda,
                                      &box_info));
             // GD_div_vJ end update
             // -------------------------------------------------------
@@ -484,7 +494,8 @@ pub fn do_sim(configinput: cfg_struct::ConfigInput) {
                          &pressure(GD_rho.get_pos(row, col),
                                    &GD_grad_rho.get_pos(row, col),
                                    GD_lap_rho.get_pos(row, col),
-                                   GD_temp.get_pos(row, col)));
+                                   GD_temp.get_pos(row, col),
+                                   kB, aa, b, w));
             // GD_pressure end update
             // -------------------------------------------------------
 
@@ -516,6 +527,7 @@ pub fn do_sim(configinput: cfg_struct::ConfigInput) {
             GD_div_press
                 .set_pos(row, col,
                          &div_tensor(&GD_pressure, row_i32, col_i32,
+                                     lambda,
                                      &box_info));
             // div_press end update
             // -------------------------------------------------------

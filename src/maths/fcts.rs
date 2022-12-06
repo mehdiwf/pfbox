@@ -1,86 +1,86 @@
 use super::mystructs::*;
 
-pub const aa : f64 = 1.0;
+// pub const aa : f64 = 1.0;
 
-// critical mass density
-pub const rhom_c : f64 = 1.0/3.0;
+// // critical mass density
+// pub const rhom_c : f64 = 1.0/3.0;
 
-pub const b : f64 = 1.0/(3.0*rhom_c);
-// square gradient coefficient 
-pub const w : f64 = 1.0;
+// pub const b : f64 = 1.0/(3.0*rhom_c);
+// // square gradient coefficient 
+// pub const w : f64 = 1.0;
 
-// chosen so that kBTc=1!
-pub const kB : f64 = 8./27.;
+// // chosen so that kBTc=1!
+// pub const kB : f64 = 8./27.;
 
-// molecule mass
-pub const m : f64 = 1.0;
-// shear viscosity
-pub const eta0 : f64 = 1.0;
-// bulk viscosity 
-pub const zeta0 : f64 = 1.0;
-// thermal conductivity
-pub const lambda0 : f64 = 0.2;
+// // molecule mass
+// pub const m : f64 = 1.0;
+// // shear viscosity
+// pub const eta0 : f64 = 1.0;
+// // bulk viscosity 
+// pub const zeta0 : f64 = 1.0;
+// // thermal conductivity
+// pub const lambda0 : f64 = 0.2;
 
-// coefficient to evaluate the gradients
-pub const lambda : f64 = 0.66;
+// // coefficient to evaluate the gradients
+// pub const lambda : f64 = 0.66;
 
-// space dimensionality 
-pub const dim : i32 = 2;
+// // space dimensionality 
+// pub const dim : i32 = 2;
 
-// elementary unit cell length in the x direction
-pub const dx : f64 = 0.5;
-pub const dy : f64 = 0.5;
+// // elementary unit cell length in the x direction
+// pub const dx : f64 = 0.5;
+// pub const dy : f64 = 0.5;
 
-// dimensions of the simulation box 
-// :mifzmodif:
-pub const NX : i32 = 100;
-pub const NY : i32 = 2 ;
+// // dimensions of the simulation box 
+// // :mifzmodif:
+// pub const NX : i32 = 100;
+// pub const NY : i32 = 2 ;
 
-// UNUSED VARIABLES //----------------------------------
+// // UNUSED VARIABLES //----------------------------------
 
-// critical temperature
-pub const Tc : f64 = 1.0;
-// critical pressure (not used)
-pub const Pc : f64 = 1.0;
+// // critical temperature
+// pub const Tc : f64 = 1.0;
+// // critical pressure (not used)
+// pub const Pc : f64 = 1.0;
 
-// Cahn Hilliard coefficient
-pub const G : f64 = 0.0;
+// // Cahn Hilliard coefficient
+// pub const G : f64 = 0.0;
 
-pub const DeBroglie0 : f64 = 0.1;
+// pub const DeBroglie0 : f64 = 0.1;
 
-pub const inv_m : f64 = 1./m ;
+// pub const inv_m : f64 = 1./m ;
 
-// coefficient in front of the evaporative flux
-pub const Jev : f64 = 0.0;
-// liquid/vapor latent heat
-pub const hlv : f64 = 1.0;
+// // coefficient in front of the evaporative flux
+// pub const Jev : f64 = 0.0;
+// // liquid/vapor latent heat
+// pub const hlv : f64 = 1.0;
 
-// force density in the x_direction 
-pub const forcex : f64 = 0.00;
-// constant heat flux at the bottom of the crenel
-pub const flux : f64 = 0.00;
+// // force density in the x_direction 
+// pub const forcex : f64 = 0.00;
+// // constant heat flux at the bottom of the crenel
+// pub const flux : f64 = 0.00;
 
-pub const j_wall_bot : i32 =  0;
-pub const j_wall_top : i32 =  NY-1;
-pub const rho_wall : f64 = 0.2/b;
-pub const Tw : f64 = 0.9;
+// pub const j_wall_bot : i32 =  0;
+// pub const j_wall_top : i32 =  NY-1;
+// pub const rho_wall : f64 = 0.2/b;
+// pub const Tw : f64 = 0.9;
 
-// number of time step of equilibration without energy transfer 
-pub const nsteps_eq_heat : i32 = 100000;
-pub const rho_min : f64 = 0.01/b;
+// // number of time step of equilibration without energy transfer 
+// pub const nsteps_eq_heat : i32 = 100000;
+// pub const rho_min : f64 = 0.01/b;
 
-// a small number 
-pub const EPS : f64 = 0.004;
-pub const PI : f64 = 3.14159265358;
+// // a small number 
+// pub const EPS : f64 = 0.004;
+// pub const PI : f64 = 3.14159265358;
 
-pub fn shear_viscosity(rho: f64) -> f64
+pub fn shear_viscosity(rho: f64, mass: f64, dyn_visc: f64) -> f64
 {
-    eta0 * m * rho
+    dyn_visc * mass * rho
 }
 
-pub fn bulk_viscosity(rho: f64) -> f64
+pub fn bulk_viscosity(rho: f64, mass: f64, cin_visc: f64) -> f64
 {
-    zeta0 * m * rho
+    cin_visc * mass * rho
 }
 
 pub fn dissipative_stress(shear_visc: f64,
@@ -145,10 +145,13 @@ pub fn dyadic_product(tens_a: &tens2D, tens_b: &tens2D) -> f64
 pub fn partial_deriv(scal_field: &Vec<Vec<f64>>,
                      i: i32, j: i32,
                      direction: i32,
+                     lambda: f64,
                      box_info: &BoxInfo) -> f64
 {
-    let BoxInfo { col_max: box_col_max,
-                  row_max: box_row_max } = box_info;
+    let &BoxInfo { col_max: box_col_max,
+                  row_max: box_row_max,
+                  col_dx: dx,
+                  row_dx: dy} = box_info;
     // i+1 with Periodic Boundaries
     let ip = ((i+1) % box_row_max) as usize;
     // i-1 with Periodic Boundaries
@@ -185,67 +188,75 @@ pub fn partial_deriv(scal_field: &Vec<Vec<f64>>,
 
 pub fn grad_scalar(scalar_field: &Vec<Vec<f64>>,
                    i: i32, j: i32,
+                   lambda: f64,
                    box_info: &BoxInfo) -> vec2D
 {
     let grad = vec2D {
         // x is index 1 because it's the columns in the simulation
-        x: partial_deriv(&scalar_field, i, j, 0, &box_info),
-        y: partial_deriv(&scalar_field, i, j, 1, &box_info),};
+        x: partial_deriv(&scalar_field, i, j, 0, lambda, &box_info),
+        y: partial_deriv(&scalar_field, i, j, 1, lambda, &box_info),};
         
     return grad;
 }
 
 pub fn gradient(scalar_field: &ScalarField2D,
                 i: i32, j: i32,
+                lambda: f64,
                 box_info: &BoxInfo) -> vec2D
 {
     let field = &scalar_field.s;
     return grad_scalar(field, i, j,
-                       &box_info);
+                       lambda, &box_info);
 }
 
 pub fn gradient_vector(vector_field: &VectorField2D,
-                    i: i32, j: i32,
-                    box_info: &BoxInfo) -> tens2D
+                       i: i32, j: i32,
+                       lambda: f64,
+                       box_info: &BoxInfo) -> tens2D
 {
     let tens = tens2D {
-        xx: partial_deriv(&vector_field.x, i, j, 0, &box_info),
-        xy: partial_deriv(&vector_field.x, i, j, 1, &box_info),
-        yx: partial_deriv(&vector_field.y, i, j, 0, &box_info),
-        yy: partial_deriv(&vector_field.y, i, j, 1, &box_info)};
+        xx: partial_deriv(&vector_field.x, i, j, 0, lambda, &box_info),
+        xy: partial_deriv(&vector_field.x, i, j, 1, lambda, &box_info),
+        yx: partial_deriv(&vector_field.y, i, j, 0, lambda, &box_info),
+        yy: partial_deriv(&vector_field.y, i, j, 1, lambda, &box_info)};
     return tens;
 }
 
 pub fn div_vector(vector_field: &VectorField2D,
                   i: i32, j: i32,
+                  lambda: f64,
                   box_info: &BoxInfo) -> f64
 {
-    let dVx_dx = partial_deriv(&vector_field.x, i, j, 0, &box_info);
-    let dVy_dy = partial_deriv(&vector_field.y, i, j, 1, &box_info);
+    let dVx_dx = partial_deriv(&vector_field.x, i, j, 0, lambda, &box_info);
+    let dVy_dy = partial_deriv(&vector_field.y, i, j, 1, lambda, &box_info);
 
     return dVx_dx + dVy_dy;
 }
 
 pub fn div_tensor(tensor_field: &TensorField2D,
                   i: i32, j: i32,
+                  lambda: f64,
                   box_info: &BoxInfo) -> vec2D
 {
     let vector = vec2D{
-        x: partial_deriv(&tensor_field.xx, i, j, 0, &box_info)
-         + partial_deriv(&tensor_field.yx, i, j, 1, &box_info),
+        x: partial_deriv(&tensor_field.xx, i, j, 0, lambda, &box_info)
+         + partial_deriv(&tensor_field.yx, i, j, 1, lambda, &box_info),
         
-        y: partial_deriv(&tensor_field.xy, i, j, 0, &box_info)
-         + partial_deriv(&tensor_field.yy, i, j, 1, &box_info)};
+        y: partial_deriv(&tensor_field.xy, i, j, 0, lambda, &box_info)
+         + partial_deriv(&tensor_field.yy, i, j, 1, lambda, &box_info)};
     return vector;
 }
 
 pub fn lap_scalar(scalar_field: &Vec<Vec<f64>>,
-                 i: i32, j: i32,
-                 box_info: &BoxInfo) -> f64
+                  i: i32, j: i32,
+                  lambda: f64,
+                  box_info: &BoxInfo) -> f64
 {
 
     let BoxInfo { col_max: box_col_max,
-                  row_max: box_row_max } = box_info;
+                  row_max: box_row_max,
+                  col_dx: dx,
+                  row_dx: dy} = *box_info;
     let ip = ((i+1) % box_row_max) as usize;
     let im = ((i - 1 + box_row_max) % box_row_max) as usize;
     let jp = ((j+1) % box_col_max) as usize;
@@ -266,35 +277,40 @@ pub fn lap_scalar(scalar_field: &Vec<Vec<f64>>,
 
 pub fn laplacian(scalar_field: &ScalarField2D,
                  i: i32, j: i32,
+                 lambda: f64,
                  box_info: &BoxInfo) -> f64
 {
     let field = &scalar_field.s;
     let laplacian_value = lap_scalar(field,
-                                     i, j, &box_info);
+                                     i, j, lambda, &box_info);
     return laplacian_value;
 }
 
 pub fn laplacian_vector(vector_field: &VectorField2D,
                         i: i32, j: i32,
+                        lambda: f64,
                         box_info: &BoxInfo) -> vec2D
 {
     let vec = vec2D {
         x: lap_scalar(&vector_field.x,
                       i, j,
-                      &box_info),
+                      lambda, &box_info),
         y: lap_scalar(&vector_field.y,
                       i, j,
-                      &box_info)};
+                      lambda, &box_info)};
 
                 return vec;
 }
 
 pub fn grad_div_vel(vector_field: &VectorField2D,
                     i: i32, j: i32,
+                    lambda: f64,
                     box_info: &BoxInfo) -> vec2D
 {
     let BoxInfo { col_max: box_col_max,
-                  row_max: box_row_max } = box_info;
+                  row_max: box_row_max,
+                  col_dx: dx,
+                  row_dx: dy} = *box_info;
     
     let ip = ((i+1) % box_row_max) as usize;
     let im = ((i - 1 + box_row_max) % box_row_max) as usize;
@@ -332,7 +348,9 @@ pub fn grad_div_vel(vector_field: &VectorField2D,
 }
 
 pub fn pressure(rho: f64, grad_rho: &vec2D, 
-                lap_rho: f64, temp: f64) -> tens2D
+                lap_rho: f64, temp: f64,
+                kB: f64, aa: f64, b: f64,
+                w: f64) -> tens2D
 {
     let p_thermo = rho * kB * temp/(1. - b * rho)
                    - aa * rho * rho;
@@ -380,14 +398,16 @@ mod tests {
 
         let box_info = BoxInfo {
             col_max: 4,
-            row_max: 4};
+            row_max: 4,
+            col_dx: 0.1,
+            row_dx: 0.1};
         
         // three tests:
         // first one with an uniform field
 
         let uni_grid = vec![vec![1.; 4]; 4];
         
-        v = grad_scalar(&uni_grid, 2, 2, &box_info);
+        v = grad_scalar(&uni_grid, 2, 2, lambda, &box_info);
         assert_eq!(v.x, 0., "testing the gradient is zero \
                              with a uniform field");
         assert_eq!(v.y, 0., "testing the gradient is zero \
@@ -397,7 +417,7 @@ mod tests {
 
         let grid_x = vec![vec![1., 2., 3., 4.]; 4];
 
-        v = grad_scalar(&grid_x, 2, 2, &box_info);
+        v = grad_scalar(&grid_x, 2, 2, lambda, &box_info);
         assert!((v.x > 0.), "testing the gradient.x is positive \
                             for a field growing with respect of x");
         assert_eq!(v.y, 0., "testing the gradient.y is zero \
@@ -410,7 +430,7 @@ mod tests {
                           vec![3., 3., 3., 3.],
                           vec![4., 4., 4., 4.]];
 
-        v = grad_scalar(&grid_y, 2, 2, &box_info);
+        v = grad_scalar(&grid_y, 2, 2, lambda, &box_info);
         println!("y {:?}", v);
         assert!((v.y > 0.), "testing the gradient.y is positive \
                             for a field growing with respect of y");

@@ -33,7 +33,9 @@ pub struct TensorField2D {
 #[derive(Debug, PartialEq)]
 pub struct BoxInfo {
     pub col_max: i32,
-    pub row_max: i32}
+    pub row_max: i32,
+    pub col_dx: f64,
+    pub row_dx: f64}
 
 pub struct VectorProfile2D{
     x: Vec<f64>,
