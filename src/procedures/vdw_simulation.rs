@@ -4,7 +4,9 @@ use rgsl::logarithm::log;
 use rgsl::exponential::exp;
 use crate::maths::fcts::*;
 use crate::maths::mystructs::*;
-
+use crate::maths::fcts::*;
+use crate::configfile::cfg_io;
+use crate::configfile::cfg_struct;
 
 fn create_scalar_grid(ncol_size: i32,
                       nrow_size: i32) -> ScalarField2D
@@ -45,10 +47,7 @@ fn create_tensor_grid(ncol_size: i32,
     return result;
 }
 
-pub fn do_sim() {
-    let do_vdw_sim = true;
-    // let do_vdw_sim = false;
-    // env::set_var("RUST_BACKTRACE", "1");
+pub fn do_sim(configinput: cfg_struct::ConfigInput) {
     let output_dir = "./testoutput";
     let output_dir = "/home/mehdi/workdir/dossiers/ilm/these/code_simulations/rust_implementation/pfbox_git/src/testoutput";
     let path = format!("{}/log.txt", output_dir);
@@ -67,27 +66,109 @@ pub fn do_sim() {
     let str_to_append = format!("new sim\n");
     // appending the string to 
     file.write_all(&str_to_append.as_bytes());
+
+    let config = cfg_struct::SimCfg{
+        physics_config: 
+        cfg_struct::PhyParam{
+            dx: 0.5,
+            dy: 0.5,
+            dt: 1e-3,
+            max_sim_time: 5_000,
+            temper0: 0.7,
+            temper1: 0.8,
+            rho_liq: 0.8,
+            rho_vap: 2e-2,
+            Tc: 1.0,
+            aa: 1.0,
+            w: 1.0,
+            b: 1.0,
+            zeta0: 1.0,
+            eta0: 1.0,
+            m: 1.0,
+            lambda0: 0.2
+
+        },
+        initial_time_config: 
+        cfg_struct::InitCfg{
+            n_liq: 40
+        },
+        save_config: 
+        cfg_struct::SaveCfg{
+            directory_name: "test_simu".to_string(),
+            user_comment: "".to_string(),
+            histo_freq: 100,
+            histo_save: 100,
+            num_bin: 100
+        },
+        physics_constants: 
+        cfg_struct::PhyConstants{
+            kB: 8.0/27.0 ,
+            DeBroglie0: 0.1,
+            dim: 2,
+            lambda_grad: 0.66}
+};
+
+    let cfg_struct::SimCfg{
+        physics_config: 
+        cfg_struct::PhyParam{
+            dx,
+            dy,
+            dt,
+            max_sim_time: max_time_step,
+            temper0,
+            temper1,
+            rho_liq,
+            rho_vap,
+            Tc,
+            aa,
+            w,
+            b,
+            zeta0,
+            eta0,
+            m,
+            lambda0
+        },
+        initial_time_config: 
+        cfg_struct::InitCfg{
+            n_liq,
+        },
+        save_config: 
+        cfg_struct::SaveCfg{
+            directory_name,
+            user_comment,
+            histo_freq,
+            histo_save,
+            num_bin,
+        },
+        physics_constants: 
+        cfg_struct::PhyConstants{
+            kB,
+            DeBroglie0,
+            dim,
+            lambda_grad: lambda}
+    } = config;
+    // config.physics_config.dx
     
     // System initialisation
     let mut step = 0;
-    let max_time_step = 1_000;
+    // let max_time_step = 1_000;
     // let step_count_before_save = max_time_step/20;
     let step_count_before_save = max_time_step/10;
 
     let print_frequency = 20.;
     let mut print_percertage_threshold = 100./print_frequency;
     
-    let dt = 1e-2;
+    // let dt = 1e-2;
     let mut time = 0.;
 
     let ncol_size = 100;
     let nrow_size = 2;
 
-    let rho_liq0 = 0.8;
+    let rho_liq0 = rho_liq;
     let ln_rho_liq0 = log(rho_liq0);
-    let rho_vap0 = 0.02;
+    let rho_vap0 = rho_vap;
     let ln_rho_vap0 = log(rho_vap0);
-    let temp0 = 0.7;
+    let temp0 = temper0;
 
     let box_info = BoxInfo{col_max: ncol_size,
                            row_max: nrow_size};
@@ -572,5 +653,4 @@ pub fn do_sim() {
             
         }} // i, j loop closing parenthesis
     } // time step closing parenthesis
-    } // if vdw_simu closing parenthesis
 } // main definition closing parenthesis
