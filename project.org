@@ -16,6 +16,10 @@ fs::create_dir("MyDir").expect("problem creating the directory");
 #+end_src
 ** csv
 https://docs.rs/csv/latest/csv/
+** c++/rust interop
+https://cxx.rs/
+** bindgen c / rust interop
+https://rust-lang.github.io/rust-bindgen/
 * code dependencies
 ** flamegraph-rs
 #+begin_src 
