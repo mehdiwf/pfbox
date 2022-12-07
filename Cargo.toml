@@ -6,8 +6,8 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-chrono = "0.4"
-serde = "1.0.147"
-serde_derive = "1.0.147"
-toml = "0.5.9"
+chrono = "0.4" # for time logging
+serde = "1.0.147" # for de·serializing toml files
+serde_derive = "1.0.147" # for deriving de·serialize trait to config files
+toml = "0.5.9" # to manage toml config files
 GSL = "4.0" # GSL https://docs.rs/GSL/latest/rgsl/index.html

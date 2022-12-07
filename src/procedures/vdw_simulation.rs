@@ -1,4 +1,5 @@
 const PFBOX_VERSION: &str = env!("CARGO_PKG_VERSION");
+
 use chrono;
 use std::io::Write; // to use "write_all" method
 use std::path::Path;
@@ -52,6 +53,9 @@ fn create_tensor_grid(ncol_size: i32,
 
 pub fn do_sim(configinput: cfg_struct::ConfigInput,
               overwrite: bool) {
+
+    println!("Starting vdw simulation");
+
     let mut logproblem_counts = 0;
     let print_logproblems = false;
     let mut output_path = "./src/testoutput";

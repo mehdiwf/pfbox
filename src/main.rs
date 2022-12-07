@@ -4,6 +4,8 @@
 #![allow(unused)]
 #![allow(dead_code)]
 
+const PFBOX_VERSION: &str = env!("CARGO_PKG_VERSION");
+
 mod maths;
 mod procedures;
 mod configfile;
@@ -21,14 +23,18 @@ use configfile::cfg_struct;
 fn main() {
     env::set_var("RUST_BACKTRACE", "1");
 
+    println!("pfbox version {}\n", PFBOX_VERSION);
+
     let args: Vec<String> = env::args().collect();
     let mut config_input = cfg_struct::ConfigInput::Empty;
     let mut output_path = "";
     let mut overwrite = true;
     
     if args.len() < 2 {
-        println!{"No input file given as argument, default config file
+
+        println!{"No input file given as argument, default config file\
         used. Type -h (:todo:) for more information\n"};
+
     }
     else
     {
