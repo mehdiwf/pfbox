@@ -22,8 +22,8 @@ data_dir_begin = "2D_NX100_simu_VdW_heatc_critic_"
 # data_dir_list = get_directory_list("../src/testoutput/", data_dir_begin)
 # data_dir_test = data_dir_list[-1]
 
-simdic = extract_simulation_info("../src/testoutput", prefix = "step_")
-simdic_c = extract_simulation_info("/home/mehdif/dossiers/ilm/these/code_simulations/water_c_code/looped_vdw/2D_NX100_simu_VdW_heatc_critic_0")
+simdic = extract_simulation_info("../src/testoutput/defaultdir/sim_data", prefix = "step_")
+simdic_c = extract_simulation_info("/home/mehdi/workdir/dossiers/ilm/these/code_simulations/rust_implementation/c_code_git/looped_vdw/2D_NX100_simu_VdW_heatc_critic_0")
 
 # to_plot = 'density_profile'
 # to_plot = 'Pxx_profile'
@@ -42,9 +42,9 @@ liquid_density_list = []
 final_temp_list = []
 final_temp_std_list = []
 
-# show_plot_evolution(simdic, to_plot, interval=1,
-#                     save=False,
-#                     space_index_column = 'column')
+show_plot_evolution(simdic, to_plot, interval=1,
+                    save=False,
+                    space_index_column = 'column')
 # to_plot = 'density_profile'
 # show_plot_evolution(simdic_c, to_plot, interval=1,
 #                     save=False,
@@ -58,14 +58,19 @@ dfc = simdic_c['df']
 rename_dic = {'column':'j',
               'density':'density_profile'}
 
+# not fixed
 df = df[df['time'] == 80000]
 df.rename(columns = rename_dic, inplace = True)
 dfc = dfc[dfc['time'] == 80000]
 diff = (dfc['density_profile'] - df['density_profile']).abs()/dfc['density_profile']
 
-plt.plot(df['j'], df['density_profile'], label="rust sim")
-plt.plot(dfc['j'], dfc['density_profile'], label="c sim")
+plt.plot(df['j'], df['density_profile'], label="rust simulation")
+plt.plot(dfc['j'], dfc['density_profile'], label="c simulation",
+         lw=2, alpha=0.5)
 plt.legend()
+plt.xlabel('x')
+plt.ylabel('density')
+plt.savefig('comparaison_rust_c.pdf')
 plt.show()
 
 # for datadir in data_dir_list:
