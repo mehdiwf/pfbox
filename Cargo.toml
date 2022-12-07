@@ -1,5 +1,5 @@
 [package]
-name = "pfbox_procedure"
+name = "pfbox"
 version = "0.1.4"
 edition = "2021"
 
