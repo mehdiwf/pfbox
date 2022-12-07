@@ -334,12 +334,16 @@ pub fn do_sim(configinput: cfg_struct::ConfigInput,
             // :todo:log:
             let rho = GD_rho.get_pos(row, col);
             if (rho < 0.) {
-                let str_to_append = format!("step {}, col={}, row={}\n\
-                                             neg log: {}\n\
+                let str_to_append = format!("IMPOSSIBLE COMPUTATION: NEGATIVE LOG\n\
+                                             step {}, col={}, row={}\n\
+                                             negative log of rho avoided!\n\
+                                             rho value: {}\n\
                                              ------------\n",
                                             &step, &col, &row, &rho);
-                // appending the string to 
-                file.write_all(&str_to_append.as_bytes())
+                logproblem_counts += 1;
+                if print_logproblems {
+                    println!("negative log detected ! check log for more info")};
+                logfile.write_all(&str_to_append.as_bytes())
                     .expect("write failed");
                 println!("error step {}:\n\
                           negative rho: rho = {}", step, rho);
