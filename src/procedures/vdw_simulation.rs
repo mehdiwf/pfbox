@@ -1,4 +1,5 @@
 use std::io::Write; // to use "write_all" method
+use std::path::Path;
 use std::fs; // to read/write a file contents
 use rgsl::logarithm::log;
 use rgsl::exponential::exp;
@@ -47,66 +48,53 @@ fn create_tensor_grid(ncol_size: i32,
     return result;
 }
 
-pub fn do_sim(configinput: cfg_struct::ConfigInput) {
-    let output_dir = "./testoutput";
-    let output_dir = "/home/mehdi/workdir/dossiers/ilm/these/code_simulations/rust_implementation/pfbox_git/src/testoutput";
-    let path = format!("{}/log.txt", output_dir);
-    // Open/Create a file in write-only mode, returns `io::Result<File>`
-    let file = match fs::File::create(&path) {
-        Err(why) => panic!("couldn't create logfile {}: {}", path, why),
-        Ok(file) => file,
-    };
-    // Open an already created file
-    let mut file = fs::OpenOptions::new()
-        .write(true)
-        .append(true) // This is needed to append to file
-        .open(&path)
-        .unwrap();
-
-    let str_to_append = format!("new sim\n");
-    // appending the string to 
-    file.write_all(&str_to_append.as_bytes());
-
-    let config = cfg_struct::SimCfg{
-        physics_config: 
-        cfg_struct::PhyParam{
-            dx: 0.5,
-            dy: 0.5,
-            dt: 1e-3,
-            max_sim_time: 5_000,
-            temper0: 0.7,
-            temper1: 0.8,
-            rho_liq: 0.8,
-            rho_vap: 2e-2,
-            Tc: 1.0,
-            aa: 1.0,
-            w: 1.0,
-            b: 1.0,
-            zeta0: 1.0,
-            eta0: 1.0,
-            m: 1.0,
-            lambda0: 0.2
-
+pub fn do_sim(configinput: cfg_struct::ConfigInput,
+              overwrite: bool) {
+    let mut logproblem_counts = 0;
+    let print_logproblems = false;
+    let mut output_path = "./src/testoutput";
+    let mut config = cfg_io::read_cfg_file(
+        "src/procedures/vdw_default_cfg.toml"); // the default config file
+    
+    match configinput {
+        cfg_struct::ConfigInput::Empty => {
+            config = cfg_io::read_cfg_file(
+                "src/procedures/vdw_default_cfg.toml");
         },
-        initial_time_config: 
-        cfg_struct::InitCfg{
-            n_liq: 40
-        },
-        save_config: 
-        cfg_struct::SaveCfg{
-            directory_name: "test_simu".to_string(),
-            user_comment: "".to_string(),
-            histo_freq: 100,
-            histo_save: 100,
-            num_bin: 100
-        },
-        physics_constants: 
-        cfg_struct::PhyConstants{
-            kB: 8.0/27.0 ,
-            DeBroglie0: 0.1,
-            dim: 2,
-            lambda_grad: 0.66}
-};
+        cfg_struct::ConfigInput::Path(input_path) =>
+        {
+            config = cfg_io::read_cfg_file(&input_path);
+        }
+    }
+    
+    let output_dir = format!("./src/testoutput/{}",
+                             &config.save_config.directory_name);
+
+    let dir_exist = Path::new(&output_dir).is_dir();
+    if (dir_exist && overwrite)
+    {
+        fs::remove_dir_all(&output_dir);
+        println!("deleted already existing directory");
+        fs::create_dir(&output_dir);
+        println!("created fresh directory");
+    }
+    else
+    {
+        fs::create_dir(&output_dir);
+    }
+
+    let simdata_dir = format!("{}/sim_data",output_dir);
+    fs::create_dir(&simdata_dir);
+    let mut readmefile = fs::File::create(
+        &format!("{}/README.txt", output_dir))
+        .expect("couldn't create readme file");
+
+    let mut logfile = fs::File::create(
+        &format!("{}/logfile", output_dir))
+        .expect("couldn't create logfile file");
+    
+    let simulation_utc_start_time = chrono::offset::Utc::now();
+    
 
     let cfg_struct::SimCfg{
         physics_config: 
@@ -147,13 +135,13 @@ pub fn do_sim(configinput: cfg_struct::ConfigInput) {
             dim,
             lambda_grad: lambda}
     } = config;
-    // config.physics_config.dx
+
+    let output_dir = format!("./src/testoutput/{}",
+                             directory_name);
     
     // System initialisation
     let mut step = 0;
-    // let max_time_step = 1_000;
-    // let step_count_before_save = max_time_step/20;
-    let step_count_before_save = max_time_step/10;
+    let step_count_before_save = histo_save;
 
     let print_frequency = 20.;
     let mut print_percertage_threshold = 100./print_frequency;
@@ -540,7 +528,7 @@ pub fn do_sim(configinput: cfg_struct::ConfigInput) {
         if (step % step_count_before_save == 0) {
         
         let filename = format!("{}/step_{}",
-                               output_dir, i_time_step);
+                               simdata_dir, i_time_step);
         let mut file = fs::File::create(&filename)
             .expect("couldn't create log file");
         
