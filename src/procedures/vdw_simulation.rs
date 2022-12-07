@@ -21,7 +21,7 @@ pub fn do_sim(configinput: cfg_struct::ConfigInput,
     let print_logproblems = false;
     let mut output_path = "./src/testoutput";
     let mut config = cfg_io::read_cfg_file(
-        "src/procedures/vdw_default_cfg.toml"); // the default config file
+        "./src/procedures/vdw_default_cfg.toml"); // the default config file
     
     match configinput {
         cfg_struct::ConfigInput::Empty => {
