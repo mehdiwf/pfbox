@@ -138,14 +138,13 @@ mod tests {
 
     #[test]
     fn x_profile_test() {
-        let grid_y = vec![vec![1., 1., 0., -1.],
-                          vec![0., 0., 0., -2.],
-                          vec![-1., 2., 0., 0.]];
-        let profile = vec![0., 1., 0., -1.];
-        // :todo:
-        // assert_eq!(profile, 
-        //            x_profile(&grid_y));
-        assert_eq!(0, 1);
+        let grid_y = ScalarField2D {
+            s: array![[1., 1., 0., -1.],
+                      [0., 0., 0., -2.],
+                      [-1., 2., 0., 0.]] };
+        let profile = array![0., 1., 0., -1.];
+        assert_eq!(profile, 
+                   x_profile(&grid_y));
         }
 
 }

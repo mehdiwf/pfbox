@@ -1,4 +1,5 @@
 use super::mystructs::*;
+use ndarray::prelude::*;
 
 // an enum used to indicate the direction of a derivative calculation
 // in 2D
@@ -352,9 +353,9 @@ mod tests {
         // three tests:
         // first one with an uniform field
 
-        let uni_grid = vec![vec![1.; 4]; 4];
+        let uni_grid = ScalarField2D { s: Array::<f64, Ix2>::ones((4, 4).f()) };
         
-        v = grad_scalar(&uni_grid, 2, 2, lambda, &box_info);
+        v = grad_scalar(&uni_grid, 2, 2, 0.66, &box_info);
         assert_eq!(v.x, 0., "testing the gradient is zero \
                              with a uniform field");
         assert_eq!(v.y, 0., "testing the gradient is zero \
@@ -362,27 +363,32 @@ mod tests {
 
         // second one with a x growing field
 
-        let grid_x = vec![vec![1., 2., 3., 4.]; 4];
+        let grid_x = ScalarField2D {
+            s:array![[1., 2., 3., 4.],
+                     [1., 2., 3., 4.],
+                     [1., 2., 3., 4.],
+                     [1., 2., 3., 4.]]};
 
-        v = grad_scalar(&grid_x, 2, 2, lambda, &box_info);
-        assert!((v.x > 0.), "testing the gradient.x is positive \
-                            for a field growing with respect of x");
-        assert_eq!(v.y, 0., "testing the gradient.y is zero \
-                            for a field growing with respect of x");
-
-        // second one with a y growing field
-
-        let grid_y = vec![vec![1., 1., 1., 1.],
-                          vec![2., 2., 2., 2.],
-                          vec![3., 3., 3., 3.],
-                          vec![4., 4., 4., 4.]];
-
-        v = grad_scalar(&grid_y, 2, 2, lambda, &box_info);
-        println!("y {:?}", v);
+        v = grad_scalar(&grid_x, 2, 2, 0.66, &box_info);
         assert!((v.y > 0.), "testing the gradient.y is positive \
                             for a field growing with respect of y");
         assert_eq!(v.x, 0., "testing the gradient.x is zero \
                             for a field growing with respect of y");
+
+        // second one with a y growing field
+
+        let grid_y = ScalarField2D{
+            s:array![[1., 1., 1., 1.],
+                     [2., 2., 2., 2.],
+                     [3., 3., 3., 3.],
+                     [4., 4., 4., 4.]]};
+
+        v = grad_scalar(&grid_y, 2, 2, 0.66, &box_info);
+        println!("y {:?}", v);
+        assert!((v.x > 0.), "testing the gradient.x is positive \
+                            for a field growing with respect of x");
+        assert_eq!(v.y, 0., "testing the gradient.y is zero \
+                            for a field growing with respect of x");
 }
     // todo: test gradient fct
 }
