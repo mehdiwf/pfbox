@@ -12,3 +12,13 @@ serde = "1.0.147" # for de·serializing toml files
 serde_derive = "1.0.147" # for deriving de·serialize trait to config files
 toml = "0.5.9" # to manage toml config files
 GSL = "4.0" # GSL https://docs.rs/GSL/latest/rgsl/index.html
+
+[profile.release]
+# link time optimisation
+lto = true
+# Do not cut the code in tiny pieces to compile it. This is not
+# always the best thing to do for performance! as it is heuristic
+codegen-units = 1
+# no unwind in panic! (not nice for debug)
+# panic = "abort" # (not accepted by GSL)
+
