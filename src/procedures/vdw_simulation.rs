@@ -265,7 +265,7 @@ pub fn do_sim(configinput: cfg_struct::ConfigInput,
     ////////////////////////////////////////////////////////////////////////////
     // Computations variables update
     ////////////////////////////////////////////////////////////////////////////
-
+    println!("\nBeginning time loop\n");
     //auie time loop
     for i_time_step in 0..max_time_step {
 
@@ -690,4 +690,7 @@ pub fn do_sim(configinput: cfg_struct::ConfigInput,
           for different parameters, which written in the first\n\
           commented line of each data file. The first numbers are the\n\
           column number");
+    println!("\nSimulation finished, problems logged in log: {}", logproblem_counts);
+    
+    
 } // main definition closing parenthesis
