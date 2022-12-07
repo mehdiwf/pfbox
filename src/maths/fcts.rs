@@ -72,9 +72,9 @@ pub fn dyadic_product(tens_a: &tens2D, tens_b: &tens2D) -> f64
 }
 
 /// returns the partial derivative of a scalar field
-/// in i,j and in the direction 0 (j axis) or 1 (i axis)
-/// WARNING!!!: partial derivative in the x direction is 1, not 0
-/// WARNING!!!: partial derivative in the y direction is 0, not 1
+/// in i,j and in one direction
+/// partial derivative in the x direction is DerivDirection::Rows
+/// partial derivative in the y direction is DerivDirection::Columns
 pub fn partial_deriv(scal_field: &ScalarField2D,
                      i: i32, j: i32,
                      direction: DerivDirection,
