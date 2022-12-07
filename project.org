@@ -39,7 +39,58 @@ sudo apt-get install libgsl0-dev
 #+end_src
 * orga code building
 ** todos
-*** verify with samy
+*** TODO improve performance
+**** TODO compilation
+
+[[https://nnethercote.github.io/perf-book/build-configuration.html][build config, performance book]]
+**** TODO benchmarking
+example in stack
+https://stackoverflow.com/questions/13322479/benchmarking-programs-in-rust
+
+links given
+[[https://doc.rust-lang.org/1.4.0/book/benchmark-tests.html][benchmark test]]
+**** TODO change Vector2 to [[https://docs.rs/ndarray/latest/ndarray/index.html][Array2]]
+***** to see
+https://docs.rs/ndarray/latest/ndarray/index.html
+https://docs.rs/ndarray/latest/ndarray/doc/ndarray_for_numpy_users/index.html
+***** reddit answer
+****** my message
+Hey everyone, I have two questions
+
+context: I'm doing a 2d fluid simulation, and I'm using 2D Vectors to
+store variables that have a value for each position in my 2D plane. I
+wrap these Vectors in a structure which has "get_position(i: usize, j:
+usize)" method implemented, which allows me to change the way these 2D
+information are stored without changing the code of the simulation
+accessing these values for computations
+
+- Is it way better to use arrays instead of vectors for performance?
+  I'm using vectors because the size of the simulation should be given
+  as an input of the program, and thus is not always known at compile
+  time (but this can be changed is the speed gain is huge)
+
+- Is it very slow to wrap my big 2D vectors in structures with
+  setters/getters? this makes my code more flexible but I can also
+  change it if it speeds it very badly
+
+Thank you very much! If you are curious, here is my github, feel free
+to ask more questions on my project, any help or curiosity is
+welcomed!
+
+****** answer by WasserMarder
+
+Vectors of vectors are typically bad for performance because they tend
+do give band caching performance. My advice is to use Array2 from the
+ndarray crate. It is also somewhat compatible with numpy if you need
+python interoperability.
+
+You can implement your TensorField2D ontop of Array3.
+
+Use ArrayView and ArrayViewMut for functions that only need
+views. This makes them usable independent of data layout i.e. you can
+create a view with shape (n, m) from any array with shape (..., n,
+..., m, ...).
+*** TODO verify with samy
 **** eta0
 
 shear visc = eta0 * m * rho
@@ -52,9 +103,6 @@ eta0 * mass * rho
 
 cin_visc = eta0?
 
-*** TODO make the program take arguments from input file
-and choose which arguments to fix and which to get in input!
-*** TODO fix row_dx/col_dx in BoxInfo definition
 *** TODO understand why there is a jump in some simulations
 **** vdw file with jump?
 use std::io::Write; // to use "write_all" method
@@ -636,6 +684,8 @@ pub fn do_sim() {
 
 *** TODO create a module for the simulation, outside of main
 *** TODO verify derivatives direction
+et pas oublier row_dx/col_dx dans la def de  BoxInfo
+
 - j'ai mis comme c'est fait dans le code de Samy, mais ça me semblait
   bizarre la direction dans laquelle c'était fait...
 
@@ -1106,6 +1156,13 @@ CLOSED: [2022-12-01 Thu 15:01]
 functions:
 - exp (check gsl lib)
 *** api
+**** DONE make the program take arguments from input file
+CLOSED: [2022-12-07 Wed 16:58]
+:LOGBOOK:
+- State "DONE"       from "TODO"       [2022-12-07 Wed 16:58]
+:END:
+and choose which arguments to fix and which to get in input!
+
 **** DONE function that creates a default/template SimConfig
 CLOSED: [2022-11-25 ven. 15:40]
 :LOGBOOK:
@@ -1139,3 +1196,15 @@ is the good way to go in "./src/configfile/cfg_struct.rs"
 *** TOHO remove all the "allow"
 unused_variables
 *** TOHO remove & in setter for scalar fields
+* discussion samy thierry
+** parallélisation "à la main" Thierry
+découper le système en plusieurs cases, et faire les calculs
+** comparer performances en c et en rust
+- compiler le rust en --release
+- faire le parrall avec rayon
+- faire le openMP sur C (voir ce que samy a envoyé)
+** tension de surface
+- calcul avec l'intégrale
+- finir de dimensionner
+- (densité = g/cm3, correspondant à ce que j'avais pris comme
+  paramètres la dernière fois)
