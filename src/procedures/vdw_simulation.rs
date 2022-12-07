@@ -1,3 +1,5 @@
+const PFBOX_VERSION: &str = env!("CARGO_PKG_VERSION");
+use chrono;
 use std::io::Write; // to use "write_all" method
 use std::path::Path;
 use std::fs; // to read/write a file contents
@@ -95,6 +97,22 @@ pub fn do_sim(configinput: cfg_struct::ConfigInput,
     
     let simulation_utc_start_time = chrono::offset::Utc::now();
     
+    let readme_message = format!(
+        " ----------------------------------------\n\
+         | Van Der Waals simulation readme file   |\n\
+         | Pfbox version: {:>21}   |\n \
+         ----------------------------------------\n\
+         \n\
+         user comment: {}\n\n\
+         [TIME]\n\
+         Simulation started at: {}\n",
+        &PFBOX_VERSION,
+        &config.save_config.user_comment,
+        chrono::offset::Utc::now());
+    readmefile.write_all(readme_message.as_bytes()).unwrap();
+
+    cfg_io::write_cfg_file(&config,
+                           &format!("{}/config_file.toml", output_dir));
 
     let cfg_struct::SimCfg{
         physics_config: 
@@ -653,4 +671,23 @@ pub fn do_sim(configinput: cfg_struct::ConfigInput,
             
         }} // i, j loop closing parenthesis
     } // time step closing parenthesis
+
+    let simulation_utc_end_time = chrono::offset::Utc::now();
+    let simulation_utc_duration = simulation_utc_end_time - simulation_utc_start_time;
+    readmefile.write_all(
+        &format!("Simulation ended at:   {}\n\
+                  Duration: {}\n\n",
+                 chrono::offset::Utc::now(),
+                 simulation_utc_duration).as_bytes()).unwrap();
+
+    readmefile.write_all(
+        b"* MORE INFO *\n\
+          You can access the simulation configuration\n\
+          in config_file.toml, written in Tom's Obvious Minimal\n\
+          Language. The simulation data is stored in sim_data directory, and\n\
+          the logfile file contains possible warnings\n\n\
+          The data stored in sim_data is the mean value on each column\n\
+          for different parameters, which written in the first\n\
+          commented line of each data file. The first numbers are the\n\
+          column number");
 } // main definition closing parenthesis
