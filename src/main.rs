@@ -8,7 +8,7 @@ mod maths;
 mod procedures;
 mod configfile;
 
-use std::env; // to have a backtrace (search backtrace in this file)
+use std::env; // to have a backtrace + input arguments
 use std::io::Write; // to use "write_all" method
 use std::fs; // to read/write a file contents
 
