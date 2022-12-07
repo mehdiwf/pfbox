@@ -1,5 +1,10 @@
 use super::mystructs::*;
 
+// an enum used to indicate the direction of a derivative calculation
+// in 2D
+pub enum DerivDirection {
+    Rows,
+    Columns}
 
 pub fn shear_viscosity(rho: f64, mass: f64, dyn_visc: f64) -> f64
 {
@@ -72,7 +77,7 @@ pub fn dyadic_product(tens_a: &tens2D, tens_b: &tens2D) -> f64
 /// WARNING!!!: partial derivative in the y direction is 0, not 1
 pub fn partial_deriv(scal_field: &ScalarField2D,
                      i: i32, j: i32,
-                     direction: i32,
+                     direction: DerivDirection,
                      lambda: f64,
                      box_info: &BoxInfo) -> f64
 {
@@ -93,7 +98,7 @@ pub fn partial_deriv(scal_field: &ScalarField2D,
     match direction
         {
             // on the x axis
-            0 => {
+            DerivDirection::Rows => {
    let derivative = 
           lambda*(scal_field.get_pos(ip, j) - scal_field.get_pos(im, j))/(2.*dx)
 	  + 0.25*lambda*(scal_field.get_pos(ip, jp) - scal_field.get_pos(im, jp))/(2.*dx)
@@ -101,7 +106,7 @@ pub fn partial_deriv(scal_field: &ScalarField2D,
                 return derivative;
             },
             // on the y axis
-            1 => {
+            DerivDirection::Columns => {
    let derivative = 
           lambda*(scal_field.get_pos(i, jp) - scal_field.get_pos(i, jm))/(2.*dx)
 	  + 0.25*lambda*(scal_field.get_pos(ip, jp) - scal_field.get_pos(ip, jm))/(2.*dx)	
@@ -121,8 +126,10 @@ pub fn grad_scalar(scalar_field: &ScalarField2D,
 {
     let grad = vec2D {
         // x is index 1 because it's the columns in the simulation
-        x: partial_deriv(&scalar_field, i, j, 0, lambda, &box_info),
-        y: partial_deriv(&scalar_field, i, j, 1, lambda, &box_info),};
+        x: partial_deriv(&scalar_field, i, j,
+                         DerivDirection::Rows, lambda, &box_info),
+        y: partial_deriv(&scalar_field, i, j,
+                         DerivDirection::Columns, lambda, &box_info),};
         
     return grad;
 }
@@ -143,10 +150,14 @@ pub fn gradient_vector(vector_field: &VectorField2D,
                        box_info: &BoxInfo) -> tens2D
 {
     let tens = tens2D {
-        xx: partial_deriv(&vector_field.x, i, j, 0, lambda, &box_info),
-        xy: partial_deriv(&vector_field.x, i, j, 1, lambda, &box_info),
-        yx: partial_deriv(&vector_field.y, i, j, 0, lambda, &box_info),
-        yy: partial_deriv(&vector_field.y, i, j, 1, lambda, &box_info)};
+        xx: partial_deriv(&vector_field.x, i, j,
+                          DerivDirection::Rows, lambda, &box_info),
+        xy: partial_deriv(&vector_field.x, i, j,
+                          DerivDirection::Columns, lambda, &box_info),
+        yx: partial_deriv(&vector_field.y, i, j,
+                          DerivDirection::Rows, lambda, &box_info),
+        yy: partial_deriv(&vector_field.y, i, j,
+                          DerivDirection::Columns, lambda, &box_info)};
     return tens;
 }
 
@@ -155,8 +166,10 @@ pub fn div_vector(vector_field: &VectorField2D,
                   lambda: f64,
                   box_info: &BoxInfo) -> f64
 {
-    let dVx_dx = partial_deriv(&vector_field.x, i, j, 0, lambda, &box_info);
-    let dVy_dy = partial_deriv(&vector_field.y, i, j, 1, lambda, &box_info);
+    let dVx_dx = partial_deriv(&vector_field.x, i, j,
+                               DerivDirection::Rows, lambda, &box_info);
+    let dVy_dy = partial_deriv(&vector_field.y, i, j,
+                               DerivDirection::Columns, lambda, &box_info);
 
     return dVx_dx + dVy_dy;
 }
@@ -167,11 +180,17 @@ pub fn div_tensor(tensor_field: &TensorField2D,
                   box_info: &BoxInfo) -> vec2D
 {
     let vector = vec2D{
-        x: partial_deriv(&tensor_field.xx, i, j, 0, lambda, &box_info)
-         + partial_deriv(&tensor_field.yx, i, j, 1, lambda, &box_info),
+        x: partial_deriv(&tensor_field.xx, i, j,
+                         DerivDirection::Rows, lambda, &box_info)
+            + partial_deriv(&tensor_field.yx, i, j,
+                            DerivDirection::Columns, lambda, &box_info),
         
-        y: partial_deriv(&tensor_field.xy, i, j, 0, lambda, &box_info)
-         + partial_deriv(&tensor_field.yy, i, j, 1, lambda, &box_info)};
+        y: partial_deriv(&tensor_field.xy, i, j,
+                         DerivDirection::Rows, lambda,
+                         &box_info)
+            + partial_deriv(&tensor_field.yy, i, j,
+                            DerivDirection::Columns, lambda,
+                            &box_info)};
     return vector;
 }
 
