@@ -18,6 +18,8 @@ pub struct PhyParam {
     pub eta0: f64,
     pub m: f64,
     pub lambda0: f64,
+    pub nb_col: usize,
+    pub nb_row: usize
 }
 
 #[derive(Serialize, Deserialize, Debug)]

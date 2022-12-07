@@ -97,7 +97,10 @@ pub fn do_sim(configinput: cfg_struct::ConfigInput,
             zeta0,
             eta0,
             m,
-            lambda0
+            lambda0,
+            nb_col: ncol_size,
+            nb_row: nrow_size
+                
         },
         initial_time_config: 
         cfg_struct::InitCfg{
@@ -132,8 +135,8 @@ pub fn do_sim(configinput: cfg_struct::ConfigInput,
     // let dt = 1e-2;
     let mut time = 0.;
 
-    let ncol_size = 100usize;
-    let nrow_size = 2usize;
+    // let ncol_size = 100usize;
+    // let nrow_size = 2usize;
 
     let rho_liq0 = rho_liq;
     let ln_rho_liq0 = log(rho_liq0);
