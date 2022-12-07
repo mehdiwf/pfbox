@@ -253,10 +253,10 @@ pub fn do_sim(configinput: cfg_struct::ConfigInput,
             // GD_lap_rho begin update
             GD_lap_rho
                 .set_pos(row, col,
-                         &laplacian(&GD_rho,
-                                    row_i32, col_i32,
-                                    lambda,
-                                    &box_info));
+                         laplacian(&GD_rho,
+                                   row_i32, col_i32,
+                                   lambda,
+                                   &box_info));
             // GD_lap_rho end update
             // -------------------------------------------------------
 
@@ -264,10 +264,10 @@ pub fn do_sim(configinput: cfg_struct::ConfigInput,
             // GD_lap_T begin update
             GD_lap_T
                 .set_pos(row, col,
-                         &laplacian(&GD_temp,
-                                    row_i32, col_i32,
-                                    lambda,
-                                    &box_info));
+                         laplacian(&GD_temp,
+                                   row_i32, col_i32,
+                                   lambda,
+                                   &box_info));
             // GD_lap_T end update
             // -------------------------------------------------------
 
@@ -314,12 +314,12 @@ pub fn do_sim(configinput: cfg_struct::ConfigInput,
                           negative rho: rho = {}", step, rho);
             GD_ln_rho
                 .set_pos(row, col,
-                         &0.);}
+                         0.);}
             else {
                 let ln_rho = log(rho);
                 GD_ln_rho
                     .set_pos(row, col,
-                             &ln_rho);}
+                             ln_rho);}
             // GD_ln_rho end update
             // -------------------------------------------------------
 
@@ -340,10 +340,10 @@ pub fn do_sim(configinput: cfg_struct::ConfigInput,
             // GD_div_v begin update
             GD_div_v
                 .set_pos(row, col,
-                         &div_vector(&GD_v,
-                                     row_i32, col_i32,
-                                     lambda,
-                                     &box_info));
+                         div_vector(&GD_v,
+                                    row_i32, col_i32,
+                                    lambda,
+                                    &box_info));
             // GD_div_v end update
             // -------------------------------------------------------
 
@@ -436,8 +436,8 @@ pub fn do_sim(configinput: cfg_struct::ConfigInput,
             // GD_v_scal_grad_T begin update            
             GD_v_scalar_grad_T
                 .set_pos(row, col,
-                         &scal_product(&GD_v.get_pos(row, col),
-                                       &GD_grad_T.get_pos(row, col)));
+                         scal_product(&GD_v.get_pos(row, col),
+                                      &GD_grad_T.get_pos(row, col)));
             // GD_v_scal_grad_T end update
             // -------------------------------------------------------
 
@@ -446,8 +446,8 @@ pub fn do_sim(configinput: cfg_struct::ConfigInput,
             // GD_traceless_grad_v_dyadic_grad_v begin update            
             GD_traceless_grad_v_dyadic_grad_v
                 .set_pos(row, col,
-                         &dyadic_product(&GD_traceless_grad_v.get_pos(row, col),
-                                         &GD_grad_v.get_pos(row, col)));
+                         dyadic_product(&GD_traceless_grad_v.get_pos(row, col),
+                                        &GD_grad_v.get_pos(row, col)));
             // GD_traceless_grad_v_dyadic_grad_v end update
             // -------------------------------------------------------
 
@@ -456,8 +456,8 @@ pub fn do_sim(configinput: cfg_struct::ConfigInput,
             // GD_v_scalar_grad_ln_rho begin update            
             GD_v_scalar_grad_ln_rho
                 .set_pos(row, col,
-                         &scal_product(&GD_v.get_pos(row, col),
-                                       &GD_grad_ln_rho.get_pos(row, col)));
+                         scal_product(&GD_v.get_pos(row, col),
+                                      &GD_grad_ln_rho.get_pos(row, col)));
             // GD_v_scalar_grad_ln_rho end update
             // -------------------------------------------------------
 
@@ -491,8 +491,8 @@ pub fn do_sim(configinput: cfg_struct::ConfigInput,
             // GD_grad_ln_rho_scalar_grad_T begin update
             GD_grad_ln_rho_scalar_grad_T
                 .set_pos(row, col,
-                         &scal_product(&GD_grad_ln_rho.get_pos(row, col),
-                                       &GD_grad_T.get_pos(row, col)));
+                         scal_product(&GD_grad_ln_rho.get_pos(row, col),
+                                      &GD_grad_T.get_pos(row, col)));
             // GD_grad_ln_rho_scalar_grad_T end update
             // -------------------------------------------------------
 
@@ -612,8 +612,8 @@ pub fn do_sim(configinput: cfg_struct::ConfigInput,
                 (div_v + v_grad_ln_rho) * dt;
             let mut new_rho = exp(new_ln_rho);
             
-            GD_ln_rho.set_pos(row, col, &new_ln_rho);
-            GD_rho.set_pos(row, col, &new_rho);
+            GD_ln_rho.set_pos(row, col, new_ln_rho);
+            GD_rho.set_pos(row, col, new_rho);
 
             //bépo VELOCITY from momentum
             GD_v.set_pos(row, col,
@@ -636,7 +636,7 @@ pub fn do_sim(configinput: cfg_struct::ConfigInput,
                         + lambda0 * (grad_ln_rho_scalar_grad_T + lap_T)
                 ) * dt
                 - v_scalar_grad_T * dt;
-            GD_temp.set_pos(row, col, &new_T);
+            GD_temp.set_pos(row, col, new_T);
             
         }} // i, j loop closing parenthesis
     } // time step closing parenthesis
