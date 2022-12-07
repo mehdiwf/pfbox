@@ -12,45 +12,6 @@ use crate::maths::fcts::*;
 use crate::configfile::cfg_io;
 use crate::configfile::cfg_struct;
 
-fn create_scalar_grid(ncol_size: i32,
-                      nrow_size: i32) -> ScalarField2D
-{
-    return ScalarField2D {
-        s: vec![vec![0.; ncol_size as usize];
-                nrow_size as usize],
-    };
-}
-
-fn create_vector_grid(ncol_size: i32,
-                      nrow_size: i32) -> VectorField2D
-{
-    let result = VectorField2D
-    {
-        x: vec![vec![0.; ncol_size as usize];
-                nrow_size as usize],
-        y: vec![vec![0.; ncol_size as usize];
-                nrow_size as usize]
-    };
-    return result;
-}
-
-fn create_tensor_grid(ncol_size: i32,
-                      nrow_size: i32) -> TensorField2D
-{
-    let result = TensorField2D
-        {
-            xx: vec![vec![0.; ncol_size as usize];
-                     nrow_size as usize],
-            xy: vec![vec![0.; ncol_size as usize];
-                     nrow_size as usize],
-            yx: vec![vec![0.; ncol_size as usize];
-                     nrow_size as usize],
-            yy: vec![vec![0.; ncol_size as usize];
-                     nrow_size as usize]
-        };
-    return result;
-}
-
 pub fn do_sim(configinput: cfg_struct::ConfigInput,
               overwrite: bool) {
 
@@ -171,8 +132,8 @@ pub fn do_sim(configinput: cfg_struct::ConfigInput,
     // let dt = 1e-2;
     let mut time = 0.;
 
-    let ncol_size = 100;
-    let nrow_size = 2;
+    let ncol_size = 100usize;
+    let nrow_size = 2usize;
 
     let rho_liq0 = rho_liq;
     let ln_rho_liq0 = log(rho_liq0);
@@ -180,8 +141,8 @@ pub fn do_sim(configinput: cfg_struct::ConfigInput,
     let ln_rho_vap0 = log(rho_vap0);
     let temp0 = temper0;
 
-    let box_info = BoxInfo{col_max: ncol_size,
-                           row_max: nrow_size,
+    let box_info = BoxInfo{col_max: ncol_size as i32,
+                           row_max: nrow_size as i32,
                            col_dx: dx,
                            row_dx: dy};
 
@@ -190,78 +151,78 @@ pub fn do_sim(configinput: cfg_struct::ConfigInput,
     // Physics quantities definition
     ////////////////////////////////////////////////////////////////////////////
     // GD for grid
-    let mut GD_rho = create_scalar_grid(ncol_size, nrow_size);
-    let mut GD_temp = create_scalar_grid(ncol_size, nrow_size);
-    let mut GD_pressure = create_tensor_grid(ncol_size, nrow_size);
+    let mut GD_rho = ScalarField2D::new(nrow_size, ncol_size);
+    let mut GD_temp = ScalarField2D::new(nrow_size, ncol_size);
+    let mut GD_pressure = TensorField2D::new(nrow_size, ncol_size);
     // momentum, also known as J = rho*velocity
-    let mut GD_J = create_vector_grid(ncol_size, nrow_size);
+    let mut GD_J = VectorField2D::new(nrow_size, ncol_size);
     // velocity
-    let mut GD_v = create_vector_grid(ncol_size, nrow_size);
+    let mut GD_v = VectorField2D::new(nrow_size, ncol_size);
 
     //auie quantities used for the computations definition
     ////////////////////////////////////////////////////////////////////////////
     // Quantities used for the computations definition
     ////////////////////////////////////////////////////////////////////////////
     
-    let mut GD_ln_rho = create_scalar_grid(ncol_size, nrow_size);
-    let mut GD_grad_rho = create_vector_grid(ncol_size, nrow_size);
-    let mut GD_lap_rho = create_scalar_grid(ncol_size, nrow_size);
+    let mut GD_ln_rho = ScalarField2D::new(nrow_size, ncol_size);
+    let mut GD_grad_rho = VectorField2D::new(nrow_size, ncol_size);
+    let mut GD_lap_rho = ScalarField2D::new(nrow_size, ncol_size);
 
-    let mut GD_vJ = create_tensor_grid(ncol_size, nrow_size);
+    let mut GD_vJ = TensorField2D::new(nrow_size, ncol_size);
 
-    let mut GD_grad_v = create_tensor_grid(ncol_size, nrow_size);
+    let mut GD_grad_v = TensorField2D::new(nrow_size, ncol_size);
 
-    let mut GD_div_v = create_scalar_grid(ncol_size, nrow_size);
+    let mut GD_div_v = ScalarField2D::new(nrow_size, ncol_size);
 
-    let mut GD_traceless_grad_v = create_tensor_grid(ncol_size, nrow_size);
+    let mut GD_traceless_grad_v = TensorField2D::new(nrow_size, ncol_size);
 
-    let mut GD_lap_v = create_vector_grid(ncol_size, nrow_size);
+    let mut GD_lap_v = VectorField2D::new(nrow_size, ncol_size);
 
-    let mut GD_div_vJ = create_vector_grid(ncol_size, nrow_size);
-    let mut GD_grad_div_v = create_vector_grid(ncol_size, nrow_size);
+    let mut GD_div_vJ = VectorField2D::new(nrow_size, ncol_size);
+    let mut GD_grad_div_v = VectorField2D::new(nrow_size, ncol_size);
 
-    let mut GD_div_press = create_vector_grid(ncol_size, nrow_size);
+    let mut GD_div_press = VectorField2D::new(nrow_size, ncol_size);
 
-    let mut GD_ln_rho_traceless_grad_v = create_vector_grid(ncol_size, nrow_size);
+    let mut GD_ln_rho_traceless_grad_v = VectorField2D::new(nrow_size, ncol_size);
     
     let inv_cv = 1.0/(1.5*kB);
 
-    let mut GD_traceless_grad_v_dyadic_grad_v = create_scalar_grid(ncol_size, nrow_size);
+    let mut GD_traceless_grad_v_dyadic_grad_v = ScalarField2D::new(nrow_size, ncol_size);
 
-    let mut GD_grad_ln_rho_scalar_grad_T = create_scalar_grid(ncol_size, nrow_size);
+    let mut GD_grad_ln_rho_scalar_grad_T = ScalarField2D::new(nrow_size, ncol_size);
 
-    let mut GD_grad_ln_rho = create_vector_grid(ncol_size, nrow_size);
+    let mut GD_grad_ln_rho = VectorField2D::new(nrow_size, ncol_size);
 
-    let mut GD_v_scalar_grad_ln_rho = create_scalar_grid(ncol_size, nrow_size);
+    let mut GD_v_scalar_grad_ln_rho = ScalarField2D::new(nrow_size, ncol_size);
 
-    let mut GD_grad_ln_rho_traceless_grad_v = create_vector_grid(ncol_size, nrow_size);
+    let mut GD_grad_ln_rho_traceless_grad_v = VectorField2D::new(nrow_size, ncol_size);
     
-    let mut GD_grad_T = create_vector_grid(ncol_size, nrow_size);
+    let mut GD_grad_T = VectorField2D::new(nrow_size, ncol_size);
 
-    let mut GD_lap_T = create_scalar_grid(ncol_size, nrow_size);
+    let mut GD_lap_T = ScalarField2D::new(nrow_size, ncol_size);
 
-    let mut GD_v_scalar_grad_T = create_scalar_grid(ncol_size, nrow_size);
+    let mut GD_v_scalar_grad_T = ScalarField2D::new(nrow_size, ncol_size);
 
     //auie fluid initial state
     ////////////////////////////////////////////////////////////////////////////
     // Fluid initial state
     ////////////////////////////////////////////////////////////////////////////
     
-    for col in 0usize..ncol_size as usize {
-        for row in 0usize..nrow_size as usize {
+    for col in 0..ncol_size {
+        for row in 0..nrow_size {
             // putting liquid in the first half
-            if ((col as i32) < ncol_size/2){
+            if (col < ncol_size/2){
                 GD_rho.set_pos(row, col,
-                               &rho_liq0);
+                               rho_liq0);
                 GD_ln_rho.set_pos(row, col,
-                                  &ln_rho_liq0);}
+                                  ln_rho_liq0);}
             else {GD_rho.set_pos(row, col,
-                                 &rho_vap0);
+                                 rho_vap0);
                   GD_ln_rho.set_pos(row, col,
-                                    &ln_rho_vap0);}
+                                    ln_rho_vap0);}
 
             // setting initial temperature
-            GD_temp.set_pos(row, col, &temp0);
+            GD_temp.set_pos(row, col, temp0);
         }}
     
 
@@ -282,8 +243,8 @@ pub fn do_sim(configinput: cfg_struct::ConfigInput,
         }
 
     // update of computations variables
-    for col in 0usize..ncol_size as usize {
-        for row in 0usize..nrow_size as usize {
+    for col in 0..ncol_size {
+        for row in 0..nrow_size {
 
             let col_i32 = col as i32;
             let row_i32 = row as i32;
@@ -565,7 +526,7 @@ pub fn do_sim(configinput: cfg_struct::ConfigInput,
         let rho_profile = GD_rho.x_profile();
         let temp_profile = GD_temp.x_profile();
         
-        for col_index in 0usize..ncol_size as usize
+        for col_index in 0..ncol_size
         {
             let str_to_append = format!("{} {} {}\n",
                                         &col_index,
@@ -589,8 +550,8 @@ pub fn do_sim(configinput: cfg_struct::ConfigInput,
     // Main loop
     ////////////////////////////////////////////////////////////////////////////
     
-    for row in 0usize..nrow_size as usize {
-        for col in 0usize..ncol_size as usize {
+    for row in 0..nrow_size {
+        for col in 0..ncol_size {
 
             let row_i32 = row as i32;
             let col_i32 = col as i32;
