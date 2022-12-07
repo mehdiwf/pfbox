@@ -22,8 +22,8 @@ n_liq = 40
 [save_config]
 directory_name = "defaultdir"
 user_comment = ""
-histo_freq = 10_000
-histo_save = 10_000
+histo_freq = 50
+histo_save = 50
 num_bin = 100
 
 [physics_constants]

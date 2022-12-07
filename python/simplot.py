@@ -92,7 +92,8 @@ def get_value_from_readme(value_searched, readme_path):
                 value = value[:-1]
     return value
 
-def extract_simulation_info(simulation_dir, prefix = "profile_"):
+def extract_simulation_info(simulation_dir, prefix = "profile_",
+                            readme = True):
     """returns a dictionnary with a df containing all the profiles data of
     the simulation, a list containing all the time accessibles for
     profiles data, and a dictionnary containing the readme info of the
@@ -109,7 +110,8 @@ def extract_simulation_info(simulation_dir, prefix = "profile_"):
     df, profile_index = get_simulation_data(simulation_dir, prefix= prefix)
     simu_info['df'] = df
     simu_info['profile_time_list'] = profile_index
-    simu_info['readme'] = get_readme_info(readmefile)
+    if readme:
+        simu_info['readme'] = get_readme_info(readmefile)
     return simu_info
 
 def get_convergence_data(simulation_dictionnary, column):

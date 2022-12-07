@@ -22,8 +22,8 @@ data_dir_begin = "2D_NX100_simu_VdW_heatc_critic_"
 # data_dir_list = get_directory_list("../src/testoutput/", data_dir_begin)
 # data_dir_test = data_dir_list[-1]
 
-simdic = extract_simulation_info("../src/testoutput/defaultdir/sim_data", prefix = "step_")
-simdic_c = extract_simulation_info("/home/mehdi/workdir/dossiers/ilm/these/code_simulations/rust_implementation/c_code_git/looped_vdw/2D_NX100_simu_VdW_heatc_critic_0")
+simdic = extract_simulation_info("../src/testoutput/defaultdir/sim_data", prefix = "step_", readme = False)
+# simdic_c = extract_simulation_info("/home/mehdi/workdir/dossiers/ilm/these/code_simulations/rust_implementation/c_code_git/looped_vdw/2D_NX100_simu_VdW_heatc_critic_0")
 
 # to_plot = 'density_profile'
 # to_plot = 'Pxx_profile'
