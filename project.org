@@ -40,59 +40,30 @@ sudo apt-get install libgsl0-dev
 * orga code building
 ** cheatsheet
 *** ndarray rust
-https://github.com/rust-ndarray/ndarray/blob/master/README-quick-start.md
+- [[https://github.com/rust-ndarray/ndarray/blob/master/README-quick-start.md][readme quickstart]]
+- [[https://docs.rs/ndarray/latest/ndarray/doc/ndarray_for_numpy_users/index.html][ndarray_for_numpy_users]]
+
 ** todos
 *** TODO improve performance
-**** TODO compilation
-
-[[https://nnethercote.github.io/perf-book/build-configuration.html][build config, performance book]]
 **** TODO benchmarking
 example in stack
 https://stackoverflow.com/questions/13322479/benchmarking-programs-in-rust
 
 links given
 [[https://doc.rust-lang.org/1.4.0/book/benchmark-tests.html][benchmark test]]
-**** TODO change Vector2 to [[https://docs.rs/ndarray/latest/ndarray/index.html][Array2]]
-***** to see
-https://docs.rs/ndarray/latest/ndarray/index.html
-https://docs.rs/ndarray/latest/ndarray/doc/ndarray_for_numpy_users/index.html
-***** reddit answer
-****** my message
-Hey everyone, I have two questions
+**** TODO using ArrayView for things needing only views
+**** TODO using Zip! instead of indexing
 
-context: I'm doing a 2d fluid simulation, and I'm using 2D Vectors to
-store variables that have a value for each position in my 2D plane. I
-wrap these Vectors in a structure which has "get_position(i: usize, j:
-usize)" method implemented, which allows me to change the way these 2D
-information are stored without changing the code of the simulation
-accessing these values for computations
+https://docs.rs/ndarray/latest/ndarray/struct.Zip.html
 
-- Is it way better to use arrays instead of vectors for performance?
-  I'm using vectors because the size of the simulation should be given
-  as an input of the program, and thus is not always known at compile
-  time (but this can be changed is the speed gain is huge)
+WasserMarder advice
 
-- Is it very slow to wrap my big 2D vectors in structures with
-  setters/getters? this makes my code more flexible but I can also
-  change it if it speeds it very badly
+"Getters and setters are typically not idomatic rust but are expected
+to be optimized out by the compiler. Performance sensitive code should
+try to avoid indexing when possible but instead use iterators. The
+Zip/azip! functionality from ndarray should be what you are looking
+for."
 
-Thank you very much! If you are curious, here is my github, feel free
-to ask more questions on my project, any help or curiosity is
-welcomed!
-
-****** answer by WasserMarder
-
-Vectors of vectors are typically bad for performance because they tend
-do give band caching performance. My advice is to use Array2 from the
-ndarray crate. It is also somewhat compatible with numpy if you need
-python interoperability.
-
-You can implement your TensorField2D ontop of Array3.
-
-Use ArrayView and ArrayViewMut for functions that only need
-views. This makes them usable independent of data layout i.e. you can
-create a view with shape (n, m) from any array with shape (..., n,
-..., m, ...).
 *** TODO verify with samy
 **** eta0
 
@@ -1158,6 +1129,71 @@ CLOSED: [2022-12-01 Thu 15:01]
 
 functions:
 - exp (check gsl lib)
+*** performance
+**** DONE change Vector2 to [[https://docs.rs/ndarray/latest/ndarray/index.html][Array2]]
+CLOSED: [2022-12-07 Wed 21:44]
+:LOGBOOK:
+- State "DONE"       from "TODO"       [2022-12-07 Wed 21:44]
+:END:
+***** to see
+https://docs.rs/ndarray/latest/ndarray/index.html
+https://docs.rs/ndarray/latest/ndarray/doc/ndarray_for_numpy_users/index.html
+***** reddit answer
+****** my message
+Hey everyone, I have two questions
+
+context: I'm doing a 2d fluid simulation, and I'm using 2D Vectors to
+store variables that have a value for each position in my 2D plane. I
+wrap these Vectors in a structure which has "get_position(i: usize, j:
+usize)" method implemented, which allows me to change the way these 2D
+information are stored without changing the code of the simulation
+accessing these values for computations
+
+- Is it way better to use arrays instead of vectors for performance?
+  I'm using vectors because the size of the simulation should be given
+  as an input of the program, and thus is not always known at compile
+  time (but this can be changed is the speed gain is huge)
+
+- Is it very slow to wrap my big 2D vectors in structures with
+  setters/getters? this makes my code more flexible but I can also
+  change it if it speeds it very badly
+
+Thank you very much! If you are curious, here is my github, feel free
+to ask more questions on my project, any help or curiosity is
+welcomed!
+
+****** answer by WasserMarder
+
+Vectors of vectors are typically bad for performance because they tend
+do give band caching performance. My advice is to use Array2 from the
+ndarray crate. It is also somewhat compatible with numpy if you need
+python interoperability.
+
+You can implement your TensorField2D ontop of Array3.
+
+Use ArrayView and ArrayViewMut for functions that only need
+views. This makes them usable independent of data layout i.e. you can
+create a view with shape (n, m) from any array with shape (..., n,
+..., m, ...).
+**** DONE measuring c execution time
+CLOSED: [2022-12-07 Wed 23:08]
+:LOGBOOK:
+- State "DONE"       from              [2022-12-07 Wed 23:08]
+:END:
+I used this:
+https://www.geeksforgeeks.org/how-to-measure-time-taken-by-a-program-in-c/
+**** DONE compare execution time/performances rust/c
+CLOSED: [2022-12-07 Wed 22:59]
+:LOGBOOK:
+- State "DONE"       from              [2022-12-07 Wed 22:59]
+:END:
+
+|  n_step | c_time (s) | rust_time (s) |
+|---------+------------+---------------|
+|  100000 |       17.6 | 6.7           |
+| 1000000 | 172.172902 | 66.774802945S |
+
+257.84% faster on the 1 million test
 *** api
 **** DONE make the program take arguments from input file
 CLOSED: [2022-12-07 Wed 16:58]
@@ -1173,6 +1209,23 @@ CLOSED: [2022-11-25 ven. 15:40]
 :END:
 
 ** tohos
+*** TODO compilation optimisation
+[[https://nnethercote.github.io/perf-book/build-configuration.html][build config, performance book]]
+**** with cpu-specific optimisations
+RUSTFLAGS="-C target-cpu=native" cargo build --release
+**** with release
+cargo build --release
+cargo run --release
+
+???
+
+-C opt-level
+
+If you are unsure whether -C target-cpu=native is working optimally,
+compare the output of rustc --print cfg and rustc --print cfg -C
+target-cpu=native to see if the CPU features are being detected
+correctly in the latter case. If not, you can use -C target-feature to
+target specific features.
 *** TOHO separate constants from functions
 *** TOHO colorful outputs
 https://docs.rs/colored/latest/colored/
@@ -1206,7 +1259,11 @@ découper le système en plusieurs cases, et faire les calculs
 - compiler le rust en --release
 - faire le parrall avec rayon
 - faire le openMP sur C (voir ce que samy a envoyé)
-** tension de surface
+** tension de surface + dimensions
+- potentiel chimique à coex et de la pression
+- puis calculer avec l'intégrale
+- voir courbe tension superficielle en fct de la température
+  
 - calcul avec l'intégrale
 - finir de dimensionner
 - (densité = g/cm3, correspondant à ce que j'avais pris comme
