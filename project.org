@@ -38,6 +38,9 @@ for rgsl:
 sudo apt-get install libgsl0-dev
 #+end_src
 * orga code building
+** cheatsheet
+*** ndarray rust
+https://github.com/rust-ndarray/ndarray/blob/master/README-quick-start.md
 ** todos
 *** TODO improve performance
 **** TODO compilation
