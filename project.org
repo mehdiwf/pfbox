@@ -9,6 +9,11 @@ state[0][1] = 42;
 https://stackoverflow.com/questions/72690767/how-to-parse-toml-in-rust-with-unknown-structure
 ** float comparison
 https://stackoverflow.com/questions/41447678/comparison-of-two-floats-in-rust-to-arbitrary-level-of-precision
+** criterion: benchmark/profiling lines of code
+criterion
+https://docs.rs/criterion/latest/criterion/
+** parsing cli arguments
+https://rust-cli.github.io/book/tutorial/cli-args.html
 ** creating dir
 #+begin_src rust
 use std::fs;
