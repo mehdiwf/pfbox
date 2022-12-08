@@ -44,7 +44,32 @@ sudo apt-get install libgsl0-dev
 - [[https://docs.rs/ndarray/latest/ndarray/doc/ndarray_for_numpy_users/index.html][ndarray_for_numpy_users]]
 
 ** todos
+*** DONE compare c/rust performances
+CLOSED: [2022-12-08 Thu 23:17]
+:LOGBOOK:
+- State "DONE"       from "TODO"       [2022-12-08 Thu 23:17]
+:END:
+**** org table
+| nb time steps | rust (time in seconds) | c (time in seconds) |
+|---------------+------------------------+---------------------|
+|         10000 |            0.636702614 |            1.605196 |
+|         50000 |            3.105668876 |            8.001673 |
+|        100000 |            6.165691205 |           15.999283 |
+|        500000 |           30.774588656 |           80.354180 |
+|       1000000 |           61.782680750 |          159.692652 |
+**** python
+#+begin_src python :results output :session
+rust_time_list = np.array([0.636702614, 3.105668876, 6.165691205, 30.774588656, 61.782680750])
+c_time_list = np.array([1.605196, 8.001673, 15.999283, 80.354180, 159.692652])
+nb_step_list = np.array([10000, 50000, 100000, 500000, 1000000])
+#+end_src
+
 *** TODO improve performance
+**** rayon integration in ndarray
+Zip also implements NdarrayIntoParallelIterator, and there is an extension trait so that it can use a method .par_apply directly.
+
+https://docs.rs/ndarray/latest/ndarray/parallel/index.html
+
 **** TODO benchmarking
 example in stack
 https://stackoverflow.com/questions/13322479/benchmarking-programs-in-rust
