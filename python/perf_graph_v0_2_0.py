@@ -7,7 +7,7 @@ nb_step_list = np.array([10000, 50000, 100000, 500000, 1000000])
 
 fig, axes= plt.subplots(2,1)
 
-axes[0].scatter(nb_step_list, rust_time_list, c="orange",
+axes[0].scatter(nb_step_list, rust_time_list, color=(236/255,103/255,28/255),
                 marker="+",
                 label="rust")
 axes[0].scatter(nb_step_list, c_time_list, c="grey",
@@ -20,7 +20,7 @@ axes[0].legend()
 
 axes[1].scatter(nb_step_list, c_time_list/rust_time_list,
                 marker="+",
-                c="red", label="c execution time / rust execution time")
+                c="blue", label="c execution time / rust execution time")
 axes[1].set_xlabel("total step number")
 axes[1].set_ylabel("speed multiplication")
 axes[1].set_xscale("log")
