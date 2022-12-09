@@ -44,7 +44,30 @@ sudo apt-get install libgsl0-dev
 - [[https://docs.rs/ndarray/latest/ndarray/doc/ndarray_for_numpy_users/index.html][ndarray_for_numpy_users]]
 
 ** todos
-*** DONE compare c/rust performances
+*** DONE compare c/rust performances on jemac
+CLOSED: [2022-12-09 ven. 11:55]
+:LOGBOOK:
+- State "DONE"       from              [2022-12-09 ven. 11:55]
+:END:
+**** org table
+| timesteps |          rust |          c |
+|-----------+---------------+------------|
+|     10000 |   1.363861436 |   3.829171 |
+|     50000 |   6.623272585 |  19.006658 |
+|    100000 |  13.228002208 |  38.029916 |
+|    500000 |  65.768119034 | 190.004333 |
+|   1000000 | 131.536727645 | 380.368056 |
+**** python
+timesteps
+[10000, 50000, 100000, 500000, 1000000]
+
+rust
+[1.363861436, 6.623272585, 13.228002208, 65.768119034, 131.536727645]
+
+c
+[3.829171, 19.006658, 38.029916, 190.004333, 380.368056]
+
+*** DONE compare c/rust performances on personal computer
 CLOSED: [2022-12-08 Thu 23:17]
 :LOGBOOK:
 - State "DONE"       from "TODO"       [2022-12-08 Thu 23:17]
