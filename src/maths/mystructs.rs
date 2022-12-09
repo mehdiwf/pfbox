@@ -49,8 +49,16 @@ pub struct BoxInfo {
 
 #[derive(Debug, PartialEq)]
 pub struct VectorProfile2D{
-    x: Array1<f64>,
-    y: Array1<f64>
+    pub x: Array1<f64>,
+    pub y: Array1<f64>
+}
+
+#[derive(Debug, PartialEq)]
+pub struct TensorProfile2D{
+    pub xx: Array1<f64>,
+    pub xy: Array1<f64>,
+    pub yx: Array1<f64>,
+    pub yy: Array1<f64>
 }
 
 impl ScalarField2D {
@@ -130,6 +138,18 @@ impl TensorField2D {
         self.yy.set_pos(i, j, tens.yy);
     }
     
+    pub fn x_profile(&self) -> TensorProfile2D
+    {
+        let profile = TensorProfile2D
+        {
+            xx: x_profile(&self.xx),
+            xy: x_profile(&self.xy),
+            yx: x_profile(&self.yx),
+            yy: x_profile(&self.yy)
+        };
+        return profile;
+    }
+
 }
 
 #[cfg(test)]
