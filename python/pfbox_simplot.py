@@ -8,8 +8,8 @@ def reformat_dataframe(df):
     their right place (this deletes the two last columns of the
     dataframe, that are in general just NaN values)
     """
-    columns_name = df.columns[1:-1]
-    last_columns_name = df.columns[-2:]
+    columns_name = df.columns[1:]
+    last_columns_name = df.columns[-1]
     df.drop(columns = last_columns_name, inplace=True)
     df.columns = columns_name
     return None
@@ -37,7 +37,7 @@ def concatenate_all_data(filenames, time_list):
     return df
 
 # --------------------------
-def get_simulation_data(data_directory, prefix = "profile_"):
+def get_simulation_data(data_directory, prefix = "step_"):
     """returns a df with all the profile data in it, and the
     profile_index list (time list)
     """
@@ -48,51 +48,7 @@ def get_simulation_data(data_directory, prefix = "profile_"):
     return df, profile_index
 # --------------------------
 
-def get_readme_info(readme_path):
-    readme_info = {}
-    with open(readme_path, 'r') as f:
-        lines = f.readlines()
-    for l in lines:
-        if l.endswith("\n"):
-            l = l[:-1]
-        key, value = l.split("=")
-        key = key.strip()
-        if value.strip() != '':
-            value = float(value.strip())
-        else:
-            value = None
-        readme_info[key] = value
-    return readme_info        
-
-def get_value_from_readme(value_searched, readme_path):
-    """
-    returns the string after the "{value_searched}=" string in the readme file in readme_path
-
-    example:
-    so if there is a line with
-    ```
-    T0= 2.345
-    ```
-    in the readmefile,
-    and you call:
-    ```
-    get_value_from_readme("T0=", readme_path)
-    ```
-    you will get:
-    " 2.345"
-    as a string
-    """
-    with open(readme_path, 'r') as f:
-        lines = f.readlines()
-    value = None
-    for e in lines:
-        if e.startswith(value_searched):
-            value = e[len(value_searched)+1:]
-            if value.endswith("\n"):
-                value = value[:-1]
-    return value
-
-def extract_pfbox_sim_info(simulation_dir):
+def extract_pfbox_sim_info(simulation_dir, prefix = "step_"):
     """returns a dictionnary with a df containing all the profiles data of
     the simulation, a list containing all the time accessibles for
     profiles data, and a dictionnary containing the readme info of the
@@ -106,15 +62,16 @@ def extract_pfbox_sim_info(simulation_dir):
     """    
     simu_info = {}
     readmefile = f"{simulation_dir}/README.txt"
-    df, profile_index = get_simulation_data(simulation_dir, prefix= prefix)
+    df, profile_index = get_simulation_data(f"{simulation_dir}/sim_data", prefix= prefix)
     simu_info['df'] = df
     simu_info['profile_time_list'] = profile_index
-    if readme:
-        simu_info['readme'] = get_readme_info(readmefile)
+    # do something with readme :toho:
     return simu_info
     
-def extract_simulation_info(simulation_dir, prefix = "profile_",
-                            readme = True):
+def extract_simulation_info(simulation_dir,
+                            readme = True, # unused :toho:
+                            prefix = "profile_"
+                            ):
     """returns a dictionnary with a df containing all the profiles data of
     the simulation, a list containing all the time accessibles for
     profiles data, and a dictionnary containing the readme info of the
@@ -131,8 +88,8 @@ def extract_simulation_info(simulation_dir, prefix = "profile_",
     df, profile_index = get_simulation_data(simulation_dir, prefix= prefix)
     simu_info['df'] = df
     simu_info['profile_time_list'] = profile_index
-    if readme:
-        simu_info['readme'] = get_readme_info(readmefile)
+    # if readme:
+        # do something with readme :toho:
     return simu_info
 
 def get_convergence_data(simulation_dictionnary, column):
@@ -185,7 +142,7 @@ def get_df_at_percent_time(simulation_dic, percent):
     return df_time
 
 def show_plot_evolution(simu_dic, column, interval=1, save=False,
-                        space_index_column = 'j'):
+                        space_index_column = 'column'):
     """
     save is the str of the pdf file if you want to save your plot
     """
@@ -213,7 +170,7 @@ def show_plot_evolution(simu_dic, column, interval=1, save=False,
              df_time_final[column], color = color_tuples[-1],
              label=f"time = {final_time}")
     plt.title(f"evolution of {column} for different times")
-    plt.xlabel('index')
+    plt.xlabel('column index')
     plt.ylabel(column)
     plt.legend()
     if save:

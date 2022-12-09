@@ -1,4 +1,5 @@
 from simplot import *
+import pfbox_simplot as pfp
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -22,7 +23,6 @@ data_dir_begin = "2D_NX100_simu_VdW_heatc_critic_"
 # data_dir_list = get_directory_list("../src/testoutput/", data_dir_begin)
 # data_dir_test = data_dir_list[-1]
 
-simdic = extract_simulation_info("../src/testoutput/defaultdir/sim_data", prefix = "step_", readme = False)
 # simdic_c = extract_simulation_info("/home/mehdi/workdir/dossiers/ilm/these/code_simulations/rust_implementation/c_code_git/looped_vdw/2D_NX100_simu_VdW_heatc_critic_0")
 
 # to_plot = 'density_profile'
@@ -31,6 +31,10 @@ simdic = extract_simulation_info("../src/testoutput/defaultdir/sim_data", prefix
 # to_plot = 'vx_profile'
 to_plot = 'T_profile'
 to_plot = 'density'
+to_plot = 'v_y'
+
+simdic = pfp.extract_pfbox_sim_info("../src/testoutput/defaultdir")
+pfp.show_plot_evolution(simdic, "v_y")
 
 # gradient = np.linspace(0, 1, len(data_dir_list))
 # # from red to blue
