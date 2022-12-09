@@ -4,8 +4,8 @@ use ndarray::prelude::*;
 // an enum used to indicate the direction of a derivative calculation
 // in 2D
 pub enum DerivDirection {
-    Rows,
-    Columns}
+    Rows_x,
+    Columns_y}
 
 pub fn shear_viscosity(rho: f64, mass: f64, dyn_visc: f64) -> f64
 {
@@ -55,13 +55,13 @@ pub fn scal_product(va: &vec2D,
            + va.y * vb.y;
 }
 
-pub fn tens_product_vec(tens_a: &tens2D, 
-                    vec_b: &vec2D) -> vec2D
+pub fn tens_product_vec(tens: &tens2D, 
+                    vec: &vec2D) -> vec2D
 {
-    let vec_ab = vec2D{
-        x: tens_a.xx * vec_b.x + tens_a.yx * vec_b.y,
-        y: tens_a.xy * vec_b.x + tens_a.yy * vec_b.y};
-    return vec_ab;
+    let product = vec2D{
+        x: tens.xx * vec.x + tens.yx * vec.y,
+        y: tens.xy * vec.x + tens.yy * vec.y};
+    return product;
 }
 
 pub fn dyadic_product(tens_a: &tens2D, tens_b: &tens2D) -> f64
@@ -76,7 +76,7 @@ pub fn dyadic_product(tens_a: &tens2D, tens_b: &tens2D) -> f64
 /// in i,j and in one direction
 /// partial derivative in the x direction is DerivDirection::Rows
 /// partial derivative in the y direction is DerivDirection::Columns
-pub fn partial_deriv(scal_field: &ScalarField2D,
+pub fn partial_deriv(a: &ScalarField2D,
                      i: i32, j: i32,
                      direction: DerivDirection,
                      lambda: f64,
@@ -98,27 +98,22 @@ pub fn partial_deriv(scal_field: &ScalarField2D,
 
     match direction
         {
-            // on the x axis
-            DerivDirection::Rows => {
+            // on the x axis on samy's code
+            DerivDirection::Rows_x => {
    let derivative = 
-          lambda*(scal_field.get_pos(ip, j) - scal_field.get_pos(im, j))/(2.*dx)
-	  + 0.25*lambda*(scal_field.get_pos(ip, jp) - scal_field.get_pos(im, jp))/(2.*dx)
-          + 0.25*lambda*(scal_field.get_pos(ip, jm) - scal_field.get_pos(im, jm))/(2.*dx);
+          lambda*(a.get_pos(ip, j) - a.get_pos(im, j))/(2.*dx)
+	  + 0.25*lambda*(a.get_pos(ip, jp) - a.get_pos(im, jp))/(2.*dx)
+          + 0.25*lambda*(a.get_pos(ip, jm) - a.get_pos(im, jm))/(2.*dx);
                 return derivative;
             },
-            // on the y axis
-            DerivDirection::Columns => {
+            // on the y axis on samy's code
+            DerivDirection::Columns_y => {
    let derivative = 
-          lambda*(scal_field.get_pos(i, jp) - scal_field.get_pos(i, jm))/(2.*dx)
-	  + 0.25*lambda*(scal_field.get_pos(ip, jp) - scal_field.get_pos(ip, jm))/(2.*dx)	
-          + 0.25*lambda*(scal_field.get_pos(im, jp) - scal_field.get_pos(im, jm))/(2.*dx);
+          lambda*(a.get_pos(i, jp) - a.get_pos(i, jm))/(2.*dx)
+	  + 0.25*lambda*(a.get_pos(ip, jp) - a.get_pos(ip, jm))/(2.*dx)	
+          + 0.25*lambda*(a.get_pos(im, jp) - a.get_pos(im, jm))/(2.*dx);
                 return derivative;
-            },
-            // if different than 0/1, panic
-            _ => panic!("direction should be 0 or 1")
-        }
-    
-}
+            }}}
 
 pub fn grad_scalar(scalar_field: &ScalarField2D,
                    i: i32, j: i32,
@@ -128,9 +123,9 @@ pub fn grad_scalar(scalar_field: &ScalarField2D,
     let grad = vec2D {
         // x is index 1 because it's the columns in the simulation
         x: partial_deriv(&scalar_field, i, j,
-                         DerivDirection::Rows, lambda, &box_info),
+                         DerivDirection::Rows_x, lambda, &box_info),
         y: partial_deriv(&scalar_field, i, j,
-                         DerivDirection::Columns, lambda, &box_info),};
+                         DerivDirection::Columns_y, lambda, &box_info),};
         
     return grad;
 }
@@ -140,8 +135,7 @@ pub fn gradient(scalar_field: &ScalarField2D,
                 lambda: f64,
                 box_info: &BoxInfo) -> vec2D
 {
-    let field = &scalar_field;
-    return grad_scalar(field, i, j,
+    return grad_scalar(&scalar_field, i, j,
                        lambda, &box_info);
 }
 
@@ -152,13 +146,13 @@ pub fn gradient_vector(vector_field: &VectorField2D,
 {
     let tens = tens2D {
         xx: partial_deriv(&vector_field.x, i, j,
-                          DerivDirection::Rows, lambda, &box_info),
-        xy: partial_deriv(&vector_field.x, i, j,
-                          DerivDirection::Columns, lambda, &box_info),
-        yx: partial_deriv(&vector_field.y, i, j,
-                          DerivDirection::Rows, lambda, &box_info),
+                          DerivDirection::Rows_x, lambda, &box_info),
+        xy: partial_deriv(&vector_field.y, i, j,
+                          DerivDirection::Rows_x, lambda, &box_info),
+        yx: partial_deriv(&vector_field.x, i, j,
+                          DerivDirection::Columns_y, lambda, &box_info),
         yy: partial_deriv(&vector_field.y, i, j,
-                          DerivDirection::Columns, lambda, &box_info)};
+                          DerivDirection::Columns_y, lambda, &box_info)};
     return tens;
 }
 
@@ -168,9 +162,9 @@ pub fn div_vector(vector_field: &VectorField2D,
                   box_info: &BoxInfo) -> f64
 {
     let dVx_dx = partial_deriv(&vector_field.x, i, j,
-                               DerivDirection::Rows, lambda, &box_info);
+                               DerivDirection::Rows_x, lambda, &box_info);
     let dVy_dy = partial_deriv(&vector_field.y, i, j,
-                               DerivDirection::Columns, lambda, &box_info);
+                               DerivDirection::Columns_y, lambda, &box_info);
 
     return dVx_dx + dVy_dy;
 }
@@ -182,20 +176,20 @@ pub fn div_tensor(tensor_field: &TensorField2D,
 {
     let vector = vec2D{
         x: partial_deriv(&tensor_field.xx, i, j,
-                         DerivDirection::Rows, lambda, &box_info)
+                         DerivDirection::Rows_x, lambda, &box_info)
             + partial_deriv(&tensor_field.yx, i, j,
-                            DerivDirection::Columns, lambda, &box_info),
+                            DerivDirection::Columns_y, lambda, &box_info),
         
         y: partial_deriv(&tensor_field.xy, i, j,
-                         DerivDirection::Rows, lambda,
+                         DerivDirection::Rows_x, lambda,
                          &box_info)
             + partial_deriv(&tensor_field.yy, i, j,
-                            DerivDirection::Columns, lambda,
+                            DerivDirection::Columns_y, lambda,
                             &box_info)};
     return vector;
 }
 
-pub fn lap_scalar(scalar_field: &ScalarField2D,
+pub fn lap_scalar(a: &ScalarField2D,
                   i: i32, j: i32,
                   lambda: f64,
                   box_info: &BoxInfo) -> f64
@@ -213,11 +207,11 @@ pub fn lap_scalar(scalar_field: &ScalarField2D,
             // on the x axis
     let laplacian_value = 
         (
-            2.0*(scalar_field.get_pos(ip, j) + scalar_field.get_pos(im, j)  
-                 + scalar_field.get_pos(i, jp) + scalar_field.get_pos(i, jm))
-            + scalar_field.get_pos(ip, jp) + scalar_field.get_pos(im, jm) 
-            + scalar_field.get_pos(im, jp) + scalar_field.get_pos(ip, jm)
-            - 12.0*scalar_field.get_pos(i, j)
+            2.0*(a.get_pos(ip, j) + a.get_pos(im, j)  
+                 + a.get_pos(i, jp) + a.get_pos(i, jm))
+            + a.get_pos(ip, jp) + a.get_pos(im, jm) 
+            + a.get_pos(im, jp) + a.get_pos(ip, jm)
+            - 12.0*a.get_pos(i, j)
         )
         /(3.0*dx*dy);
                 return laplacian_value;
@@ -250,7 +244,7 @@ pub fn laplacian_vector(vector_field: &VectorField2D,
                 return vec;
 }
 
-pub fn grad_div_vel(vector_field: &VectorField2D,
+pub fn grad_div_vel(v: &VectorField2D,
                     i: i32, j: i32,
                     lambda: f64,
                     box_info: &BoxInfo) -> vec2D
@@ -268,28 +262,28 @@ pub fn grad_div_vel(vector_field: &VectorField2D,
     
     let vec = vec2D{
         x: 
-        (10.* vector_field.x.get_pos(ip, j) + 10.* vector_field.x.get_pos(im, j)
-         + vector_field.x.get_pos(ip, jp) + vector_field.x.get_pos(im, jp) 
-         + vector_field.x.get_pos(im, jm) + vector_field.x.get_pos(ip, jm)
-	 - 2.* vector_field.x.get_pos(i, jp) - 2.* vector_field.x.get_pos(i, jm)
-         - 20.* vector_field.x.get_pos(i, j))
+        (10.* v.x.get_pos(ip, j) + 10.* v.x.get_pos(im, j)
+         + v.x.get_pos(ip, jp) + v.x.get_pos(im, jp) 
+         + v.x.get_pos(im, jm) + v.x.get_pos(ip, jm)
+	 - 2.* v.x.get_pos(i, jp) - 2.* v.x.get_pos(i, jm)
+         - 20.* v.x.get_pos(i, j))
             /(12.*dx*dy)
-        + ((vector_field.y.get_pos(ip, jp) - vector_field.y.get_pos(im, jp))  
-           + (vector_field.y.get_pos(im, jm) 
-           - vector_field.y.get_pos(ip, jm)))
+        + ((v.y.get_pos(ip, jp) - v.y.get_pos(im, jp))  
+           + (v.y.get_pos(im, jm) 
+           - v.y.get_pos(ip, jm)))
             /(4.0*dx*dy),
 
 
         y: 
-        (10.* vector_field.y.get_pos(i, jp) + 10.* vector_field.y.get_pos(i, jm)
-         + vector_field.y.get_pos(ip, jp) + vector_field.y.get_pos(ip, jm)
-         + vector_field.y.get_pos(im, jp) + vector_field.y.get_pos(im, jm)
-         - 2.* vector_field.y.get_pos(ip, j) -2.* vector_field.y.get_pos(im, j)
-         - 20.0*vector_field.y.get_pos(i, j))
+        (10.* v.y.get_pos(i, jp) + 10.* v.y.get_pos(i, jm)
+         + v.y.get_pos(ip, jp) + v.y.get_pos(ip, jm)
+         + v.y.get_pos(im, jp) + v.y.get_pos(im, jm)
+         - 2.* v.y.get_pos(ip, j) -2.* v.y.get_pos(im, j)
+         - 20.0*v.y.get_pos(i, j))
             /(12.0*dx*dy)
             
-          + ((vector_field.x.get_pos(ip, jp) - vector_field.x.get_pos(im, jp))
-             + (vector_field.x.get_pos(im, jm) - vector_field.x.get_pos(ip, jm)))
+          + ((v.x.get_pos(ip, jp) - v.x.get_pos(im, jp))
+             + (v.x.get_pos(im, jm) - v.x.get_pos(ip, jm)))
             /(4.0*dx*dy)};
 
     return vec;
