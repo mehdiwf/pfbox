@@ -26,7 +26,7 @@ pub fn do_sim(configinput: cfg_struct::ConfigInput,
     match configinput {
         cfg_struct::ConfigInput::Empty => {
             config = cfg_io::read_cfg_file(
-                "src/procedures/vdw_default_cfg.toml");
+                "./src/procedures/vdw_default_cfg.toml");
         },
         cfg_struct::ConfigInput::Path(input_path) =>
         {
@@ -243,6 +243,28 @@ pub fn do_sim(configinput: cfg_struct::ConfigInput,
         {
             print_percertage_threshold += 100./print_frequency;
             println!("completed {percentage_done:.1}%");
+            println!("div_vJ.y = {:.8}\n\
+                      lap_v.y = {:.8}\n\
+                      v_y= {:.8}\n\
+                      grad_ln_rho_traceless_grad_v.y = {:.8}\n\
+                      div_press.y = {:.8}",
+                     GD_div_vJ.get_pos(0,25).y,
+                     GD_lap_v.get_pos(0,25).y,
+                     GD_v.get_pos(0,25).y,
+                     GD_ln_rho_traceless_grad_v.get_pos(0,25).y,
+                     GD_div_press.get_pos(0,25).y);
+            println!("-------");
+
+            println!("ln_rho = {:.8}\n\
+                      div_v = {:.8}\n\
+                      v_x= {:.8}\n\
+                      v_y= {:.8}",
+                     GD_ln_rho.get_pos(0,25),
+                     GD_div_v.get_pos(0,25),
+                     GD_v.get_pos(0,25).x,
+                     GD_v.get_pos(0,25).y);
+            println!("-------");
+            
         }
 
     // update of computations variables
@@ -513,41 +535,6 @@ pub fn do_sim(configinput: cfg_struct::ConfigInput,
 
         }} // updating computations values end parenthesis
 
-    //bépo WRITING part
-
-        if (step % step_count_before_save == 0) {
-        
-        let filename = format!("{}/step_{}",
-                               simdata_dir, i_time_step);
-        let mut file = fs::File::create(&filename)
-            .expect("couldn't create log file");
-        
-        file.write_all(
-            "# column density temperature\n".as_bytes())
-            .expect("write failed");
-
-        let rho_profile = GD_rho.x_profile();
-        let temp_profile = GD_temp.x_profile();
-        
-        for col_index in 0..ncol_size
-        {
-            let str_to_append = format!("{} {} {}\n",
-                                        &col_index,
-                                        &rho_profile[col_index],
-                                        &temp_profile[col_index]);
-
-            file.write_all(&str_to_append.as_bytes())
-                .expect("write failed");
-        }}
-    // let str_to_append = format!("step {}, i={}, j={}\n\
-    //                              neg log {}\n\
-    //                              ------------\n",
-    //                             &step, &i, &j, &rho);
-    //     // appending the string to 
-    //     file.write_all(&str_to_append.as_bytes())
-    //         .expect("write failed");
-        
-
     //auie main loop
     ////////////////////////////////////////////////////////////////////////////
     // Main loop
@@ -642,6 +629,33 @@ pub fn do_sim(configinput: cfg_struct::ConfigInput,
             GD_temp.set_pos(row, col, new_T);
             
         }} // i, j loop closing parenthesis
+            //bépo WRITING part
+
+        if (step % step_count_before_save == 0) {
+        
+        let filename = format!("{}/step_{}",
+                               simdata_dir, i_time_step);
+        let mut file = fs::File::create(&filename)
+            .expect("couldn't create log file");
+        
+        file.write_all(
+            "# column density temperature\n".as_bytes())
+            .expect("write failed");
+
+        let rho_profile = GD_rho.x_profile();
+        let temp_profile = GD_temp.x_profile();
+        
+        for col_index in 0..ncol_size
+        {
+            let str_to_append = format!("{} {} {}\n",
+                                        &col_index,
+                                        &rho_profile[col_index],
+                                        &temp_profile[col_index]);
+
+            file.write_all(&str_to_append.as_bytes())
+                .expect("write failed");
+        }}
+        
     } // time step closing parenthesis
 
     let simulation_utc_end_time = chrono::offset::Utc::now();
