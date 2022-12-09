@@ -20,5 +20,5 @@ lto = true
 # always the best thing to do for performance! as it is heuristic
 codegen-units = 1
 # no unwind in panic! (not nice for debug)
-# panic = "abort" # (not accepted by GSL)
+# panic = "abort" # (not accepted by GSL!)
 
