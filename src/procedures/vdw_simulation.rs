@@ -122,7 +122,6 @@ pub fn do_sim(configinput: cfg_struct::ConfigInput,
 
     let output_dir = format!("./src/testoutput/{}",
                              directory_name);
-    
     // System initialisation
     let mut step = 0;
     let step_count_before_save = histo_save;
@@ -241,16 +240,16 @@ pub fn do_sim(configinput: cfg_struct::ConfigInput,
         {
             print_percertage_threshold += 100./print_frequency;
             println!("completed {percentage_done:.1}%");
-            println!("div_vJ.y = {:.8}\n\
-                      lap_v.y = {:.8}\n\
-                      v_y= {:.8}\n\
-                      grad_ln_rho_traceless_grad_v.y = {:.8}\n\
-                      div_press.y = {:.8}",
-                     GD_div_vJ.get_pos(0,25).y,
-                     GD_lap_v.get_pos(0,25).y,
-                     GD_v.get_pos(0,25).y,
-                     GD_ln_rho_traceless_grad_v.get_pos(0,25).y,
-                     GD_div_press.get_pos(0,25).y);
+            // println!("div_vJ.y = {:.8}\n\
+            //           lap_v.y = {:.8}\n\
+            //           v_y= {:.8}\n\
+            //           grad_ln_rho_traceless_grad_v.y = {:.8}\n\
+            //           div_press.y = {:.8}",
+            //          GD_div_vJ.get_pos(0,25).y,
+            //          GD_lap_v.get_pos(0,25).y,
+            //          GD_v.get_pos(0,25).y,
+            //          GD_ln_rho_traceless_grad_v.get_pos(0,25).y,
+            //          GD_div_press.get_pos(0,25).y);
             println!("-------");
 
             println!("ln_rho = {:.8}\n\
@@ -319,7 +318,6 @@ pub fn do_sim(configinput: cfg_struct::ConfigInput,
 
             // -------------------------------------------------------
             // GD_ln_rho begin update
-            // :todo:log:
             let rho = GD_rho.get_pos(row, col);
             if (rho < 0.) {
                 let str_to_append = format!("IMPOSSIBLE COMPUTATION: NEGATIVE LOG\n\
