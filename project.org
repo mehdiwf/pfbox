@@ -44,6 +44,8 @@ sudo apt-get install libgsl0-dev
 - [[https://docs.rs/ndarray/latest/ndarray/doc/ndarray_for_numpy_users/index.html][ndarray_for_numpy_users]]
 
 ** todos
+*** TODO fix the derive problem                                      :URGENT:
+with big times, we can see that the density derives...
 *** DONE compare c/rust performances on jemac
 CLOSED: [2022-12-09 ven. 11:55]
 :LOGBOOK:

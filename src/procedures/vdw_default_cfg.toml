@@ -2,7 +2,7 @@
 dx = 0.5
 dy = 0.5
 dt = 1e-2
-max_sim_time = 1_000_000
+max_sim_time = 100000
 temper0 = 0.5
 temper1 = 0.8
 rho_liq = 0.8
@@ -26,7 +26,7 @@ n_liq = 40 # not used
 directory_name = "defaultdir"
 user_comment = "simulation made with default vdw config"
 histo_freq = 50
-histo_save = 100_000
+histo_save = 100
 num_bin = 100
 
 [physics_constants]
