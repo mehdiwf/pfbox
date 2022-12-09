@@ -46,9 +46,7 @@ pub fn do_sim(configinput: cfg_struct::ConfigInput,
         println!("created fresh directory");
     }
     else
-    {
-        fs::create_dir(&output_dir);
-    }
+    {fs::create_dir(&output_dir);}
 
     let simdata_dir = format!("{}/sim_data",output_dir);
     fs::create_dir(&simdata_dir);
@@ -632,25 +630,35 @@ pub fn do_sim(configinput: cfg_struct::ConfigInput,
             //bépo WRITING part
 
         if (step % step_count_before_save == 0) {
+            
+            let filename = format!("{}/step_{}",
+                                   simdata_dir, i_time_step);
+            let mut file = fs::File::create(&filename)
+                .expect("couldn't create log file");
         
-        let filename = format!("{}/step_{}",
-                               simdata_dir, i_time_step);
-        let mut file = fs::File::create(&filename)
-            .expect("couldn't create log file");
-        
-        file.write_all(
-            "# column density temperature\n".as_bytes())
-            .expect("write failed");
+            file.write_all(
+                "# column density temperature v_x v_y \
+                 P_xx P_xy P_yx P_yy\n".as_bytes())
+                .expect("write failed");
 
-        let rho_profile = GD_rho.x_profile();
-        let temp_profile = GD_temp.x_profile();
+            let rho_profile = GD_rho.x_profile();
+            let temp_profile = GD_temp.x_profile();
+            let v_profile = GD_v.x_profile();
+            let P_profile = GD_pressure.x_profile();
         
         for col_index in 0..ncol_size
         {
-            let str_to_append = format!("{} {} {}\n",
+            let str_to_append = format!("{} {} {} {} {} {} {} {} {}\n",
                                         &col_index,
                                         &rho_profile[col_index],
-                                        &temp_profile[col_index]);
+                                        &temp_profile[col_index],
+                                        &v_profile.x[col_index],
+                                        &v_profile.y[col_index],
+                                        &P_profile.xx[col_index],
+                                        &P_profile.xy[col_index],
+                                        &P_profile.yx[col_index],
+                                        &P_profile.yy[col_index],
+            );
 
             file.write_all(&str_to_append.as_bytes())
                 .expect("write failed");
