@@ -184,8 +184,6 @@ pub fn do_sim(configinput: cfg_struct::ConfigInput,
     let mut GD_div_press = VectorField2D::new(nrow_size, ncol_size);
 
     let mut GD_ln_rho_traceless_grad_v = VectorField2D::new(nrow_size, ncol_size);
-    
-    let inv_cv = 1.0/(1.5*kB);
 
     let mut GD_traceless_grad_v_dyadic_grad_v = ScalarField2D::new(nrow_size, ncol_size);
 
@@ -202,6 +200,8 @@ pub fn do_sim(configinput: cfg_struct::ConfigInput,
     let mut GD_lap_T = ScalarField2D::new(nrow_size, ncol_size);
 
     let mut GD_v_scalar_grad_T = ScalarField2D::new(nrow_size, ncol_size);
+
+    let inv_cv = 1.0/(1.5*kB);
 
     //auie fluid initial state
     ////////////////////////////////////////////////////////////////////////////
@@ -251,7 +251,6 @@ pub fn do_sim(configinput: cfg_struct::ConfigInput,
             //          GD_ln_rho_traceless_grad_v.get_pos(0,25).y,
             //          GD_div_press.get_pos(0,25).y);
             println!("-------");
-
             println!("ln_rho = {:.8}\n\
                       div_v = {:.8}\n\
                       v_x= {:.8}\n\
