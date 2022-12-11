@@ -235,33 +235,6 @@ pub fn do_sim(configinput: cfg_struct::ConfigInput,
     for i_time_step in 0..max_time_step {
 
         step = i_time_step;
-        let percentage_done = 100.*(step as f64/max_time_step as f64);
-        if (percentage_done > print_percertage_threshold)
-        {
-            print_percertage_threshold += 100./print_frequency;
-            println!("completed {percentage_done:.1}%");
-            // println!("div_vJ.y = {:.8}\n\
-            //           lap_v.y = {:.8}\n\
-            //           v_y= {:.8}\n\
-            //           grad_ln_rho_traceless_grad_v.y = {:.8}\n\
-            //           div_press.y = {:.8}",
-            //          GD_div_vJ.get_pos(0,25).y,
-            //          GD_lap_v.get_pos(0,25).y,
-            //          GD_v.get_pos(0,25).y,
-            //          GD_ln_rho_traceless_grad_v.get_pos(0,25).y,
-            //          GD_div_press.get_pos(0,25).y);
-            println!("-------");
-            println!("ln_rho = {:.8}\n\
-                      div_v = {:.8}\n\
-                      v_x= {:.8}\n\
-                      v_y= {:.8}",
-                     GD_ln_rho.get_pos(0,25),
-                     GD_div_v.get_pos(0,25),
-                     GD_v.get_pos(0,25).x,
-                     GD_v.get_pos(0,25).y);
-            println!("-------");
-            
-        }
 
     // update of computations variables
     for col in 0..ncol_size {
@@ -529,6 +502,86 @@ pub fn do_sim(configinput: cfg_struct::ConfigInput,
 
 
         }} // updating computations values end parenthesis
+
+                let percentage_done = 100.*(step as f64/max_time_step as f64);
+        if (percentage_done > print_percertage_threshold)
+        {
+            print_percertage_threshold += 100./print_frequency;
+            println!("completed {percentage_done:.1}%");
+            // println!("div_vJ.y = {:.8}\n\
+            //           lap_v.y = {:.8}\n\
+            //           v_y= {:.8}\n\
+            //           grad_ln_rho_traceless_grad_v.y = {:.8}\n\
+            //           div_press.y = {:.8}",
+            //          GD_div_vJ.get_pos(0,25).y,
+            //          GD_lap_v.get_pos(0,25).y,
+            //          GD_v.get_pos(0,25).y,
+            //          GD_ln_rho_traceless_grad_v.get_pos(0,25).y,
+            //          GD_div_press.get_pos(0,25).y);
+            // println!("-------");
+            // println!("ln_rho = {:.8}\n\
+            //           div_v = {:.8}\n\
+            //           v_x= {:.8}\n\
+            //           v_y= {:.8}",
+            //          GD_ln_rho.get_pos(0,25),
+            //          GD_div_v.get_pos(0,25),
+            //          GD_v.get_pos(0,25).x,
+            //          GD_v.get_pos(0,25).y);
+            // println!("-------");
+            
+        }
+        let a = 0..=5;
+        if (a.contains(&step))
+            // (- div_vJ.x
+            //  + eta0 * rho * lap_v.x
+            //  + eta0 * (1.-2./(1.*dim as f64) + zeta0)
+            //  * rho * grad_div_v.x
+            //  + eta0 * rho * grad_ln_rho_traceless_grad_v.x
+            //  + zeta0 * rho * grad_ln_rho.x * div_v
+            //  - div_press.x)
+            // printing init doing
+        {   let print_pos = 98;
+            println!("-----------------[I]\n\
+                      STEP {step}");
+            // println!("GD_div_vJ.x = {:.8}\n\
+            //          GD_div_vJ.y = {:.8}",
+            //          GD_div_vJ.x.get_pos(0,print_pos),
+            //          GD_div_vJ.y.get_pos(0,print_pos));
+            // println!("GD_lap_v.x = {:.8}\n\
+            //          GD_lap_v.y = {:.8}",
+            //          GD_lap_v.x.get_pos(0,print_pos),
+            //          GD_lap_v.y.get_pos(0,print_pos));
+            // println!("GD_div_v = {:.8}",
+            //          GD_div_v.get_pos(0,print_pos));
+            // println!("GD_v.x = {:.8}\n\
+            //           GD_v.y = {:.8}",
+            //          GD_v.x.get_pos(0,print_pos),
+            //          GD_v.y.get_pos(0,print_pos));
+            // println!("GD_J.x = {:.8}\n\
+            //           GD_J.y = {:.8}",
+            //          GD_J.x.get_pos(0,print_pos),
+            //          GD_J.y.get_pos(0,print_pos));
+            println!("GD_rho = {:.8}",
+                     GD_rho.get_pos(0,print_pos));
+            println!("GD_ln_rho = {:.8}",
+                     GD_ln_rho.get_pos(0,print_pos));
+            println!("GD_grad_ln_rho.x = {:.8}\n\
+                      GD_grad_ln_rho.y = {:.8}",
+                     GD_grad_ln_rho.x.get_pos(0,print_pos),
+                     GD_grad_ln_rho.y.get_pos(0,print_pos));
+            println!("GD_div_press.x = {:.8}\n\
+                      GD_div_press.y = {:.8}",
+                     GD_div_press.x.get_pos(0,print_pos),
+                     GD_div_press.y.get_pos(0,print_pos));
+            println!("GD_pressure.xx = {:.8}\n\
+                      GD_pressure.xy = {:.8}\n\
+                      GD_pressure.yx = {:.8}\n\
+                      GD_pressure.yy = {:.8}",
+                     GD_pressure.xx.get_pos(0,print_pos),
+                     GD_pressure.xy.get_pos(0,print_pos),
+                     GD_pressure.yx.get_pos(0,print_pos),
+                     GD_pressure.yy.get_pos(0,print_pos));
+        }
 
     //auie main loop
     ////////////////////////////////////////////////////////////////////////////
