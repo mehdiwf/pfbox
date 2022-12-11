@@ -70,7 +70,22 @@ pub struct TensorProfile2D{
 impl ScalarField2D {
     pub fn new(x_size: usize, y_size: usize) -> ScalarField2D {
         return ScalarField2D {
-        s: Array::<f64, Ix2>::zeros((nrow, ncol).f())};}
+        s: Array::<f64, Ix2>::zeros((y_size, x_size).f())};}
+
+    pub fn new_growx(x_size: usize, y_size: usize, 
+                     minvalue: f64, maxvalue: f64) -> ScalarField2D {
+        let ones = Array::<f64, Ix2>::ones((y_size, x_size));
+        let mult_array = Array::linspace(minvalue, maxvalue, x_size);
+        let growx_array = ones*mult_array;
+        return ScalarField2D {s: growx_array};}
+
+    pub fn new_growy(x_size: usize, y_size: usize, 
+                     minvalue: f64, maxvalue: f64) -> ScalarField2D {
+        
+        let growx = ScalarField2D::new_growx(x_size, y_size,
+                                             minvalue, maxvalue);
+        let growy = growx.s.t().to_owned();
+        return ScalarField2D {s: growy};}
 
     pub fn get_pos(&self, x: usize, y: usize) -> f64
     {
