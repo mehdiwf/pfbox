@@ -45,7 +45,156 @@ sudo apt-get install libgsl0-dev
 
 ** todos
 *** TODO fix the derive problem                                      :URGENT:
+**** before changing rows/cols
+***** hints
 with big times, we can see that the density derives...
+
+- v_x and v_y are inverted in my code and samy's code!
+- seems like v_y takes a long time to tend to 0... maybe the viscosity?
+  or something in the J conservation?
+
+- idées:
+  - différence d'encodage? non, les deux sont en IEEE 754 double precision
+  - mes x/y sont pas en accord (j'ai l'impression d'avoir bien vérifié
+    ça tho...)
+***** problem in pressure (coming from gradient scalar)
+- PROBLEM: dans pressure
+  grad_rho n'est pas le même
+
+pressure is updated one step just before step 0 in C
+also the values are good but:
+
+
+grad_rho_IN_C_STEP_-1.x = grad_rho_IN_RUST_STEP_0.y
+
+this comes from the scalar gradient computation!
+***** problem in scalar gradient
+***** prints
+C-1:
+pressure debug init PPPPPPPPPPPPPPPPP
+P_th: -0.047407
+P_iso: 2.982446
+grad_rho00.x: 0.772200
+grad_rho00.y: 0.000000
+pressure debug end  PPPPPPPPPPPPPPPPP
+
+Cstep0:
+div_vJ.x: 0.000000
+div_vJ.x: 0.000000
+lap_v.x: 0.000000
+lap_v.x: 0.000000
+div_v: 0.000000
+vx: 0.003279
+vy: 0.000000
+Jx: 0.002623
+Jy: 0.000000
+Jx: 0.002623
+Jy: 0.000000
+div_press_x: -0.262327
+div_press_y: 0.000000
+press_xx: 3.578739
+press_xy: 0.000000
+press_yx: 0.000000
+press_yy: 2.982446
+percentage done = 0.000000
+---------------
+pressure debug init PPPPPPPPPPPPPPPPP
+P_th: -0.047407
+P_iso: 2.982446
+grad_rho00.x: 0.772200
+grad_rho00.y: 0.000000
+pressure debug end  PPPPPPPPPPPPPPPPP
+
+Ruststep0:
+-----------------[I]
+STEP 0
+GD_div_vJ.x = 0.00000000
+GD_div_vJ.y = 0.00000000
+GD_lap_v.x = 0.00000000
+GD_lap_v.y = 0.00000000
+GD_div_v = 0.00000000
+GD_v.x = 0.00000000
+GD_v.y = 0.00000000
+GD_J.x = 0.00000000
+GD_J.y = 0.00000000
+GD_div_press.x = 0.00000000
+GD_div_press.y = 0.00000000
+GD_pressure.xx = 0.00000000
+GD_pressure.xy = 0.00000000
+GD_pressure.yx = 0.00000000
+GD_pressure.yy = 0.00000000
+p_thermo = -0.04740741
+p_iso = 2.98244617
+grad_rho.x = 0.00000000
+grad_rho.y = 0.77220000
+grad_rho.x = 0.00000000
+grad_rho.y = 0.77220000
+***** verifications
+- fcts, DONE
+- ordered the update of calculation values like in samy's code:
+  changes nothing
+- looked at differences in J update: div_press is different in rust
+  and in c
+- turns out this difference comes from a difference in grad_rho
+  values, which are swapped and pressure is updated one step earlier
+  in C
+  (grad_rho_IN_C_STEP_-1.x = grad_rho_IN_RUST_STEP_0.y)
+- it's also the case for grad_ln_rho, which means it's a problem with
+  the scalar gradient
+**** SOLUTION?
+***** problem indexing in c
+when i
+
+rho[0][99]
+it gives me 0.8
+
+but for 
+
+rho[99][0]
+it gives me 0.002
+
+wtf?
+
+in c
+nx = 100
+ny = 2
+
+and rho[x_indice][y_indice]
+
+so it's the number of rows!!!!! fuccccckkkkkkkk
+***** solution
+take a convention in the matrixes, and see if i need to invert the
+position in samy's code
+
+Matrix organisation choice:
+- the rows are the y direction
+- the columns are the x direction
+this way, we don't need to transpose or change the matrixes if we want
+to plot them
+
+To index our objects (ScalarField, VectorField ect...) we use
+ScalarField.get_pos(x, y) with x, y the indices in respectively the x
+and y direction, because it's usually intuitive to have f(x,y) in
+physics. But internally, the matrixes are accessible through
+Matrix[row][column], thus: Matrix[y][x]
+
+**** TODO another problem
+div_press is not good
+
+compare with div_vJ between the two ?
+
+to see if it's a problem with div_tensor or with press
+**** stuff I learned
+to debug a difference between two simulation programs suposed to do
+exactly the same thing, print the results (obviously with the same
+input/initial/computation parameters) at the first steps, to see what
+term is not equal to the other simulation
+*** TODO other error?                                                :URGENT:
+in samy's code: div_vector: derivative on x component with respect to
+rows, so y?
+
+TO FIX ON MY CODE TOO
+
 *** DONE compare c/rust performances on jemac
 CLOSED: [2022-12-09 ven. 11:55]
 :LOGBOOK:
@@ -1259,7 +1408,25 @@ CLOSED: [2022-11-25 ven. 15:40]
 :END:
 
 ** tohos
-*** TODO compilation optimisation
+*** TOHO [#2] when getting the info col_dx, because col is y, it's ambiguous
+in lap_scalar and partial_deriv
+col_dx: dx,
+*** TOHO change gradient: so that it increases in the intuitive sense?
+right now, the gradient is positive when the scalar field is bigger in
+the bottow part of the matrix
+
+or maybe keep it this way to not have overhead with matrices indices
+*** TOHO change tensor.xx .xy .yx .yy notation
+if possible?
+
+confusing with accessing x/y positions !
+
+same with vector!
+*** TOHO as usize conversions in fcts
+in partial_deriv
+
+    let (i, j) = (i as usize, j as usize);
+*** TOHO compilation optimisation
 [[https://nnethercote.github.io/perf-book/build-configuration.html][build config, performance book]]
 **** with cpu-specific optimisations
 RUSTFLAGS="-C target-cpu=native" cargo build --release
