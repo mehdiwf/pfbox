@@ -21,7 +21,7 @@ use configfile::cfg_struct;
 // ConfigInput
 
 fn main() {
-    env::set_var("RUST_BACKTRACE", "1");
+    env::set_var("RUST_BACKTRACE", "full");
 
     println!("pfbox version {}\n", PFBOX_VERSION);
 
