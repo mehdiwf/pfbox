@@ -96,8 +96,8 @@ pub fn do_sim(configinput: cfg_struct::ConfigInput,
             eta0,
             m,
             lambda0,
-            nb_col: ncol_size,
-            nb_row: nrow_size
+            nb_col: x_max,
+            nb_row: y_max
                 
         },
         initial_time_config: 
@@ -141,65 +141,65 @@ pub fn do_sim(configinput: cfg_struct::ConfigInput,
     let ln_rho_vap0 = log(rho_vap0);
     let temp0 = temper0;
 
-    let box_info = BoxInfo{col_max: ncol_size as i32,
-                           row_max: nrow_size as i32,
-                           col_dx: dx,
-                           row_dx: dy};
+    let box_info = BoxInfo{x_max: x_max as i32,
+                           y_max: y_max as i32,
+                           dx,
+                           dy};
 
     //auie physics quantities definition
     ////////////////////////////////////////////////////////////////////////////
     // Physics quantities definition
     ////////////////////////////////////////////////////////////////////////////
     // GD for grid
-    let mut GD_rho = ScalarField2D::new(nrow_size, ncol_size);
-    let mut GD_temp = ScalarField2D::new(nrow_size, ncol_size);
-    let mut GD_pressure = TensorField2D::new(nrow_size, ncol_size);
+    let mut GD_rho = ScalarField2D::new(x_max, y_max);
+    let mut GD_temp = ScalarField2D::new(x_max, y_max);
+    let mut GD_pressure = TensorField2D::new(x_max, y_max);
     // momentum, also known as J = rho*velocity
-    let mut GD_J = VectorField2D::new(nrow_size, ncol_size);
+    let mut GD_J = VectorField2D::new(x_max, y_max);
     // velocity
-    let mut GD_v = VectorField2D::new(nrow_size, ncol_size);
+    let mut GD_v = VectorField2D::new(x_max, y_max);
 
     //auie quantities used for the computations definition
     ////////////////////////////////////////////////////////////////////////////
     // Quantities used for the computations definition
     ////////////////////////////////////////////////////////////////////////////
     
-    let mut GD_ln_rho = ScalarField2D::new(nrow_size, ncol_size);
-    let mut GD_grad_rho = VectorField2D::new(nrow_size, ncol_size);
-    let mut GD_lap_rho = ScalarField2D::new(nrow_size, ncol_size);
+    let mut GD_ln_rho = ScalarField2D::new(x_max, y_max);
+    let mut GD_grad_rho = VectorField2D::new(x_max, y_max);
+    let mut GD_lap_rho = ScalarField2D::new(x_max, y_max);
 
-    let mut GD_vJ = TensorField2D::new(nrow_size, ncol_size);
+    let mut GD_vJ = TensorField2D::new(x_max, y_max);
 
-    let mut GD_grad_v = TensorField2D::new(nrow_size, ncol_size);
+    let mut GD_grad_v = TensorField2D::new(x_max, y_max);
 
-    let mut GD_div_v = ScalarField2D::new(nrow_size, ncol_size);
+    let mut GD_div_v = ScalarField2D::new(x_max, y_max);
 
-    let mut GD_traceless_grad_v = TensorField2D::new(nrow_size, ncol_size);
+    let mut GD_traceless_grad_v = TensorField2D::new(x_max, y_max);
 
-    let mut GD_lap_v = VectorField2D::new(nrow_size, ncol_size);
+    let mut GD_lap_v = VectorField2D::new(x_max, y_max);
 
-    let mut GD_div_vJ = VectorField2D::new(nrow_size, ncol_size);
-    let mut GD_grad_div_v = VectorField2D::new(nrow_size, ncol_size);
+    let mut GD_div_vJ = VectorField2D::new(x_max, y_max);
+    let mut GD_grad_div_v = VectorField2D::new(x_max, y_max);
 
-    let mut GD_div_press = VectorField2D::new(nrow_size, ncol_size);
+    let mut GD_div_press = VectorField2D::new(x_max, y_max);
 
-    let mut GD_ln_rho_traceless_grad_v = VectorField2D::new(nrow_size, ncol_size);
+    let mut GD_ln_rho_traceless_grad_v = VectorField2D::new(x_max, y_max);
 
-    let mut GD_traceless_grad_v_dyadic_grad_v = ScalarField2D::new(nrow_size, ncol_size);
+    let mut GD_traceless_grad_v_dyadic_grad_v = ScalarField2D::new(x_max, y_max);
 
-    let mut GD_grad_ln_rho_scalar_grad_T = ScalarField2D::new(nrow_size, ncol_size);
+    let mut GD_grad_ln_rho_scalar_grad_T = ScalarField2D::new(x_max, y_max);
 
-    let mut GD_grad_ln_rho = VectorField2D::new(nrow_size, ncol_size);
+    let mut GD_grad_ln_rho = VectorField2D::new(x_max, y_max);
 
-    let mut GD_v_scalar_grad_ln_rho = ScalarField2D::new(nrow_size, ncol_size);
+    let mut GD_v_scalar_grad_ln_rho = ScalarField2D::new(x_max, y_max);
 
-    let mut GD_grad_ln_rho_traceless_grad_v = VectorField2D::new(nrow_size, ncol_size);
+    let mut GD_grad_ln_rho_traceless_grad_v = VectorField2D::new(x_max, y_max);
     
-    let mut GD_grad_T = VectorField2D::new(nrow_size, ncol_size);
+    let mut GD_grad_T = VectorField2D::new(x_max, y_max);
 
-    let mut GD_lap_T = ScalarField2D::new(nrow_size, ncol_size);
+    let mut GD_lap_T = ScalarField2D::new(x_max, y_max);
 
-    let mut GD_v_scalar_grad_T = ScalarField2D::new(nrow_size, ncol_size);
+    let mut GD_v_scalar_grad_T = ScalarField2D::new(x_max, y_max);
 
     let inv_cv = 1.0/(1.5*kB);
 
@@ -208,21 +208,21 @@ pub fn do_sim(configinput: cfg_struct::ConfigInput,
     // Fluid initial state
     ////////////////////////////////////////////////////////////////////////////
     
-    for col in 0..ncol_size {
-        for row in 0..nrow_size {
+    for yi in 0..y_max {
+        for xi in 0..x_max {
             // putting liquid in the first half
-            if (col < ncol_size/2){
-                GD_rho.set_pos(row, col,
+            if (xi < x_max/2){
+                GD_rho.set_pos(xi, yi,
                                rho_liq0);
-                GD_ln_rho.set_pos(row, col,
+                GD_ln_rho.set_pos(xi, yi,
                                   ln_rho_liq0);}
-            else {GD_rho.set_pos(row, col,
+            else {GD_rho.set_pos(xi, yi,
                                  rho_vap0);
-                  GD_ln_rho.set_pos(row, col,
+                  GD_ln_rho.set_pos(xi, yi,
                                     ln_rho_vap0);}
 
             // setting initial temperature
-            GD_temp.set_pos(row, col, temp0);
+            GD_temp.set_pos(xi, yi, temp0);
         }}
     
 
@@ -237,18 +237,18 @@ pub fn do_sim(configinput: cfg_struct::ConfigInput,
         step = i_time_step;
 
     // update of computations variables
-    for col in 0..ncol_size {
-        for row in 0..nrow_size {
+    for yi in 0..y_max {
+        for xi in 0..x_max {
 
-            let col_i32 = col as i32;
-            let row_i32 = row as i32;
+            let yi_i32 = yi as i32;
+            let xi_i32 = xi as i32;
 
             // -------------------------------------------------------
             // GD_lap_rho begin update
             GD_lap_rho
-                .set_pos(row, col,
+                .set_pos(xi, yi,
                          laplacian(&GD_rho,
-                                   row_i32, col_i32,
+                                   xi_i32, yi_i32,
                                    lambda,
                                    &box_info));
             // GD_lap_rho end update
@@ -257,9 +257,9 @@ pub fn do_sim(configinput: cfg_struct::ConfigInput,
             // -------------------------------------------------------
             // GD_lap_T begin update
             GD_lap_T
-                .set_pos(row, col,
+                .set_pos(xi, yi,
                          laplacian(&GD_temp,
-                                   row_i32, col_i32,
+                                   xi_i32, yi_i32,
                                    lambda,
                                    &box_info));
             // GD_lap_T end update
@@ -268,9 +268,9 @@ pub fn do_sim(configinput: cfg_struct::ConfigInput,
             // -------------------------------------------------------
             // GD_grad_T begin update
             GD_grad_T
-                .set_pos(row, col,
+                .set_pos(xi, yi,
                          &gradient(&GD_temp,
-                                   row_i32, col_i32,
+                                   xi_i32, yi_i32,
                                    lambda,
                                    &box_info));
             // GD_grad_T end update
@@ -279,9 +279,9 @@ pub fn do_sim(configinput: cfg_struct::ConfigInput,
             // -------------------------------------------------------
             // GD_grad_rho begin update
             GD_grad_rho
-                .set_pos(row, col,
+                .set_pos(xi, yi,
                          &gradient(&GD_rho,
-                                   row_i32, col_i32,
+                                   xi_i32, yi_i32,
                                    lambda,
                                    &box_info));
             // GD_grad_rho end update
@@ -290,14 +290,14 @@ pub fn do_sim(configinput: cfg_struct::ConfigInput,
 
             // -------------------------------------------------------
             // GD_ln_rho begin update
-            let rho = GD_rho.get_pos(row, col);
+            let rho = GD_rho.get_pos(xi, yi);
             if (rho < 0.) {
                 let str_to_append = format!("IMPOSSIBLE COMPUTATION: NEGATIVE LOG\n\
                                              step {}, col={}, row={}\n\
                                              negative log of rho avoided!\n\
                                              rho value: {}\n\
                                              ------------\n",
-                                            &step, &col, &row, &rho);
+                                            &step, &yi, &xi, &rho);
                 logproblem_counts += 1;
                 if print_logproblems {
                     println!("negative log detected ! check log for more info")};
@@ -306,23 +306,22 @@ pub fn do_sim(configinput: cfg_struct::ConfigInput,
                 println!("error step {}:\n\
                           negative rho: rho = {}", step, rho);
             GD_ln_rho
-                .set_pos(row, col,
+                .set_pos(xi, yi,
                          0.);}
             else {
                 let ln_rho = log(rho);
                 GD_ln_rho
-                    .set_pos(row, col,
+                    .set_pos(xi, yi,
                              ln_rho);}
             // GD_ln_rho end update
             // -------------------------------------------------------
 
-
             // -------------------------------------------------------
             // GD_lap_v begin update
             GD_lap_v
-                .set_pos(row, col,
+                .set_pos(xi, yi,
                          &laplacian_vector(&GD_v,
-                                           row_i32, col_i32,
+                                           xi_i32, yi_i32,
                                            lambda,
                                            &box_info));
             // GD_lap_v end update
@@ -332,21 +331,20 @@ pub fn do_sim(configinput: cfg_struct::ConfigInput,
             // -------------------------------------------------------
             // GD_div_v begin update
             GD_div_v
-                .set_pos(row, col,
+                .set_pos(xi, yi,
                          div_vector(&GD_v,
-                                    row_i32, col_i32,
+                                    xi_i32, yi_i32,
                                     lambda,
                                     &box_info));
             // GD_div_v end update
             // -------------------------------------------------------
 
-
             // -------------------------------------------------------
             // GD_grad_v begin update
             GD_grad_v
-                .set_pos(row, col,
+                .set_pos(xi, yi,
                          &gradient_vector(&GD_v,
-                                          row_i32, col_i32,
+                                          xi_i32, yi_i32,
                                           lambda,
                                           &box_info));
             // GD_grad_v end update
@@ -356,21 +354,20 @@ pub fn do_sim(configinput: cfg_struct::ConfigInput,
             // -------------------------------------------------------
             // GD_grad_ln_rho begin update
             GD_grad_ln_rho
-                .set_pos(row, col,
+                .set_pos(xi, yi,
                          &gradient(&GD_ln_rho,
-                                   row_i32, col_i32,
+                                   xi_i32, yi_i32,
                                    lambda,
                                    &box_info));
             // GD_grad_ln_rho end update
             // -------------------------------------------------------
 
-
             // -------------------------------------------------------
             // GD_grad_div_v begin update
             GD_grad_div_v
-                .set_pos(row, col,
+                .set_pos(xi, yi,
                          &grad_div_vel(&GD_v,
-                                       row_i32, col_i32,
+                                       xi_i32, yi_i32,
                                        lambda,
                                        &box_info));
             // GD_grad_div_v end update
@@ -379,8 +376,8 @@ pub fn do_sim(configinput: cfg_struct::ConfigInput,
             // -------------------------------------------------------
             // GD_traceless_grad_v begin update
             {
-                let grad_v = GD_grad_v.get_pos(row, col);
-                let div_v = GD_div_v.get_pos(row, col);
+                let grad_v = GD_grad_v.get_pos(xi, yi);
+                let div_v = GD_div_v.get_pos(xi, yi);
                 
                 let traceless_grad_v = tens2D {
                     xx: 2.*grad_v.xx - (2./(1.*dim as f64)) * div_v,
@@ -388,7 +385,7 @@ pub fn do_sim(configinput: cfg_struct::ConfigInput,
                     yx: grad_v.xy + grad_v.yx,
                     yy: 2.*grad_v.yy - (2./(1.*dim as f64)) * div_v};
                 
-                GD_traceless_grad_v.set_pos(row, col,
+                GD_traceless_grad_v.set_pos(xi, yi,
                                             &traceless_grad_v);
             }
             // GD_traceless_grad_v end update
@@ -397,8 +394,8 @@ pub fn do_sim(configinput: cfg_struct::ConfigInput,
             // -------------------------------------------------------
             // GD_vJ begin update
             {
-                let v = GD_v.get_pos(row, col);
-                let J = GD_J.get_pos(row, col);
+                let v = GD_v.get_pos(xi, yi);
+                let J = GD_J.get_pos(xi, yi);
                 let tens_vJ = tens2D{
                     xx: v.x * J.x,
                     xy: v.x * J.y,
@@ -406,41 +403,38 @@ pub fn do_sim(configinput: cfg_struct::ConfigInput,
                     yy: v.y * J.y
                 };
                 GD_vJ
-                    .set_pos(row, col,
+                    .set_pos(xi, yi,
                              &tens_vJ)
             }
             // GD_vJ end update
             // -------------------------------------------------------
 
-
             // -------------------------------------------------------
             // GD_div_vJ begin update            
             GD_div_vJ
-                .set_pos(row, col,
+                .set_pos(xi, yi,
                          &div_tensor(&GD_vJ,
-                                     row_i32, col_i32,
+                                     xi_i32, yi_i32,
                                      lambda,
                                      &box_info));
             // GD_div_vJ end update
             // -------------------------------------------------------
 
-
             // -------------------------------------------------------
             // GD_v_scal_grad_T begin update            
             GD_v_scalar_grad_T
-                .set_pos(row, col,
-                         scal_product(&GD_v.get_pos(row, col),
-                                      &GD_grad_T.get_pos(row, col)));
+                .set_pos(xi, yi,
+                         scal_product(&GD_v.get_pos(xi, yi),
+                                      &GD_grad_T.get_pos(xi, yi)));
             // GD_v_scal_grad_T end update
             // -------------------------------------------------------
-
 
             // -------------------------------------------------------
             // GD_traceless_grad_v_dyadic_grad_v begin update            
             GD_traceless_grad_v_dyadic_grad_v
-                .set_pos(row, col,
-                         dyadic_product(&GD_traceless_grad_v.get_pos(row, col),
-                                        &GD_grad_v.get_pos(row, col)));
+                .set_pos(xi, yi,
+                         dyadic_product(&GD_traceless_grad_v.get_pos(xi, yi),
+                                        &GD_grad_v.get_pos(xi, yi)));
             // GD_traceless_grad_v_dyadic_grad_v end update
             // -------------------------------------------------------
 
@@ -448,9 +442,9 @@ pub fn do_sim(configinput: cfg_struct::ConfigInput,
             // -------------------------------------------------------
             // GD_v_scalar_grad_ln_rho begin update            
             GD_v_scalar_grad_ln_rho
-                .set_pos(row, col,
-                         scal_product(&GD_v.get_pos(row, col),
-                                      &GD_grad_ln_rho.get_pos(row, col)));
+                .set_pos(xi, yi,
+                         scal_product(&GD_v.get_pos(xi, yi),
+                                      &GD_grad_ln_rho.get_pos(xi, yi)));
             // GD_v_scalar_grad_ln_rho end update
             // -------------------------------------------------------
 
@@ -458,12 +452,12 @@ pub fn do_sim(configinput: cfg_struct::ConfigInput,
             // -------------------------------------------------------
             // GD_pressure begin update            
             GD_pressure
-                .set_pos(row, col,
-                         &pressure(GD_rho.get_pos(row, col),
-                                   &GD_grad_rho.get_pos(row, col),
-                                   GD_lap_rho.get_pos(row, col),
-                                   GD_temp.get_pos(row, col),
-                                   kB, aa, b, w));
+                .set_pos(xi, yi,
+                         &pressure(GD_rho.get_pos(xi, yi),
+                                   &GD_grad_rho.get_pos(xi, yi),
+                                   GD_lap_rho.get_pos(xi, yi),
+                                   GD_temp.get_pos(xi, yi),
+                                   kB, aa, b, w, step + 10*xi as i32 + 10*yi as i32));
             // GD_pressure end update
             // -------------------------------------------------------
 
@@ -472,10 +466,10 @@ pub fn do_sim(configinput: cfg_struct::ConfigInput,
             // GD_grad_ln_rho_traceless_grad_v begin update
             
             GD_grad_ln_rho_traceless_grad_v
-                .set_pos(row, col,
+                .set_pos(xi, yi,
                          &tens_product_vec(
-                             &GD_traceless_grad_v.get_pos(row, col),
-                             &GD_grad_ln_rho.get_pos(row, col)));
+                             &GD_traceless_grad_v.get_pos(xi, yi),
+                             &GD_grad_ln_rho.get_pos(xi, yi)));
             // GD_grad_ln_rho_traceless_grad_v end update
             // -------------------------------------------------------
 
@@ -483,26 +477,32 @@ pub fn do_sim(configinput: cfg_struct::ConfigInput,
             // -------------------------------------------------------
             // GD_grad_ln_rho_scalar_grad_T begin update
             GD_grad_ln_rho_scalar_grad_T
-                .set_pos(row, col,
-                         scal_product(&GD_grad_ln_rho.get_pos(row, col),
-                                      &GD_grad_T.get_pos(row, col)));
+                .set_pos(xi, yi,
+                         scal_product(&GD_grad_ln_rho.get_pos(xi, yi),
+                                      &GD_grad_T.get_pos(xi, yi)));
             // GD_grad_ln_rho_scalar_grad_T end update
             // -------------------------------------------------------
-
 
             // -------------------------------------------------------
             // div_press begin update
             GD_div_press
-                .set_pos(row, col,
-                         &div_tensor(&GD_pressure, row_i32, col_i32,
+                .set_pos(xi, yi,
+                         &div_tensor(&GD_pressure, xi_i32, yi_i32,
                                      lambda,
                                      &box_info));
             // div_press end update
             // -------------------------------------------------------
 
-
         }} // updating computations values end parenthesis
 
+
+        if (i_time_step <= 5)
+            {        
+        println!("after update");
+        
+        println!("GD_div_press_x_std = {:.8}",
+                 GD_div_press.x.s.std(1.));}
+        
                 let percentage_done = 100.*(step as f64/max_time_step as f64);
         if (percentage_done > print_percertage_threshold)
         {
@@ -588,29 +588,26 @@ pub fn do_sim(configinput: cfg_struct::ConfigInput,
     // Main loop
     ////////////////////////////////////////////////////////////////////////////
     
-    for row in 0..nrow_size {
-        for col in 0..ncol_size {
+    for xi in 0..x_max {
+        for yi in 0..y_max {
 
-            let row_i32 = row as i32;
-            let col_i32 = col as i32;
-
-            let div_vJ = GD_div_vJ.get_pos(row, col);
-            let rho = GD_rho.get_pos(row, col);
-            let lap_v = GD_lap_v.get_pos(row, col);
-            let grad_div_v = GD_grad_div_v.get_pos(row, col);
+            let div_vJ = GD_div_vJ.get_pos(xi, yi);
+            let rho = GD_rho.get_pos(xi, yi);
+            let lap_v = GD_lap_v.get_pos(xi, yi);
+            let grad_div_v = GD_grad_div_v.get_pos(xi, yi);
             let grad_ln_rho_traceless_grad_v =
-                GD_grad_ln_rho_traceless_grad_v.get_pos(row, col);
-            let grad_ln_rho = GD_grad_ln_rho.get_pos(row, col);
-            let div_v = GD_div_v.get_pos(row, col);
-            let div_press = GD_div_press.get_pos(row, col);
-            let ln_rho = GD_ln_rho.get_pos(row, col);
-            let v_grad_ln_rho = GD_v_scalar_grad_ln_rho.get_pos(row, col);
-            let temp = GD_temp.get_pos(row, col);            
-            let traceless_grad_v_dyadic_grad_v = GD_traceless_grad_v_dyadic_grad_v.get_pos(row, col);
-            let grad_ln_rho_scalar_grad_T = GD_grad_ln_rho_scalar_grad_T.get_pos(row, col);
-            let lap_T = GD_lap_T.get_pos(row, col);
-            let v_scalar_grad_T = GD_v_scalar_grad_T.get_pos(row, col);
-            let J = GD_J.get_pos(row, col);
+                GD_grad_ln_rho_traceless_grad_v.get_pos(xi, yi);
+            let grad_ln_rho = GD_grad_ln_rho.get_pos(xi, yi);
+            let div_v = GD_div_v.get_pos(xi, yi);
+            let div_press = GD_div_press.get_pos(xi, yi);
+            let ln_rho = GD_ln_rho.get_pos(xi, yi);
+            let v_grad_ln_rho = GD_v_scalar_grad_ln_rho.get_pos(xi, yi);
+            let temp = GD_temp.get_pos(xi, yi);            
+            let traceless_grad_v_dyadic_grad_v = GD_traceless_grad_v_dyadic_grad_v.get_pos(xi, yi);
+            let grad_ln_rho_scalar_grad_T = GD_grad_ln_rho_scalar_grad_T.get_pos(xi, yi);
+            let lap_T = GD_lap_T.get_pos(xi, yi);
+            let v_scalar_grad_T = GD_v_scalar_grad_T.get_pos(xi, yi);
+            let J = GD_J.get_pos(xi, yi);
             
             //bépo MOMENTUM conservation
 
@@ -639,7 +636,7 @@ pub fn do_sim(configinput: cfg_struct::ConfigInput,
             // if you want gravity
             // J.y += -rho * gravity * dt;
 
-            GD_J.set_pos(row, col, &new_J);
+            GD_J.set_pos(xi, yi, &new_J);
 
             //bépo MASS conservation
 
@@ -650,11 +647,11 @@ pub fn do_sim(configinput: cfg_struct::ConfigInput,
                 (div_v + v_grad_ln_rho) * dt;
             let mut new_rho = exp(new_ln_rho);
             
-            GD_ln_rho.set_pos(row, col, new_ln_rho);
-            GD_rho.set_pos(row, col, new_rho);
+            GD_ln_rho.set_pos(xi, yi, new_ln_rho);
+            GD_rho.set_pos(xi, yi, new_rho);
 
             //bépo VELOCITY from momentum
-            GD_v.set_pos(row, col,
+            GD_v.set_pos(xi, yi,
                          &vec2D{x: new_J.x/new_rho,
                                 y: new_J.y/new_rho});
             
@@ -674,7 +671,7 @@ pub fn do_sim(configinput: cfg_struct::ConfigInput,
                         + lambda0 * (grad_ln_rho_scalar_grad_T + lap_T)
                 ) * dt
                 - v_scalar_grad_T * dt;
-            GD_temp.set_pos(row, col, new_T);
+            GD_temp.set_pos(xi, yi, new_T);
             
         }} // i, j loop closing parenthesis
             //bépo WRITING part
@@ -695,19 +692,20 @@ pub fn do_sim(configinput: cfg_struct::ConfigInput,
             let temp_profile = GD_temp.x_profile();
             let v_profile = GD_v.x_profile();
             let P_profile = GD_pressure.x_profile();
-        
-        for col_index in 0..ncol_size
+
+
+        for x_index in 0..x_max
         {
             let str_to_append = format!("{} {} {} {} {} {} {} {} {}\n",
-                                        &col_index,
-                                        &rho_profile[col_index],
-                                        &temp_profile[col_index],
-                                        &v_profile.x[col_index],
-                                        &v_profile.y[col_index],
-                                        &P_profile.xx[col_index],
-                                        &P_profile.xy[col_index],
-                                        &P_profile.yx[col_index],
-                                        &P_profile.yy[col_index],
+                                        &x_index,
+                                        &rho_profile[x_index],
+                                        &temp_profile[x_index],
+                                        &v_profile.x[x_index],
+                                        &v_profile.y[x_index],
+                                        &P_profile.xx[x_index],
+                                        &P_profile.xy[x_index],
+                                        &P_profile.yx[x_index],
+                                        &P_profile.yy[x_index],
             );
 
             file.write_all(&str_to_append.as_bytes())
