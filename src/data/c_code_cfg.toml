@@ -2,7 +2,7 @@
 dx = 0.5
 dy = 0.5
 dt = 1e-2
-max_sim_time = 500000
+max_sim_time = 10000
 temper0 = 0.5
 temper1 = 0.8
 rho_liq = 0.8
@@ -16,17 +16,17 @@ eta0 = 1.0
 m = 1.0
 lambda0 = 0.2
 
-nb_col = 100
+nb_col = 10
 nb_row = 2
 
 [initial_time_config]
 n_liq = 40 # not used
 
 [save_config]
-directory_name = "defaultdir"
-user_comment = "simulation made with default vdw config"
+directory_name = "defaultdir_c_comparison"
+user_comment = "simulation made to compare results with c"
 histo_freq = 50
-histo_save = 10000
+histo_save = 1000
 num_bin = 100
 
 [physics_constants]

@@ -288,7 +288,8 @@ pub fn grad_div_vel(v: &VectorField2D,
 pub fn pressure(rho: f64, grad_rho: &vec2D, 
                 lap_rho: f64, temp: f64,
                 kB: f64, aa: f64, b: f64,
-                w: f64) -> tens2D
+                w: f64,
+                idebug: i32) -> tens2D
 {
     let p_thermo = rho * kB * temp/(1. - b * rho)
                    - aa * rho * rho;
@@ -301,7 +302,24 @@ pub fn pressure(rho: f64, grad_rho: &vec2D,
         xy: w * grad_rho.x * grad_rho.y,
 	yx: w * grad_rho.x * grad_rho.y,
         yy: p_iso  + w * grad_rho.y * grad_rho.y
+            
 };
+    // doing
+    if ((idebug >= 0) && (idebug <=5))
+    {
+        println!("p_thermo = {:.8}",
+                 p_thermo);
+        println!("p_iso = {:.8}",
+                 p_iso);
+        println!("grad_rho.x = {:.8}\n\
+                  grad_rho.y = {:.8}",
+                 grad_rho.x,
+                 grad_rho.y);
+        // println!("grad_rho.x = {:.8}\n\
+        //           grad_rho.y = {:.8}",
+        //          grad_rho.x,
+        //          grad_rho.y);
+    }
     return pressure;
 }
 
@@ -347,7 +365,7 @@ mod tests {
 
         let uni_grid = ScalarField2D { s: Array::<f64, Ix2>::ones((4, 4).f()) };
         
-        v = grad_scalar(&uni_grid, 2, 2, 0.66, &box_info);
+        v = grad_scalar(&uni_grid, 2, 2, lambda, &box_info);
         assert_eq!(v.x, 0., "testing the gradient is zero \
                              with a uniform field");
         assert_eq!(v.y, 0., "testing the gradient is zero \
@@ -361,11 +379,11 @@ mod tests {
                      [1., 2., 3., 4.],
                      [1., 2., 3., 4.]]};
 
-        v = grad_scalar(&grid_x, 2, 2, 0.66, &box_info);
-        assert!((v.y > 0.), "testing the gradient.y is positive \
-                            for a field growing with respect of y");
-        assert_eq!(v.x, 0., "testing the gradient.x is zero \
-                            for a field growing with respect of y");
+        v = grad_scalar(&grid_x, 2, 2, lambda, &box_info);
+        assert!((v.x > 0.), "testing the gradient.y is positive \
+                            for a field growing with respect of x");
+        assert_eq!(v.y, 0., "testing the gradient.y is zero \
+                            for a field growing with respect of x");
 
         // second one with a y growing field
 
@@ -375,12 +393,56 @@ mod tests {
                      [3., 3., 3., 3.],
                      [4., 4., 4., 4.]]};
 
-        v = grad_scalar(&grid_y, 2, 2, 0.66, &box_info);
+        v = grad_scalar(&grid_y, 2, 2, lambda, &box_info);
         println!("y {:?}", v);
-        assert!((v.x > 0.), "testing the gradient.x is positive \
-                            for a field growing with respect of x");
-        assert_eq!(v.y, 0., "testing the gradient.y is zero \
-                            for a field growing with respect of x");
+        assert!((v.y > 0.), "testing the gradient.y is positive \
+                            for a field growing with respect of y");
+        assert_eq!(v.x, 0., "testing the gradient.x is zero \
+                            for a field growing with respect of y");
+
+        let tf = TensorField2D{
+            xx: 
+                ScalarField2D{
+                s:array![[1., 1., 1., 1.],
+                         [2., 2., 2., 2.],
+                         [3., 3., 3., 3.],
+                         [4., 4., 4., 4.]]}
+                // ScalarField2D::new(4, 4)
+            ,
+            xy: 
+                //ScalarField2D{
+                // s:array![[1., 1., 1., 1.],
+                //          [2., 2., 2., 2.],
+                //          [3., 3., 3., 3.],
+                //          [4., 4., 4., 4.]]}
+                ScalarField2D::new(4, 4)
+
+                ,
+            yx: 
+
+                ScalarField2D::new(4, 4)
+
+                // ScalarField2D{
+                // s:array![[1., 1., 1., 1.],
+                //          [2., 2., 2., 2.],
+                //          [3., 3., 3., 3.],
+                //          [4., 4., 4., 4.]]}
+
+                ,
+            yy: 
+                // ScalarField2D{
+                // s:array![[1., 1., 1., 1.],
+                //          [2., 2., 2., 2.],
+                //          [3., 3., 3., 3.],
+                //          [4., 4., 4., 4.]]}
+                ScalarField2D::new(4, 4)
+};
+
+        let t = div_tensor(&tf, 2, 2, lambda, &box_info);
+        let v = vec2D{x:0., y:0.};
+        assert_eq!(t, v);
+        println!("{:?}", t);
+
 }
     // todo: test gradient fct
 }

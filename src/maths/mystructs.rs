@@ -27,6 +27,17 @@ pub struct tens2D {
     pub yx: f64,
     pub yy: f64}
 
+/// Matrix organisation choice:
+/// - the rows are the y direction
+/// - the columns are the x direction
+/// this way, we don't need to transpose or change the matrixes if we want
+/// to plot them
+/// 
+/// To index our objects (ScalarField, VectorField ect...) we use
+/// ScalarField.get_pos(x, y) with x, y the indices in respectively the x
+/// and y direction, because it's usually intuitive to have f(x,y) in
+/// physics. But internally, the matrixes are accessible through
+/// Matrix[row][column], thus: Matrix[y][x]
 #[derive(Debug, PartialEq)]
 pub struct ScalarField2D {
     pub s: Array2<f64>,
