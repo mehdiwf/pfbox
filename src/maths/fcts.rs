@@ -1,12 +1,6 @@
 use super::mystructs::*;
 use ndarray::prelude::*;
 
-// an enum used to indicate the direction of a derivative calculation
-// in 2D
-pub enum DerivDirection {
-    Rows,
-    Columns}
-
 pub fn shear_viscosity(rho: f64, mass: f64, dyn_visc: f64) -> f64
 {
     dyn_visc * mass * rho
@@ -77,29 +71,30 @@ pub fn dyadic_product(tens_a: &tens2D, tens_b: &tens2D) -> f64
 /// partial derivative in the x direction is DerivDirection::Rows
 /// partial derivative in the y direction is DerivDirection::Columns
 pub fn partial_deriv(a: &ScalarField2D,
-                     i: i32, j: i32,
+                     x: i32, y: i32,
                      direction: DerivDirection,
                      lambda: f64,
                      box_info: &BoxInfo) -> f64
 {
-    let &BoxInfo { col_max: box_col_max,
-                  row_max: box_row_max,
-                  col_dx: dx,
-                  row_dx: dy} = box_info;
+    let &BoxInfo {x_max,
+                  y_max,
+                  dx,
+                  dy} = box_info;
+    // println!("pd");
     // i+1 with Periodic Boundaries
-    let ip = ((i+1) % box_row_max) as usize;
+    let ip = ((x+1) % x_max) as usize;
     // i-1 with Periodic Boundaries
-    let im = ((i - 1 + box_row_max) % box_row_max) as usize;
+    let im = ((x - 1 + x_max) % x_max) as usize;
     // j+1 with Periodic Boundaries
-    let jp = ((j+1) % box_col_max) as usize;
+    let jp = ((y+1) % y_max) as usize;
     // j-1 with Periodic Boundaries
-    let jm = ((j - 1 + box_col_max) % box_col_max) as usize;
-    let (i, j) = (i as usize, j as usize);
+    let jm = ((y - 1 + y_max) % y_max) as usize;
+    let (i, j) = (x as usize, y as usize);
 
     match direction
         {
             // on the x axis on samy's code
-            DerivDirection::Rows => {
+            DerivDirection::X_axis => {
    let derivative = 
           lambda*(a.get_pos(ip, j) - a.get_pos(im, j))/(2.*dx)
 	  + 0.25*lambda*(a.get_pos(ip, jp) - a.get_pos(im, jp))/(2.*dx)
@@ -107,7 +102,7 @@ pub fn partial_deriv(a: &ScalarField2D,
                 return derivative;
             },
             // on the y axis on samy's code
-            DerivDirection::Columns => {
+            DerivDirection::Y_axis => {
    let derivative = 
           lambda*(a.get_pos(i, jp) - a.get_pos(i, jm))/(2.*dx)
 	  + 0.25*lambda*(a.get_pos(ip, jp) - a.get_pos(ip, jm))/(2.*dx)	
@@ -116,93 +111,94 @@ pub fn partial_deriv(a: &ScalarField2D,
             }}}
 
 pub fn grad_scalar(scalar_field: &ScalarField2D,
-                   i: i32, j: i32,
+                   x: i32, y: i32,
                    lambda: f64,
                    box_info: &BoxInfo) -> vec2D
 {
     let grad = vec2D {
-        x: partial_deriv(&scalar_field, i, j,
-                         DerivDirection::Columns, lambda, &box_info),
-        y: partial_deriv(&scalar_field, i, j,
-                         DerivDirection::Rows, lambda, &box_info),};
+        x: partial_deriv(&scalar_field, x, y,
+                         DerivDirection::X_axis, lambda, &box_info),
+        y: partial_deriv(&scalar_field, x, y,
+                         DerivDirection::Y_axis, lambda, &box_info),};
         
     return grad;
 }
 
 pub fn gradient(scalar_field: &ScalarField2D,
-                i: i32, j: i32,
+                x: i32, y: i32,
                 lambda: f64,
                 box_info: &BoxInfo) -> vec2D
 {
-    return grad_scalar(&scalar_field, i, j,
+    return grad_scalar(&scalar_field, x, y,
                        lambda, &box_info);
 }
 
 pub fn gradient_vector(vector_field: &VectorField2D,
-                       i: i32, j: i32,
+                       x: i32, y: i32,
                        lambda: f64,
                        box_info: &BoxInfo) -> tens2D
 {
     let tens = tens2D {
-        xx: partial_deriv(&vector_field.x, i, j,
-                          DerivDirection::Columns, lambda, &box_info),
-        xy: partial_deriv(&vector_field.y, i, j,
-                          DerivDirection::Columns, lambda, &box_info),
-        yx: partial_deriv(&vector_field.x, i, j,
-                          DerivDirection::Rows, lambda, &box_info),
-        yy: partial_deriv(&vector_field.y, i, j,
-                          DerivDirection::Rows, lambda, &box_info)};
+        xx: partial_deriv(&vector_field.x, x, y,
+                          DerivDirection::X_axis, lambda, &box_info),
+        xy: partial_deriv(&vector_field.y, x, y,
+                          DerivDirection::X_axis, lambda, &box_info),
+        yx: partial_deriv(&vector_field.x, x, y,
+                          DerivDirection::Y_axis, lambda, &box_info),
+        yy: partial_deriv(&vector_field.y, x, y,
+                          DerivDirection::Y_axis, lambda, &box_info)};
     return tens;
 }
 
 pub fn div_vector(vector_field: &VectorField2D,
-                  i: i32, j: i32,
+                  x: i32, y: i32,
                   lambda: f64,
                   box_info: &BoxInfo) -> f64
 {
-    let dVx_dx = partial_deriv(&vector_field.x, i, j,
-                               DerivDirection::Columns, lambda, &box_info);
-    let dVy_dy = partial_deriv(&vector_field.y, i, j,
-                               DerivDirection::Rows, lambda, &box_info);
+    let dVx_dx = partial_deriv(&vector_field.x, x, y,
+                               DerivDirection::X_axis, lambda, &box_info);
+    let dVy_dy = partial_deriv(&vector_field.y, x, y,
+                               DerivDirection::Y_axis, lambda, &box_info);
 
     return dVx_dx + dVy_dy;
 }
 
 pub fn div_tensor(tensor_field: &TensorField2D,
-                  i: i32, j: i32,
+                  x: i32, y: i32,
                   lambda: f64,
                   box_info: &BoxInfo) -> vec2D
 {
     let vector = vec2D{
-        x: partial_deriv(&tensor_field.xx, i, j,
-                         DerivDirection::Columns, lambda, &box_info)
-            + partial_deriv(&tensor_field.yx, i, j,
-                            DerivDirection::Rows, lambda, &box_info),
+        x: partial_deriv(&tensor_field.xx, x, y,
+                         DerivDirection::X_axis, lambda, &box_info)
+            + partial_deriv(&tensor_field.yx, x, y,
+                            DerivDirection::Y_axis, lambda, &box_info),
         
-        y: partial_deriv(&tensor_field.xy, i, j,
-                         DerivDirection::Columns, lambda,
+        y: partial_deriv(&tensor_field.xy, x, y,
+                         DerivDirection::X_axis, lambda,
                          &box_info)
-            + partial_deriv(&tensor_field.yy, i, j,
-                            DerivDirection::Rows, lambda,
+            + partial_deriv(&tensor_field.yy, x, y,
+                            DerivDirection::Y_axis, lambda,
                             &box_info)};
     return vector;
 }
 
 pub fn lap_scalar(a: &ScalarField2D,
-                  i: i32, j: i32,
+                  x: i32, y: i32,
                   lambda: f64,
                   box_info: &BoxInfo) -> f64
 {
 
-    let BoxInfo { col_max: box_col_max,
-                  row_max: box_row_max,
-                  col_dx: dx,
-                  row_dx: dy} = *box_info;
-    let ip = ((i+1) % box_row_max) as usize;
-    let im = ((i - 1 + box_row_max) % box_row_max) as usize;
-    let jp = ((j+1) % box_col_max) as usize;
-    let jm = ((j - 1 + box_col_max) % box_col_max) as usize;
-    let (i, j) = (i as usize, j as usize);
+    let BoxInfo {x_max,
+                 y_max,
+                 dx,
+                 dy} = *box_info;
+    // println!("lap sc");
+    let ip = ((x+1) % x_max) as usize;
+    let im = ((x - 1 + x_max) % x_max) as usize;
+    let jp = ((y+1) % y_max) as usize;
+    let jm = ((y - 1 + y_max) % y_max) as usize;
+    let (i, j) = (x as usize, y as usize);
             // on the x axis
     let laplacian_value = 
         (
@@ -217,47 +213,48 @@ pub fn lap_scalar(a: &ScalarField2D,
 }
 
 pub fn laplacian(scalar_field: &ScalarField2D,
-                 i: i32, j: i32,
+                 x: i32, y: i32,
                  lambda: f64,
                  box_info: &BoxInfo) -> f64
 {
     let field = &scalar_field;
     let laplacian_value = lap_scalar(field,
-                                     i, j, lambda, &box_info);
+                                     x, y, lambda, &box_info);
     return laplacian_value;
 }
 
 pub fn laplacian_vector(vector_field: &VectorField2D,
-                        i: i32, j: i32,
+                        x: i32, y: i32,
                         lambda: f64,
                         box_info: &BoxInfo) -> vec2D
 {
     let vec = vec2D {
         x: lap_scalar(&vector_field.x,
-                      i, j,
+                      x, y,
                       lambda, &box_info),
         y: lap_scalar(&vector_field.y,
-                      i, j,
+                      x, y,
                       lambda, &box_info)};
 
                 return vec;
 }
 
 pub fn grad_div_vel(v: &VectorField2D,
-                    i: i32, j: i32,
+                    x: i32, y: i32,
                     lambda: f64,
                     box_info: &BoxInfo) -> vec2D
 {
-    let BoxInfo { col_max: box_col_max,
-                  row_max: box_row_max,
-                  col_dx: dx,
-                  row_dx: dy} = *box_info;
+    let BoxInfo { x_max,
+                  y_max,
+                  dx,
+                  dy} = *box_info;
     
-    let ip = ((i+1) % box_row_max) as usize;
-    let im = ((i - 1 + box_row_max) % box_row_max) as usize;
-    let jp = ((j+1) % box_col_max) as usize;
-    let jm = ((j - 1 + box_col_max) % box_col_max) as usize;
-    let (i, j) = (i as usize, j as usize);
+    // println!("grad div vel");
+    let ip = ((x+1) % x_max) as usize;
+    let im = ((x - 1 + x_max) % x_max) as usize;
+    let jp = ((y+1) % y_max) as usize;
+    let jm = ((y - 1 + y_max) % y_max) as usize;
+    let (i, j) = (x as usize, y as usize);
     
     let vec = vec2D{
         x: 
@@ -338,10 +335,12 @@ mod tests {
         let mut v = vec2D{x: 0., y: 0.};
 
         let box_info = BoxInfo {
-            col_max: 4,
-            row_max: 4,
-            col_dx: 0.1,
-            row_dx: 0.1};
+            x_max: 4,
+            y_max: 4,
+            dx: 0.1,
+            dy: 0.1};
+
+        let lambda = 0.66;
         
         // three tests:
         // first one with an uniform field
