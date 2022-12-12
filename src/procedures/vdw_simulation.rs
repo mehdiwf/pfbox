@@ -287,35 +287,6 @@ pub fn do_sim(configinput: cfg_struct::ConfigInput,
             // GD_grad_rho end update
             // -------------------------------------------------------
 
-
-            // -------------------------------------------------------
-            // GD_ln_rho begin update
-            let rho = GD_rho.get_pos(xi, yi);
-            if (rho < 0.) {
-                let str_to_append = format!("IMPOSSIBLE COMPUTATION: NEGATIVE LOG\n\
-                                             step {}, col={}, row={}\n\
-                                             negative log of rho avoided!\n\
-                                             rho value: {}\n\
-                                             ------------\n",
-                                            &step, &yi, &xi, &rho);
-                logproblem_counts += 1;
-                if print_logproblems {
-                    println!("negative log detected ! check log for more info")};
-                logfile.write_all(&str_to_append.as_bytes())
-                    .expect("write failed");
-                println!("error step {}:\n\
-                          negative rho: rho = {}", step, rho);
-            GD_ln_rho
-                .set_pos(xi, yi,
-                         0.);}
-            else {
-                let ln_rho = log(rho);
-                GD_ln_rho
-                    .set_pos(xi, yi,
-                             ln_rho);}
-            // GD_ln_rho end update
-            // -------------------------------------------------------
-
             // -------------------------------------------------------
             // GD_lap_v begin update
             GD_lap_v
@@ -374,24 +345,6 @@ pub fn do_sim(configinput: cfg_struct::ConfigInput,
             // -------------------------------------------------------
 
             // -------------------------------------------------------
-            // GD_traceless_grad_v begin update
-            {
-                let grad_v = GD_grad_v.get_pos(xi, yi);
-                let div_v = GD_div_v.get_pos(xi, yi);
-                
-                let traceless_grad_v = tens2D {
-                    xx: 2.*grad_v.xx - (2./(1.*dim as f64)) * div_v,
-                    xy: grad_v.xy + grad_v.yx,
-                    yx: grad_v.xy + grad_v.yx,
-                    yy: 2.*grad_v.yy - (2./(1.*dim as f64)) * div_v};
-                
-                GD_traceless_grad_v.set_pos(xi, yi,
-                                            &traceless_grad_v);
-            }
-            // GD_traceless_grad_v end update
-            // -------------------------------------------------------
-
-            // -------------------------------------------------------
             // GD_vJ begin update
             {
                 let v = GD_v.get_pos(xi, yi);
@@ -407,6 +360,42 @@ pub fn do_sim(configinput: cfg_struct::ConfigInput,
                              &tens_vJ)
             }
             // GD_vJ end update
+            // -------------------------------------------------------
+            
+        }} // computation variables block end
+
+        // computation variables block end
+    for yi in 0..y_max {
+        for xi in 0..x_max {
+            
+            let yi_i32 = yi as i32;
+            let xi_i32 = xi as i32;
+
+            // -------------------------------------------------------
+            // GD_v_scalar_grad_ln_rho begin update            
+            GD_v_scalar_grad_ln_rho
+                .set_pos(xi, yi,
+                         scal_product(&GD_v.get_pos(xi, yi),
+                                      &GD_grad_ln_rho.get_pos(xi, yi)));
+            // GD_v_scalar_grad_ln_rho end update
+            // -------------------------------------------------------
+            
+            // -------------------------------------------------------
+            // GD_traceless_grad_v begin update
+            {
+                let grad_v = GD_grad_v.get_pos(xi, yi);
+                let div_v = GD_div_v.get_pos(xi, yi);
+                
+                let traceless_grad_v = tens2D {
+                    xx: 2.*grad_v.xx - (2./(1.*dim as f64)) * div_v,
+                    xy: grad_v.xy + grad_v.yx,
+                    yx: grad_v.xy + grad_v.yx,
+                    yy: 2.*grad_v.yy - (2./(1.*dim as f64)) * div_v};
+                
+                GD_traceless_grad_v.set_pos(xi, yi,
+                                            &traceless_grad_v);
+            }
+            // GD_traceless_grad_v end update
             // -------------------------------------------------------
 
             // -------------------------------------------------------
@@ -430,26 +419,6 @@ pub fn do_sim(configinput: cfg_struct::ConfigInput,
             // -------------------------------------------------------
 
             // -------------------------------------------------------
-            // GD_traceless_grad_v_dyadic_grad_v begin update            
-            GD_traceless_grad_v_dyadic_grad_v
-                .set_pos(xi, yi,
-                         dyadic_product(&GD_traceless_grad_v.get_pos(xi, yi),
-                                        &GD_grad_v.get_pos(xi, yi)));
-            // GD_traceless_grad_v_dyadic_grad_v end update
-            // -------------------------------------------------------
-
-
-            // -------------------------------------------------------
-            // GD_v_scalar_grad_ln_rho begin update            
-            GD_v_scalar_grad_ln_rho
-                .set_pos(xi, yi,
-                         scal_product(&GD_v.get_pos(xi, yi),
-                                      &GD_grad_ln_rho.get_pos(xi, yi)));
-            // GD_v_scalar_grad_ln_rho end update
-            // -------------------------------------------------------
-
-
-            // -------------------------------------------------------
             // GD_pressure begin update            
             GD_pressure
                 .set_pos(xi, yi,
@@ -460,7 +429,24 @@ pub fn do_sim(configinput: cfg_struct::ConfigInput,
                                    kB, aa, b, w, step + 10*xi as i32 + 10*yi as i32));
             // GD_pressure end update
             // -------------------------------------------------------
+            
+        }} // computation variables block end
 
+        // computation variables block end
+    for yi in 0..y_max {
+        for xi in 0..x_max {
+            
+            let yi_i32 = yi as i32;
+            let xi_i32 = xi as i32;
+            
+            // -------------------------------------------------------
+            // GD_traceless_grad_v_dyadic_grad_v begin update            
+            GD_traceless_grad_v_dyadic_grad_v
+                .set_pos(xi, yi,
+                         dyadic_product(&GD_traceless_grad_v.get_pos(xi, yi),
+                                        &GD_grad_v.get_pos(xi, yi)));
+            // GD_traceless_grad_v_dyadic_grad_v end update
+            // -------------------------------------------------------
 
             // -------------------------------------------------------
             // GD_grad_ln_rho_traceless_grad_v begin update
