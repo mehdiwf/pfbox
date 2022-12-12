@@ -66,11 +66,17 @@ a = get_dependencies(dep_dic, "press")
 deps_list = []
 for d in dep_dic:
     all_deps = get_dependencies(dep_dic, d)
-    deps_list.append([d, len(all_deps)])
+    deps_list.append([d, len(all_deps), all_deps])
     print(f"var: {d}\ndeps: {all_deps}\n---")
 sorted_deps_list = sorted(deps_list, key = lambda x: x[1],
                           reverse=True)
 print(sorted_deps_list)
+
+for i in range(4):
+    print("################################################")
+
+for e in sorted_deps_list:
+    print(f"VARIABLE:\n{e[0]}\nDEPENCDENCIES:\n{e[2]}\n-------\n")
     
 l = [['div_press', 5],
      ['grad_ln_rho_grad_T', 5],
