@@ -44,200 +44,6 @@ sudo apt-get install libgsl0-dev
 - [[https://docs.rs/ndarray/latest/ndarray/doc/ndarray_for_numpy_users/index.html][ndarray_for_numpy_users]]
 
 ** todos
-*** TODO fix the derive problem                                      :URGENT:
-**** before changing rows/cols
-***** hints
-with big times, we can see that the density derives...
-
-- v_x and v_y are inverted in my code and samy's code!
-- seems like v_y takes a long time to tend to 0... maybe the viscosity?
-  or something in the J conservation?
-
-- idées:
-  - différence d'encodage? non, les deux sont en IEEE 754 double precision
-  - mes x/y sont pas en accord (j'ai l'impression d'avoir bien vérifié
-    ça tho...)
-***** problem in pressure (coming from gradient scalar)
-- PROBLEM: dans pressure
-  grad_rho n'est pas le même
-
-pressure is updated one step just before step 0 in C
-also the values are good but:
-
-
-grad_rho_IN_C_STEP_-1.x = grad_rho_IN_RUST_STEP_0.y
-
-this comes from the scalar gradient computation!
-***** problem in scalar gradient
-***** prints
-C-1:
-pressure debug init PPPPPPPPPPPPPPPPP
-P_th: -0.047407
-P_iso: 2.982446
-grad_rho00.x: 0.772200
-grad_rho00.y: 0.000000
-pressure debug end  PPPPPPPPPPPPPPPPP
-
-Cstep0:
-div_vJ.x: 0.000000
-div_vJ.x: 0.000000
-lap_v.x: 0.000000
-lap_v.x: 0.000000
-div_v: 0.000000
-vx: 0.003279
-vy: 0.000000
-Jx: 0.002623
-Jy: 0.000000
-Jx: 0.002623
-Jy: 0.000000
-div_press_x: -0.262327
-div_press_y: 0.000000
-press_xx: 3.578739
-press_xy: 0.000000
-press_yx: 0.000000
-press_yy: 2.982446
-percentage done = 0.000000
----------------
-pressure debug init PPPPPPPPPPPPPPPPP
-P_th: -0.047407
-P_iso: 2.982446
-grad_rho00.x: 0.772200
-grad_rho00.y: 0.000000
-pressure debug end  PPPPPPPPPPPPPPPPP
-
-Ruststep0:
------------------[I]
-STEP 0
-GD_div_vJ.x = 0.00000000
-GD_div_vJ.y = 0.00000000
-GD_lap_v.x = 0.00000000
-GD_lap_v.y = 0.00000000
-GD_div_v = 0.00000000
-GD_v.x = 0.00000000
-GD_v.y = 0.00000000
-GD_J.x = 0.00000000
-GD_J.y = 0.00000000
-GD_div_press.x = 0.00000000
-GD_div_press.y = 0.00000000
-GD_pressure.xx = 0.00000000
-GD_pressure.xy = 0.00000000
-GD_pressure.yx = 0.00000000
-GD_pressure.yy = 0.00000000
-p_thermo = -0.04740741
-p_iso = 2.98244617
-grad_rho.x = 0.00000000
-grad_rho.y = 0.77220000
-grad_rho.x = 0.00000000
-grad_rho.y = 0.77220000
-***** verifications
-- fcts, DONE
-- ordered the update of calculation values like in samy's code:
-  changes nothing
-- looked at differences in J update: div_press is different in rust
-  and in c
-- turns out this difference comes from a difference in grad_rho
-  values, which are swapped and pressure is updated one step earlier
-  in C
-  (grad_rho_IN_C_STEP_-1.x = grad_rho_IN_RUST_STEP_0.y)
-- it's also the case for grad_ln_rho, which means it's a problem with
-  the scalar gradient
-**** SOLUTION?
-***** problem indexing in c
-when i
-
-rho[0][99]
-it gives me 0.8
-
-but for 
-
-rho[99][0]
-it gives me 0.002
-
-wtf?
-
-in c
-nx = 100
-ny = 2
-
-and rho[x_indice][y_indice]
-
-so it's the number of rows!!!!! fuccccckkkkkkkk
-***** solution
-take a convention in the matrixes, and see if i need to invert the
-position in samy's code
-
-Matrix organisation choice:
-- the rows are the y direction
-- the columns are the x direction
-this way, we don't need to transpose or change the matrixes if we want
-to plot them
-
-To index our objects (ScalarField, VectorField ect...) we use
-ScalarField.get_pos(x, y) with x, y the indices in respectively the x
-and y direction, because it's usually intuitive to have f(x,y) in
-physics. But internally, the matrixes are accessible through
-Matrix[row][column], thus: Matrix[y][x]
-
-**** TODO another problem
-div_press is not good
-
-compare with div_vJ between the two ?
-
-to see if it's a problem with div_tensor or with press
-**** stuff I learned
-to debug a difference between two simulation programs suposed to do
-exactly the same thing, print the results (obviously with the same
-input/initial/computation parameters) at the first steps, to see what
-term is not equal to the other simulation
-*** TODO other error?                                                :URGENT:
-in samy's code: div_vector: derivative on x component with respect to
-rows, so y?
-
-TO FIX ON MY CODE TOO
-
-*** DONE compare c/rust performances on jemac
-CLOSED: [2022-12-09 ven. 11:55]
-:LOGBOOK:
-- State "DONE"       from              [2022-12-09 ven. 11:55]
-:END:
-**** org table
-| timesteps |          rust |          c |
-|-----------+---------------+------------|
-|     10000 |   1.363861436 |   3.829171 |
-|     50000 |   6.623272585 |  19.006658 |
-|    100000 |  13.228002208 |  38.029916 |
-|    500000 |  65.768119034 | 190.004333 |
-|   1000000 | 131.536727645 | 380.368056 |
-**** python
-timesteps
-[10000, 50000, 100000, 500000, 1000000]
-
-rust
-[1.363861436, 6.623272585, 13.228002208, 65.768119034, 131.536727645]
-
-c
-[3.829171, 19.006658, 38.029916, 190.004333, 380.368056]
-
-*** DONE compare c/rust performances on personal computer
-CLOSED: [2022-12-08 Thu 23:17]
-:LOGBOOK:
-- State "DONE"       from "TODO"       [2022-12-08 Thu 23:17]
-:END:
-**** org table
-| nb time steps | rust (time in seconds) | c (time in seconds) |
-|---------------+------------------------+---------------------|
-|         10000 |            0.636702614 |            1.605196 |
-|         50000 |            3.105668876 |            8.001673 |
-|        100000 |            6.165691205 |           15.999283 |
-|        500000 |           30.774588656 |           80.354180 |
-|       1000000 |           61.782680750 |          159.692652 |
-**** python
-#+begin_src python :results output :session
-rust_time_list = np.array([0.636702614, 3.105668876, 6.165691205, 30.774588656, 61.782680750])
-c_time_list = np.array([1.605196, 8.001673, 15.999283, 80.354180, 159.692652])
-nb_step_list = np.array([10000, 50000, 100000, 500000, 1000000])
-#+end_src
-
 *** TODO improve performance
 **** rayon integration in ndarray
 Zip also implements NdarrayIntoParallelIterator, and there is an extension trait so that it can use a method .par_apply directly.
@@ -909,6 +715,381 @@ CLOSED: [2022-12-01 Thu 19:45]
 - State "DONE"       from              [2022-12-01 Thu 19:45]
 :END:
 *** physics loop construction
+**** DONE fix the derive problem
+CLOSED: [2022-12-12 lun. 18:22]
+:LOGBOOK:
+- State "DONE"       from "TODO"       [2022-12-12 lun. 18:22]
+:END:
+***** before changing rows/cols
+****** hints
+with big times, we can see that the density derives...
+
+- v_x and v_y are inverted in my code and samy's code!
+- seems like v_y takes a long time to tend to 0... maybe the viscosity?
+  or something in the J conservation?
+
+- idées:
+  - différence d'encodage? non, les deux sont en IEEE 754 double precision
+  - mes x/y sont pas en accord (j'ai l'impression d'avoir bien vérifié
+    ça tho...)
+****** problem in pressure (coming from gradient scalar)
+- PROBLEM: dans pressure
+  grad_rho n'est pas le même
+
+pressure is updated one step just before step 0 in C
+also the values are good but:
+
+
+grad_rho_IN_C_STEP_-1.x = grad_rho_IN_RUST_STEP_0.y
+
+this comes from the scalar gradient computation!
+****** problem in scalar gradient
+****** prints
+C-1:
+pressure debug init PPPPPPPPPPPPPPPPP
+P_th: -0.047407
+P_iso: 2.982446
+grad_rho00.x: 0.772200
+grad_rho00.y: 0.000000
+pressure debug end  PPPPPPPPPPPPPPPPP
+
+Cstep0:
+div_vJ.x: 0.000000
+div_vJ.x: 0.000000
+lap_v.x: 0.000000
+lap_v.x: 0.000000
+div_v: 0.000000
+vx: 0.003279
+vy: 0.000000
+Jx: 0.002623
+Jy: 0.000000
+Jx: 0.002623
+Jy: 0.000000
+div_press_x: -0.262327
+div_press_y: 0.000000
+press_xx: 3.578739
+press_xy: 0.000000
+press_yx: 0.000000
+press_yy: 2.982446
+percentage done = 0.000000
+---------------
+pressure debug init PPPPPPPPPPPPPPPPP
+P_th: -0.047407
+P_iso: 2.982446
+grad_rho00.x: 0.772200
+grad_rho00.y: 0.000000
+pressure debug end  PPPPPPPPPPPPPPPPP
+
+Ruststep0:
+-----------------[I]
+STEP 0
+GD_div_vJ.x = 0.00000000
+GD_div_vJ.y = 0.00000000
+GD_lap_v.x = 0.00000000
+GD_lap_v.y = 0.00000000
+GD_div_v = 0.00000000
+GD_v.x = 0.00000000
+GD_v.y = 0.00000000
+GD_J.x = 0.00000000
+GD_J.y = 0.00000000
+GD_div_press.x = 0.00000000
+GD_div_press.y = 0.00000000
+GD_pressure.xx = 0.00000000
+GD_pressure.xy = 0.00000000
+GD_pressure.yx = 0.00000000
+GD_pressure.yy = 0.00000000
+p_thermo = -0.04740741
+p_iso = 2.98244617
+grad_rho.x = 0.00000000
+grad_rho.y = 0.77220000
+grad_rho.x = 0.00000000
+grad_rho.y = 0.77220000
+****** verifications
+- fcts, DONE
+- ordered the update of calculation values like in samy's code:
+  changes nothing
+- looked at differences in J update: div_press is different in rust
+  and in c
+- turns out this difference comes from a difference in grad_rho
+  values, which are swapped and pressure is updated one step earlier
+  in C
+  (grad_rho_IN_C_STEP_-1.x = grad_rho_IN_RUST_STEP_0.y)
+- it's also the case for grad_ln_rho, which means it's a problem with
+  the scalar gradient
+***** SOLUTION?
+****** problem indexing in c
+when i
+
+rho[0][99]
+it gives me 0.8
+
+but for 
+
+rho[99][0]
+it gives me 0.002
+
+wtf?
+
+in c
+nx = 100
+ny = 2
+
+and rho[x_indice][y_indice]
+
+so it's the number of rows!!!!! fuccccckkkkkkkk
+****** solution
+take a convention in the matrixes, and see if i need to invert the
+position in samy's code
+
+Matrix organisation choice:
+- the rows are the y direction
+- the columns are the x direction
+this way, we don't need to transpose or change the matrixes if we want
+to plot them
+
+To index our objects (ScalarField, VectorField ect...) we use
+ScalarField.get_pos(x, y) with x, y the indices in respectively the x
+and y direction, because it's usually intuitive to have f(x,y) in
+physics. But internally, the matrixes are accessible through
+Matrix[row][column], thus: Matrix[y][x]
+
+***** another problem
+****** problem
+div_press is not good
+
+compare with div_vJ between the two ?
+****** verifications
+******* pressure is good (sure)
+it's exactly the same in rust and c at step 0
+******** rust results
+step 0:
+
+GD_pressure.xx 
+[3.578739012592596, -0.04740740740740734, -0.04740740740740734, -0.04740740740740734, 3.578739012592596, 0.21756985159486025, 0.002623431594860167, 0.002623431594860167, 0.002623431594860167, 0.21756985159486025],
+[3.578739012592596, -0.04740740740740734, -0.04740740740740734, -0.04740740740740734, 3.578739012592596, 0.21756985159486025, 0.002623431594860167, 0.002623431594860167, 0.002623431594860167, 0.21756985159486025]
+
+GD_pressure.xy
+[0.0, 0.0, 0.0, 0.0, -0.0, -0.0, 0.0, 0.0, 0.0, 0.0],
+[0.0, 0.0, 0.0, 0.0, -0.0, -0.0, 0.0, 0.0, 0.0, 0.0]
+
+GD_pressure.yx
+[0.0, 0.0, 0.0, 0.0, -0.0, -0.0, 0.0, 0.0, 0.0, 0.0],
+[0.0, 0.0, 0.0, 0.0, -0.0, -0.0, 0.0, 0.0, 0.0, 0.0]
+
+GD_pressure.yy = 
+[2.9824461725925957, -0.04740740740740734, -0.04740740740740734, -0.04740740740740734, 2.9824461725925957, -0.3787229884051399, 0.002623431594860167, 0.002623431594860167, 0.002623431594860167, -0.3787229884051399],
+[2.9824461725925957, -0.04740740740740734, -0.04740740740740734, -0.04740740740740734, 2.9824461725925957, -0.3787229884051399, 0.002623431594860167, 0.002623431594860167, 0.002623431594860167, -0.3787229884051399]
+******** c results
+step 0:
+
+STEP 0
+---------------------------------(!) pressure
+print tens_xx
+[3.578739, -0.047407, -0.047407, -0.047407, 3.578739, 0.217570, 0.002623, 0.002623, 0.002623, 0.217570]
+
+print tens_xy
+0
+
+print tens_yx
+0
+
+print tens_yy
+[2.982446, -0.047407, -0.047407, -0.047407, 2.982446, -0.378723, 0.002623, 0.002623, 0.002623, -0.378723]
+******* div_tensor is good (sure)
+******** analysis
+div_tensor gives the good result, the problem lies elsewhere..?
+******** proof
+divergence of tensor:
+tensor.xx
+[3.578739012592596, -0.04740740740740734, -0.04740740740740734, -0.04740740740740734, 3.578739012592596, 0.21756985159486025, 0.002623431594860167, 0.002623431594860167, 0.002623431594860167, 0.21756985159486025]
+[3.578739012592596, -0.04740740740740734, -0.04740740740740734, -0.04740740740740734, 3.578739012592596, 0.21756985159486025, 0.002623431594860167, 0.002623431594860167, 0.002623431594860167, 0.21756985159486025]
+tensor.yx=xy=0
+tensor.yy
+[3.578739012592596, -0.04740740740740734, -0.04740740740740734, -0.04740740740740734, 3.578739012592596, 0.21756985159486025, 0.002623431594860167, 0.002623431594860167, 0.002623431594860167, 0.21756985159486025]
+[3.578739012592596, -0.04740740740740734, -0.04740740740740734, -0.04740740740740734, 3.578739012592596, 0.21756985159486025, 0.002623431594860167, 0.002623431594860167, 0.002623431594860167, 0.21756985159486025]
+
+should be: (c code)
+divt.x
+[-0.262327, -3.589885, 0.0, 3.589885, 0.262327, -3.540354, -0.212797, 0.0, 0.212797, 3.540354],
+[-0.262327, -3.589885, 0.0, 3.589885, 0.262327, -3.540354, -0.212797, 0.0, 0.212797, 3.540354],
+divt.y: 0
+
+test result of rust div_tensor application on tensor:
+
+divt.x:
+[-0.26232748641224496, -3.589884955800003, 0.0, 3.589884955800003, 0.26232748641224496, -3.540354425187758, -0.2127969558000001, 0.0, 0.2127969558000001, 3.540354425187758],
+[-0.26232748641224496, -3.589884955800003, 0.0, 3.589884955800003, 0.26232748641224496, -3.540354425187758, -0.2127969558000001, 0.0, 0.2127969558000001, 3.540354425187758]],
+divt.y: 0
+
+GOOD!
+
+******* pressure value (again)
+******** in rust and in c
+********* list
+********** RUST
+RIST
+press.xx
+[3.578739012592596, -0.04740740740740734, -0.04740740740740734, -0.04740740740740734, 3.578739012592596, 0.21756985159486025, 0.002623431594860167, 0.002623431594860167, 0.002623431594860167, 0.21756985159486025],
+[3.578739012592596, -0.04740740740740734, -0.04740740740740734, -0.04740740740740734, 3.578739012592596, 0.21756985159486025, 0.002623431594860167, 0.002623431594860167, 0.002623431594860167, 0.21756985159486025],
+
+press.yx=xy=0
+
+press.yy
+[2.9824461725925957, -0.04740740740740734, -0.04740740740740734, -0.04740740740740734, 2.9824461725925957, -0.3787229884051399, 0.002623431594860167, 0.002623431594860167, 0.002623431594860167, -0.3787229884051399],
+[2.9824461725925957, -0.04740740740740734, -0.04740740740740734, -0.04740740740740734, 2.9824461725925957, -0.3787229884051399, 0.002623431594860167, 0.002623431594860167, 0.002623431594860167, -0.3787229884051399]
+
+********** C
+
+print tens_xx
+[3.578739, -0.047407, -0.047407, -0.047407, 3.578739, 0.217570, 0.002623, 0.002623, 0.002623, 0.217570],
+[3.578739, -0.047407, -0.047407, -0.047407, 3.578739, 0.217570, 0.002623, 0.002623, 0.002623, 0.217570]
+
+print tens_yy
+[2.982446, -0.047407, -0.047407, -0.047407, 2.982446, -0.378723, 0.002623, 0.002623, 0.002623, -0.378723]
+
+********* print
+i: 0, j: 0, x
+-0.262327
+i: 1, j: 0, x
+-3.589885
+i: 2, j: 0, x
+0.000000
+i: 3, j: 0, x
+3.589885
+i: 4, j: 0, x
+0.262327
+i: 5, j: 0, x
+-3.540354
+i: 6, j: 0, x
+-0.212797
+i: 7, j: 0, x
+0.000000
+i: 8, j: 0, x
+0.212797
+i: 9, j: 0, x
+3.540354
+******** div press in rust
+div_press.x is not the same in the two lines!
+[0.0, -2.3619677483111134, 0.031288888888888845, 0.031288888888888845, 0.031288888888888845, -2.3619677483111134, -0.14359610205260778, -0.0017314648526077104, -0.0017314648526077104, 2.3602362834585056],
+[-0.08744249547074831, -3.5585960669111145, 0.031288888888888845, 1.2279172074888898, 0.11873138435963716, -3.542085890040366, -0.21452842065260783, -0.0017314648526077104, 0.06920085374739232, 3.540354425187758]
+
+
+******** div press in c
+div_press.x
+-0.262327, -3.589885, 0.000000, 3.589885, 0.262327, -3.540354, -0.212797, 0.000000, 0.212797, 3.540354
+
+div_press.y
+0
+
+******* printing stuff near the problematic line
+***** the real problem
+we need to update entirely independant stuff, and then each the
+other...
+
+in my previous code:
+
+bad code
+
+  i,j loop
+ / 
+(  update t1
+(  update t2
+(  update t3(t1, t2)
+ \ end i, j loop
+  -----------------------
+
+good code
+
+  i,j loop
+ / 
+(  update t1
+(  update t2
+ \ end i, j loop
+  -----------------------
+
+  i,j loop
+ / 
+(  update t3(t1, t2)
+ \ end i, j loop
+  -----------------------
+
+***** stuff I learned
+****** printing in the first steps
+to debug a difference between two simulation programs suposed to do
+exactly the same thing, print the results (obviously with the same
+input/initial/computation parameters) at the first steps, to see what
+term is not equal to the other simulation
+****** do comment code blocks
+like the one I did with :
+#+begin_src rust
+// -------------------------------------------------------
+// GD_traceless_grad_v_dyadic_grad_v begin update            
+GD_traceless_grad_v_dyadic_grad_v
+    .set_pos(SOME CODE);
+// GD_traceless_grad_v_dyadic_grad_v end update
+// -------------------------------------------------------
+#+end_src
+****** make functions to print/write debug info
+on csv files for instance
+****** if something really strange happen, check the code logic
+for instance in this case, the problem was:
+
+bad code:
+
+#+begin_example
+
+  i,j loop
+ / 
+(  update t1
+(  update t2
+(  update t3(t1, t2) // t3 depends on t2 and t1
+ \ end i, j loop
+  -----------------------
+
+#+end_example
+
+good code:
+
+#+begin_example
+
+  i,j loop
+ / 
+(  update t1
+(  update t2
+ \ end i, j loop
+  -----------------------
+
+  i,j loop
+ / 
+(  update t3(t1, t2)
+ \ end i, j loop
+  -----------------------
+
+#+end_example
+****** write the code logic when possible
+and update it.
+
+Do it in an org file!
+
+for instance:
+
+#+begin_example
+
+  defining_all_variables
+
+  fluid_initialisation
+
+  i, j loop
+ / 
+(  updating GD_rho(i,j)
+(  ...
+(  ...
+ \ 
+  -----------------------
+
+#+end_example
+****** dichotomy is key
+to find where the problem comes from, dichotomise you research!!!
 **** DONE compare my simulation outputs and samy's
 CLOSED: [2022-12-05 lun. 11:56]
 :LOGBOOK:
@@ -1329,16 +1510,59 @@ CLOSED: [2022-12-01 Thu 15:01]
 functions:
 - exp (check gsl lib)
 *** performance
-**** DONE change Vector2 to [[https://docs.rs/ndarray/latest/ndarray/index.html][Array2]]
+**** before v0.3.0
+***** DONE compare c/rust performances on jemac
+CLOSED: [2022-12-09 ven. 11:55]
+:LOGBOOK:
+- State "DONE"       from              [2022-12-09 ven. 11:55]
+:END:
+****** org table
+| timesteps |          rust |          c |
+|-----------+---------------+------------|
+|     10000 |   1.363861436 |   3.829171 |
+|     50000 |   6.623272585 |  19.006658 |
+|    100000 |  13.228002208 |  38.029916 |
+|    500000 |  65.768119034 | 190.004333 |
+|   1000000 | 131.536727645 | 380.368056 |
+****** python
+timesteps
+[10000, 50000, 100000, 500000, 1000000]
+
+rust
+[1.363861436, 6.623272585, 13.228002208, 65.768119034, 131.536727645]
+
+c
+[3.829171, 19.006658, 38.029916, 190.004333, 380.368056]
+***** DONE compare c/rust performances on personal computer
+CLOSED: [2022-12-08 Thu 23:17]
+:LOGBOOK:
+- State "DONE"       from "TODO"       [2022-12-08 Thu 23:17]
+:END:
+****** org table
+| nb time steps | rust (time in seconds) | c (time in seconds) |
+|---------------+------------------------+---------------------|
+|         10000 |            0.636702614 |            1.605196 |
+|         50000 |            3.105668876 |            8.001673 |
+|        100000 |            6.165691205 |           15.999283 |
+|        500000 |           30.774588656 |           80.354180 |
+|       1000000 |           61.782680750 |          159.692652 |
+****** python
+#+begin_src python :results output :session
+rust_time_list = np.array([0.636702614, 3.105668876, 6.165691205, 30.774588656, 61.782680750])
+c_time_list = np.array([1.605196, 8.001673, 15.999283, 80.354180, 159.692652])
+nb_step_list = np.array([10000, 50000, 100000, 500000, 1000000])
+#+end_src
+
+***** DONE change Vector2 to [[https://docs.rs/ndarray/latest/ndarray/index.html][Array2]]
 CLOSED: [2022-12-07 Wed 21:44]
 :LOGBOOK:
 - State "DONE"       from "TODO"       [2022-12-07 Wed 21:44]
 :END:
-***** to see
+****** to see
 https://docs.rs/ndarray/latest/ndarray/index.html
 https://docs.rs/ndarray/latest/ndarray/doc/ndarray_for_numpy_users/index.html
-***** reddit answer
-****** my message
+****** reddit answer
+******* my message
 Hey everyone, I have two questions
 
 context: I'm doing a 2d fluid simulation, and I'm using 2D Vectors to
@@ -1361,7 +1585,7 @@ Thank you very much! If you are curious, here is my github, feel free
 to ask more questions on my project, any help or curiosity is
 welcomed!
 
-****** answer by WasserMarder
+******* answer by WasserMarder
 
 Vectors of vectors are typically bad for performance because they tend
 do give band caching performance. My advice is to use Array2 from the
@@ -1374,14 +1598,14 @@ Use ArrayView and ArrayViewMut for functions that only need
 views. This makes them usable independent of data layout i.e. you can
 create a view with shape (n, m) from any array with shape (..., n,
 ..., m, ...).
-**** DONE measuring c execution time
+***** DONE measuring c execution time
 CLOSED: [2022-12-07 Wed 23:08]
 :LOGBOOK:
 - State "DONE"       from              [2022-12-07 Wed 23:08]
 :END:
 I used this:
 https://www.geeksforgeeks.org/how-to-measure-time-taken-by-a-program-in-c/
-**** DONE compare execution time/performances rust/c
+***** DONE compare execution time/performances rust/c
 CLOSED: [2022-12-07 Wed 22:59]
 :LOGBOOK:
 - State "DONE"       from              [2022-12-07 Wed 22:59]
@@ -1407,10 +1631,46 @@ CLOSED: [2022-11-25 ven. 15:40]
 - State "DONE"       from              [2022-11-25 ven. 15:40]
 :END:
 
+*** cancelled
+**** CANCELED other error?                                           :URGENT:
+:LOGBOOK:
+- Note taken on [2022-12-12 lun. 18:19] \\
+  not a problem. I didn't understand that 
+  
+  rho[i][j]
+  
+  was the rho table in the i index on x, and j on y
+- State "CANCELED"   from "TODO"       [2022-12-12 lun. 18:18]
+:END:
+in samy's code: div_vector: derivative on x component with respect to
+rows, so y?
+
+TO FIX ON MY CODE TOO
+
 ** tohos
 *** TOHO [#2] when getting the info col_dx, because col is y, it's ambiguous
 in lap_scalar and partial_deriv
 col_dx: dx,
+*** TOHO add log entries, readable in csv
+
+this is human readable, not csv readable
+
+#+begin_src rust
+let str_to_append = format!("IMPOSSIBLE COMPUTATION: NEGATIVE LOG\n\
+                             step {}, col={}, row={}\n\
+                             negative log of rho avoided!\n\
+                             rho value: {}\n\
+                             ------------\n",
+                            &step, &yi, &xi, &rho);
+logproblem_counts += 1;
+if print_logproblems {
+    println!("negative log detected ! check log for more info")};
+logfile.write_all(&str_to_append.as_bytes())
+    .expect("write failed");
+println!("error step {}:\n\
+          negative rho: rho = {}", step, rho);
+#+end_src
+
 *** TOHO change gradient: so that it increases in the intuitive sense?
 right now, the gradient is positive when the scalar field is bigger in
 the bottow part of the matrix
@@ -1485,3 +1745,94 @@ découper le système en plusieurs cases, et faire les calculs
 - finir de dimensionner
 - (densité = g/cm3, correspondant à ce que j'avais pris comme
   paramètres la dernière fois)
+* writing
+** Matrix convention
+Matrix organisation choice:
+- the rows are the y direction
+- the columns are the x direction
+this way, we don't need to transpose or change the matrixes if we want
+to plot them
+
+To index our objects (ScalarField, VectorField ect...) we use
+ScalarField.get_pos(x, y) with x, y the indices in respectively the x
+and y direction, because it's usually intuitive to have f(x,y) in
+physics. But internally, the matrixes are accessible through
+Matrix[row][column], thus: Matrix[y][x]
+
+** stuff I learned before v0.3.0
+*** printing in the first steps
+to debug a difference between two simulation programs suposed to do
+exactly the same thing, print the results (obviously with the same
+input/initial/computation parameters) at the first steps, to see what
+term is not equal to the other simulation
+*** do comment code blocks
+like the one I did with :
+#+begin_src rust
+// -------------------------------------------------------
+// GD_traceless_grad_v_dyadic_grad_v begin update            
+GD_traceless_grad_v_dyadic_grad_v
+    .set_pos(SOME CODE);
+// GD_traceless_grad_v_dyadic_grad_v end update
+// -------------------------------------------------------
+#+end_src
+*** make functions to print/write debug info
+on csv files for instance
+*** if something really strange happen, check the code logic
+for instance in this case, the problem was:
+
+bad code:
+
+#+begin_example
+
+  i,j loop
+ / 
+(  update t1
+(  update t2
+(  update t3(t1, t2) // t3 depends on t2 and t1
+ \ end i, j loop
+  -----------------------
+
+#+end_example
+
+good code:
+
+#+begin_example
+
+  i,j loop
+ / 
+(  update t1
+(  update t2
+ \ end i, j loop
+  -----------------------
+
+  i,j loop
+ / 
+(  update t3(t1, t2)
+ \ end i, j loop
+  -----------------------
+
+#+end_example
+*** write the code logic when possible
+and update it.
+
+Do it in an org file!
+
+for instance:
+
+#+begin_example
+
+  defining_all_variables
+
+  fluid_initialisation
+
+  i, j loop
+ / 
+(  updating GD_rho(i,j)
+(  ...
+(  ...
+ \ 
+  -----------------------
+
+#+end_example
+*** dichotomy is key
+to find where the problem comes from, dichotomise you research!!!
