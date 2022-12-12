@@ -235,12 +235,6 @@ pub fn do_sim(configinput: cfg_struct::ConfigInput,
     for i_time_step in 0..max_time_step {
 
         step = i_time_step;
-
-        if (i_time_step <= 2)
-            {
-        println!("before update");
-        println!("GD_div_press_x_std = {:.8}",
-                 GD_div_press.x.s.std(1.));}
         
     // update of computations variables
     for yi in 0..y_max {
@@ -500,14 +494,6 @@ pub fn do_sim(configinput: cfg_struct::ConfigInput,
             // -------------------------------------------------------
 
         }} // updating computations values end parenthesis
-
-
-        if (i_time_step <= 2)
-            {        
-        println!("after update");
-        
-        println!("GD_div_press_x_std = {:.8}",
-                 GD_div_press.x.s.std(1.));}
         
                 let percentage_done = 100.*(step as f64/max_time_step as f64);
         if (percentage_done > print_percertage_threshold)
